@@ -8,5 +8,7 @@
         public double LiterCount { get; set; }
         public string RefillType { get; set; }
         public decimal Cost { get; set; }
+
+        public ICollection<Vehicle> Vehicles { get; set; }
     }
 }
