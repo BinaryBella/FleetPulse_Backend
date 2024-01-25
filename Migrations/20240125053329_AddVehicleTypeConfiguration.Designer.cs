@@ -3,6 +3,7 @@ using FleetPulse_BackEndDevelopment.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FleetPulse_BackEndDevelopment.Migrations
 {
     [DbContext(typeof(FleetPulseDbContext))]
-    partial class FleetPulseDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240125053329_AddVehicleTypeConfiguration")]
+    partial class AddVehicleTypeConfiguration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -20,24 +22,6 @@ namespace FleetPulse_BackEndDevelopment.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
-
-            modelBuilder.Entity("FleetPulse_BackEndDevelopment.Data.Manufacture", b =>
-                {
-                    b.Property<int>("ManufactureId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ManufactureId"), 1L, 1);
-
-                    b.Property<string>("Manufacturer")
-                        .IsRequired()
-                        .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)");
-
-                    b.HasKey("ManufactureId");
-
-                    b.ToTable("Manufacture", (string)null);
-                });
 
             modelBuilder.Entity("FleetPulse_BackEndDevelopment.Data.VehicleModel", b =>
                 {
@@ -49,12 +33,11 @@ namespace FleetPulse_BackEndDevelopment.Migrations
 
                     b.Property<string>("Model")
                         .IsRequired()
-                        .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("VehicleModelId");
 
-                    b.ToTable("VehicleModel", (string)null);
+                    b.ToTable("VehicleModels");
                 });
 
             modelBuilder.Entity("FleetPulse_BackEndDevelopment.Data.VehicleType", b =>
@@ -67,12 +50,11 @@ namespace FleetPulse_BackEndDevelopment.Migrations
 
                     b.Property<string>("Type")
                         .IsRequired()
-                        .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("VehicleTypeId");
 
-                    b.ToTable("VehicleType", (string)null);
+                    b.ToTable("VehicleType");
                 });
 #pragma warning restore 612, 618
         }
