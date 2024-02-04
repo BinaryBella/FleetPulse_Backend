@@ -37,15 +37,23 @@ namespace FleetPulse_BackEndDevelopment.Data
             modelBuilder.ApplyConfiguration(new VehicleMaintenanceTypeConfig());
             
             // configures one-to-many relationship
+            
+            //Vehicle_Model
             modelBuilder.Entity<Vehicle>()
                 .HasOne<VehicleModel>(v => v.Model)
                 .WithMany(vm => vm.Vehicles)
                 .HasForeignKey(v => v.VehicleModelId);  
-            
+            //Vehicle_Type
             modelBuilder.Entity<Vehicle>()
                 .HasOne<VehicleType>(v => v.Type)
                 .WithMany(vm => vm.Vehicles)
                 .HasForeignKey(v => v.VehicleTypeId);  
+            //Vehicle_Manufacture
+            modelBuilder.Entity<Vehicle>()
+                .HasOne<Manufacture>(v => v.Manufacturer)
+                .WithMany(vm => vm.Vehicles)
+                .HasForeignKey(v => v.ManufactureId);
+            
         }
     }
 }

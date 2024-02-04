@@ -18,5 +18,9 @@ namespace FleetPulse_BackEndDevelopment.Data
         //Vehicle_Type
         public int VehicleTypeId { get; set; }
         public VehicleType Type { get; set; }
+        //Vehicle_Manufacture
+        public int ManufactureId { get; set; }
+        public Manufacture Manufacturer { get; set; }
+        
     }
 }
