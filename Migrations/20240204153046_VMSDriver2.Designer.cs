@@ -4,6 +4,7 @@ using FleetPulse_BackEndDevelopment.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FleetPulse_BackEndDevelopment.Migrations
 {
     [DbContext(typeof(FleetPulseDbContext))]
-    partial class FleetPulseDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240204153046_VMSDriver2")]
+    partial class VMSDriver2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -170,70 +172,6 @@ namespace FleetPulse_BackEndDevelopment.Migrations
                     b.ToTable("FuelRefills", (string)null);
                 });
 
-            modelBuilder.Entity("FleetPulse_BackEndDevelopment.Data.Helper", b =>
-                {
-                    b.Property<int>("HelperId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("HelperId"), 1L, 1);
-
-                    b.Property<DateTime>("DateOfBirth")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("EmailAddress")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("EmergencyContact")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.Property<string>("FirstName")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("LastName")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("NIC")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.Property<string>("Password")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("PhoneNo")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.Property<byte[]>("ProfilePicture")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("varbinary(500)");
-
-                    b.Property<bool>("Status")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("UserName")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.HasKey("HelperId");
-
-                    b.ToTable("Helpers", (string)null);
-                });
-
             modelBuilder.Entity("FleetPulse_BackEndDevelopment.Data.Manufacture", b =>
                 {
                     b.Property<int>("ManufactureId")
@@ -253,127 +191,6 @@ namespace FleetPulse_BackEndDevelopment.Migrations
                     b.HasKey("ManufactureId");
 
                     b.ToTable("Manufacture", (string)null);
-                });
-
-            modelBuilder.Entity("FleetPulse_BackEndDevelopment.Data.Trip", b =>
-                {
-                    b.Property<string>("TripId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<DateTime>("Date")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("EndLocation")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<float>("EndMeterValue")
-                        .HasColumnType("real");
-
-                    b.Property<TimeSpan>("EndTime")
-                        .HasColumnType("time");
-
-                    b.Property<string>("StartLocation")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<float>("StartMeterValue")
-                        .HasColumnType("real");
-
-                    b.Property<TimeSpan>("StartTime")
-                        .HasColumnType("time");
-
-                    b.Property<bool>("Status")
-                        .HasColumnType("bit");
-
-                    b.HasKey("TripId");
-
-                    b.ToTable("Trips", (string)null);
-                });
-
-            modelBuilder.Entity("FleetPulse_BackEndDevelopment.Data.Vehicle", b =>
-                {
-                    b.Property<int>("VehicleId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("VehicleId"), 1L, 1);
-
-                    b.Property<string>("FuelType")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<DateTime>("LicenseExpireDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("LicenseNo")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("VehicleColor")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("VehicleRegistrationNo")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.HasKey("VehicleId");
-
-                    b.ToTable("Vehicles", (string)null);
-                });
-
-            modelBuilder.Entity("FleetPulse_BackEndDevelopment.Data.VehicleMaintenance", b =>
-                {
-                    b.Property<string>("VehicleMaintenanceId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<decimal>("Cost")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<DateTime>("MaintenanceDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("MaintenanceStatus")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("PartsReplaced")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<string>("ServiceProvider")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("SpecialNotes")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<bool>("Status")
-                        .HasColumnType("bit");
-
-                    b.HasKey("VehicleMaintenanceId");
-
-                    b.ToTable("VehicleMaintenances", (string)null);
                 });
 
             modelBuilder.Entity("FleetPulse_BackEndDevelopment.Data.VehicleMaintenanceType", b =>

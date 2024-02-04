@@ -6,7 +6,10 @@
         public DateTime Date { get; set; }
         public TimeSpan Time { get; set; }
         public double LiterCount { get; set; }
-        public string RefillType { get; set; }
+        public string FuelType { get; set; }
         public decimal Cost { get; set; }
+        
+        public bool Status { get; set; }
+
     }
 }

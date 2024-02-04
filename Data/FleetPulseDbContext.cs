@@ -14,13 +14,27 @@ namespace FleetPulse_BackEndDevelopment.Data
         public DbSet<VehicleModel> VehicleModels { get; set; }
         public DbSet<VehicleType> VehicleType { get; set; }
         public DbSet<Manufacture> Manufacture { get; set; }
+        public DbSet<FuelRefill> FuelRefill { get; set; }
+        public DbSet<Vehicle> Vehicle { get; set; }
+        public DbSet<Driver> Driver { get; set; }
+        public DbSet<Accident> Accident { get; set; }
+        public DbSet<Helper> Helper { get; set; }
+        public DbSet<Trip> Trip { get; set; }
+        public DbSet<VehicleMaintenance> VehicleMaintenance { get; set; }
+        public DbSet<VehicleMaintenanceType> VehicleMaintenanceType { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.ApplyConfiguration(new VehicleModelConfig());
-
             modelBuilder.ApplyConfiguration(new VehicleTypeConfig());
-
             modelBuilder.ApplyConfiguration(new ManufactureConfig());
+            modelBuilder.ApplyConfiguration(new FuelRefillConfig());
+            modelBuilder.ApplyConfiguration(new VehicleConfig());
+            modelBuilder.ApplyConfiguration(new DriverConfig());
+            modelBuilder.ApplyConfiguration(new AccidentConfig());
+            modelBuilder.ApplyConfiguration(new HelperConfig());
+            modelBuilder.ApplyConfiguration(new TripConfig());
+            modelBuilder.ApplyConfiguration(new VehicleMaintenanceConfig());
+            modelBuilder.ApplyConfiguration(new VehicleMaintenanceTypeConfig());
         }
     }
 }

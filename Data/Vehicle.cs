@@ -11,18 +11,5 @@ namespace FleetPulse_BackEndDevelopment.Data
         public string VehicleColor { get; set; }
         public string FuelType { get; set; }
         public string Status { get; set; }
-
-        // Navigation Properties
-        public int VehicleTypeId { get; set; }
-        public VehicleType VehicleType { get; set; }
-
-        public int VehicleModelId { get; set; }
-        public VehicleModel VehicleModel { get; set; }
-
-        public int ManufactureId { get; set; }
-        public Manufacture Manufacture { get; set; }
-
-        public int FuelRefillId { get; set; }
-        public FuelRefill FuelRefill { get; set; }
     }
 }

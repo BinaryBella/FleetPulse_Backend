@@ -4,5 +4,6 @@
     {
         public int ManufactureId { get; set; }
         public string Manufacturer { get; set; }
+        public bool Status { get; set; }
     }
 }
