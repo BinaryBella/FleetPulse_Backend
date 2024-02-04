@@ -13,5 +13,9 @@ namespace FleetPulse_BackEndDevelopment.Data
         public string ServiceProvider { get; set; }
         public string SpecialNotes { get; set; }
         public bool Status { get; set; }
+        
+        //Vehicle_Maintenance_Type
+        public int Id { get; set; }
+        public VehicleMaintenanceType TypeName { get; set; }
     }
 }

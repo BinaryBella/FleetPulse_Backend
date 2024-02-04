@@ -362,6 +362,9 @@ namespace FleetPulse_BackEndDevelopment.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
+                    b.Property<int>("Id")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("MaintenanceDate")
                         .HasColumnType("datetime2");
 
@@ -386,7 +389,12 @@ namespace FleetPulse_BackEndDevelopment.Migrations
                     b.Property<bool>("Status")
                         .HasColumnType("bit");
 
+                    b.Property<int>("TypeNameId")
+                        .HasColumnType("int");
+
                     b.HasKey("VehicleMaintenanceId");
+
+                    b.HasIndex("TypeNameId");
 
                     b.ToTable("VehicleMaintenances", (string)null);
                 });
@@ -481,9 +489,25 @@ namespace FleetPulse_BackEndDevelopment.Migrations
                     b.Navigation("Type");
                 });
 
+            modelBuilder.Entity("FleetPulse_BackEndDevelopment.Data.VehicleMaintenance", b =>
+                {
+                    b.HasOne("FleetPulse_BackEndDevelopment.Data.VehicleMaintenanceType", "TypeName")
+                        .WithMany("VehicleMaintenances")
+                        .HasForeignKey("TypeNameId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("TypeName");
+                });
+
             modelBuilder.Entity("FleetPulse_BackEndDevelopment.Data.Manufacture", b =>
                 {
                     b.Navigation("Vehicles");
+                });
+
+            modelBuilder.Entity("FleetPulse_BackEndDevelopment.Data.VehicleMaintenanceType", b =>
+                {
+                    b.Navigation("VehicleMaintenances");
                 });
 
             modelBuilder.Entity("FleetPulse_BackEndDevelopment.Data.VehicleModel", b =>
