@@ -35,6 +35,12 @@ namespace FleetPulse_BackEndDevelopment.Data
             modelBuilder.ApplyConfiguration(new TripConfig());
             modelBuilder.ApplyConfiguration(new VehicleMaintenanceConfig());
             modelBuilder.ApplyConfiguration(new VehicleMaintenanceTypeConfig());
+            
+            // configures one-to-many relationship
+            modelBuilder.Entity<Vehicle>()
+                .HasOne<VehicleModel>(v => v.Model)
+                .WithMany(vm => vm.Vehicles)
+                .HasForeignKey(v => v.VehicleModelId);          
         }
     }
 }
