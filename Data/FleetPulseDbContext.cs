@@ -40,7 +40,12 @@ namespace FleetPulse_BackEndDevelopment.Data
             modelBuilder.Entity<Vehicle>()
                 .HasOne<VehicleModel>(v => v.Model)
                 .WithMany(vm => vm.Vehicles)
-                .HasForeignKey(v => v.VehicleModelId);          
+                .HasForeignKey(v => v.VehicleModelId);  
+            
+            modelBuilder.Entity<Vehicle>()
+                .HasOne<VehicleType>(v => v.Type)
+                .WithMany(vm => vm.Vehicles)
+                .HasForeignKey(v => v.VehicleTypeId);  
         }
     }
 }
