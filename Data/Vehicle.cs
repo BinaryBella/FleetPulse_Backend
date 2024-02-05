@@ -9,7 +9,6 @@ namespace FleetPulse_BackEndDevelopment.Data
         public string LicenseNo { get; set; }
         public DateTime LicenseExpireDate { get; set; }
         public string VehicleColor { get; set; }
-        public string FuelType { get; set; }
         public string Status { get; set; }
         
         //Vehicle_Model
@@ -21,6 +20,8 @@ namespace FleetPulse_BackEndDevelopment.Data
         //Vehicle_Manufacture
         public int ManufactureId { get; set; }
         public Manufacture Manufacturer { get; set; }
-        
+        //FuelRefill
+        public int FuelRefillId { get; set; }
+        public FuelRefill FType { get; set; }
     }
 }

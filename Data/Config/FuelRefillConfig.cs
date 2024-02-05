@@ -15,7 +15,7 @@ namespace FleetPulse_BackEndDevelopment.Data.Config
             builder.Property(fr => fr.Date).IsRequired();
             builder.Property(fr => fr.Time).IsRequired();
             builder.Property(fr => fr.LiterCount).IsRequired();
-            builder.Property(fr => fr.FuelType).HasMaxLength(50);
+            builder.Property(fr => fr.FType).HasMaxLength(50);
             builder.Property(fr => fr.Cost).HasColumnType("decimal(18, 2)");
         }
     }
