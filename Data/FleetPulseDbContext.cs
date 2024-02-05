@@ -12,6 +12,7 @@ namespace FleetPulse_BackEndDevelopment.Data
         public FleetPulseDbContext(DbContextOptions<FleetPulseDbContext> options) : base(options)
         {
         }
+
         public DbSet<VehicleModel> VehicleModels { get; set; }
         public DbSet<VehicleType> VehicleType { get; set; }
         public DbSet<Manufacture> Manufacture { get; set; }
@@ -21,6 +22,7 @@ namespace FleetPulse_BackEndDevelopment.Data
         public DbSet<Trip> Trip { get; set; }
         public DbSet<VehicleMaintenance> VehicleMaintenance { get; set; }
         public DbSet<VehicleMaintenanceType> VehicleMaintenanceType { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.ApplyConfiguration(new VehicleModelConfig());
@@ -32,19 +34,19 @@ namespace FleetPulse_BackEndDevelopment.Data
             modelBuilder.ApplyConfiguration(new TripConfig());
             modelBuilder.ApplyConfiguration(new VehicleMaintenanceConfig());
             modelBuilder.ApplyConfiguration(new VehicleMaintenanceTypeConfig());
-            
+
             // configures one-to-many relationship
-            
+
             //Vehicle_Model
             modelBuilder.Entity<Vehicle>()
                 .HasOne<VehicleModel>(v => v.Model)
                 .WithMany(vm => vm.Vehicles)
-                .HasForeignKey(v => v.VehicleModelId);  
+                .HasForeignKey(v => v.VehicleModelId);
             //Vehicle_Type
             modelBuilder.Entity<Vehicle>()
                 .HasOne<VehicleType>(v => v.Type)
                 .WithMany(vm => vm.Vehicles)
-                .HasForeignKey(v => v.VehicleTypeId);  
+                .HasForeignKey(v => v.VehicleTypeId);
             //Vehicle_Manufacture
             modelBuilder.Entity<Vehicle>()
                 .HasOne<Manufacture>(v => v.Manufacturer)
@@ -70,7 +72,11 @@ namespace FleetPulse_BackEndDevelopment.Data
                 .HasOne<Accident>(v => v.Accident)
                 .WithMany(vmain => vmain.Vehicles)
                 .HasForeignKey(v => v.AccidentId);
+            //Trip
+            modelBuilder.Entity<Vehicle>()
+                .HasOne<Trip>(v => v.Trip)
+                .WithMany(t => t.Vehicles)
+                .HasForeignKey(v => v.TripId);
         }
     }
-    
 }

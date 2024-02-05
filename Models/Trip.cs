@@ -11,5 +11,8 @@
         public float StartMeterValue { get; set; }
         public float EndMeterValue { get; set; }
         public bool Status { get; set; }
+        
+        //Vehicle
+        public ICollection<Vehicle> Vehicles { get; set; }
     }
 }
