@@ -22,6 +22,7 @@ namespace FleetPulse_BackEndDevelopment.Data
         public DbSet<Trip> Trip { get; set; }
         public DbSet<VehicleMaintenance> VehicleMaintenance { get; set; }
         public DbSet<VehicleMaintenanceType> VehicleMaintenanceType { get; set; }
+        public DbSet<TripUser> TripUsers { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -77,6 +78,19 @@ namespace FleetPulse_BackEndDevelopment.Data
                 .HasOne<Trip>(v => v.Trip)
                 .WithMany(t => t.Vehicles)
                 .HasForeignKey(v => v.TripId);
+            //TripUser
+            modelBuilder.Entity<TripUser>().HasKey(tu => new { tu.TripId, tu.UserId });
+
+            modelBuilder.Entity<TripUser>()
+                .HasOne<Trip>(tu => tu.Trip)
+                .WithMany(v => v.TripUsers)
+                .HasForeignKey(tu => tu.TripId);
+
+
+            modelBuilder.Entity<TripUser>()
+                .HasOne<User>(tu => tu.User)
+                .WithMany(v => v.TripUsers)
+                .HasForeignKey(tu => tu.UserId);
         }
     }
 }
