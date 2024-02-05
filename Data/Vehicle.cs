@@ -23,5 +23,11 @@ namespace FleetPulse_BackEndDevelopment.Data
         //FuelRefill
         public int FuelRefillId { get; set; }
         public FuelRefill FType { get; set; }
+        //Vehicle_Maintenance
+        public string VehicleMaintenanceId { get; set; }
+        
+        public VehicleMaintenance VehicleMaintenance { get; set; }
+
+        
     }
 }
