@@ -12,6 +12,10 @@
         public bool HelperInjuredStatus { get; set; }
         public bool VehicleDamagedStatus { get; set; }
         public bool Status { get; set; }
+        
+        //Vehicle
+        public ICollection<Vehicle> Vehicles { get; set; }
+
     }
 }
 
