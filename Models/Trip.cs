@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace FleetPulse_BackEndDevelopment.Data
+﻿namespace FleetPulse_BackEndDevelopment.Models
 {
     public class Trip
     {

@@ -1,4 +1,5 @@
 ﻿using FleetPulse_BackEndDevelopment.Data;
+using FleetPulse_BackEndDevelopment.Models;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore;
 

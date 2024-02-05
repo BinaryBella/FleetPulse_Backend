@@ -3,6 +3,7 @@ using FleetPulse_BackEndDevelopment.Data.Config;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Reflection.Emit;
+using FleetPulse_BackEndDevelopment.Models;
 
 namespace FleetPulse_BackEndDevelopment.Data
 {
@@ -16,9 +17,7 @@ namespace FleetPulse_BackEndDevelopment.Data
         public DbSet<Manufacture> Manufacture { get; set; }
         public DbSet<FuelRefill> FuelRefill { get; set; }
         public DbSet<Vehicle> Vehicle { get; set; }
-        public DbSet<Driver> Driver { get; set; }
         public DbSet<Accident> Accident { get; set; }
-        public DbSet<Helper> Helper { get; set; }
         public DbSet<Trip> Trip { get; set; }
         public DbSet<VehicleMaintenance> VehicleMaintenance { get; set; }
         public DbSet<VehicleMaintenanceType> VehicleMaintenanceType { get; set; }
@@ -29,9 +28,7 @@ namespace FleetPulse_BackEndDevelopment.Data
             modelBuilder.ApplyConfiguration(new ManufactureConfig());
             modelBuilder.ApplyConfiguration(new FuelRefillConfig());
             modelBuilder.ApplyConfiguration(new VehicleConfig());
-            modelBuilder.ApplyConfiguration(new DriverConfig());
             modelBuilder.ApplyConfiguration(new AccidentConfig());
-            modelBuilder.ApplyConfiguration(new HelperConfig());
             modelBuilder.ApplyConfiguration(new TripConfig());
             modelBuilder.ApplyConfiguration(new VehicleMaintenanceConfig());
             modelBuilder.ApplyConfiguration(new VehicleMaintenanceTypeConfig());
