@@ -24,7 +24,7 @@
         public string VehicleMaintenanceId { get; set; }
         public VehicleMaintenance VehicleMaintenance { get; set; }
         //Accident
-        public string AccidentId { get; set; }
+        public int AccidentId { get; set; }
         public Accident Accident { get; set; }
         //Trip
         public string TripId { get; set; }

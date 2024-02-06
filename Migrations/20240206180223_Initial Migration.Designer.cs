@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FleetPulse_BackEndDevelopment.Migrations
 {
     [DbContext(typeof(FleetPulseDbContext))]
-    [Migration("20240205061818_User Model")]
-    partial class UserModel
+    [Migration("20240206180223_Initial Migration")]
+    partial class InitialMigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -26,8 +26,11 @@ namespace FleetPulse_BackEndDevelopment.Migrations
 
             modelBuilder.Entity("FleetPulse_BackEndDevelopment.Models.Accident", b =>
                 {
-                    b.Property<string>("AccidentId")
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<int>("AccidentId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("AccidentId"), 1L, 1);
 
                     b.Property<DateTime>("DateTime")
                         .HasColumnType("datetime2");
@@ -67,6 +70,21 @@ namespace FleetPulse_BackEndDevelopment.Migrations
                     b.ToTable("Accidents", (string)null);
                 });
 
+            modelBuilder.Entity("FleetPulse_BackEndDevelopment.Models.AccidentUser", b =>
+                {
+                    b.Property<int>("AccidentId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("AccidentId", "UserId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("AccidentUser");
+                });
+
             modelBuilder.Entity("FleetPulse_BackEndDevelopment.Models.FuelRefill", b =>
                 {
                     b.Property<int>("FuelRefillId")
@@ -98,6 +116,21 @@ namespace FleetPulse_BackEndDevelopment.Migrations
                     b.HasKey("FuelRefillId");
 
                     b.ToTable("FuelRefills", (string)null);
+                });
+
+            modelBuilder.Entity("FleetPulse_BackEndDevelopment.Models.FuelRefillUser", b =>
+                {
+                    b.Property<int>("FuelRefillId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("FuelRefillId", "UserId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("FuelRefillUsers");
                 });
 
             modelBuilder.Entity("FleetPulse_BackEndDevelopment.Models.Manufacture", b =>
@@ -159,6 +192,95 @@ namespace FleetPulse_BackEndDevelopment.Migrations
                     b.ToTable("Trips", (string)null);
                 });
 
+            modelBuilder.Entity("FleetPulse_BackEndDevelopment.Models.TripUser", b =>
+                {
+                    b.Property<string>("TripId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("TripId", "UserId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("TripUsers");
+                });
+
+            modelBuilder.Entity("FleetPulse_BackEndDevelopment.Models.User", b =>
+                {
+                    b.Property<int>("UserId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("UserId"), 1L, 1);
+
+                    b.Property<string>("BloodGroup")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ConfirmPassword")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("DateOfBirth")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("DriverLicenseNo")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("EmailAddress")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("EmergencyContact")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("FirstName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("JobTitle")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("LastName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("LicenseExpiryDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("NIC")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Password")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PhoneNo")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<byte[]>("ProfilePicture")
+                        .IsRequired()
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<bool>("Status")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("UserName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("UserId");
+
+                    b.ToTable("User");
+                });
+
             modelBuilder.Entity("FleetPulse_BackEndDevelopment.Models.Vehicle", b =>
                 {
                     b.Property<int>("VehicleId")
@@ -166,6 +288,9 @@ namespace FleetPulse_BackEndDevelopment.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("VehicleId"), 1L, 1);
+
+                    b.Property<int>("AccidentId")
+                        .HasColumnType("int");
 
                     b.Property<int>("FuelRefillId")
                         .HasColumnType("int");
@@ -185,6 +310,10 @@ namespace FleetPulse_BackEndDevelopment.Migrations
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("TripId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("VehicleColor")
                         .IsRequired()
@@ -208,9 +337,13 @@ namespace FleetPulse_BackEndDevelopment.Migrations
 
                     b.HasKey("VehicleId");
 
+                    b.HasIndex("AccidentId");
+
                     b.HasIndex("FuelRefillId");
 
                     b.HasIndex("ManufactureId");
+
+                    b.HasIndex("TripId");
 
                     b.HasIndex("VehicleMaintenanceId");
 
@@ -331,8 +464,71 @@ namespace FleetPulse_BackEndDevelopment.Migrations
                     b.ToTable("VehicleType", (string)null);
                 });
 
+            modelBuilder.Entity("FleetPulse_BackEndDevelopment.Models.AccidentUser", b =>
+                {
+                    b.HasOne("FleetPulse_BackEndDevelopment.Models.Accident", "Accident")
+                        .WithMany("AccidentUsers")
+                        .HasForeignKey("AccidentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("FleetPulse_BackEndDevelopment.Models.User", "User")
+                        .WithMany("AccidentUsers")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Accident");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("FleetPulse_BackEndDevelopment.Models.FuelRefillUser", b =>
+                {
+                    b.HasOne("FleetPulse_BackEndDevelopment.Models.FuelRefill", "FuelRefill")
+                        .WithMany("FuelRefillUsers")
+                        .HasForeignKey("FuelRefillId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("FleetPulse_BackEndDevelopment.Models.User", "User")
+                        .WithMany("FuelRefillUsers")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("FuelRefill");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("FleetPulse_BackEndDevelopment.Models.TripUser", b =>
+                {
+                    b.HasOne("FleetPulse_BackEndDevelopment.Models.Trip", "Trip")
+                        .WithMany("TripUsers")
+                        .HasForeignKey("TripId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("FleetPulse_BackEndDevelopment.Models.User", "User")
+                        .WithMany("TripUsers")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Trip");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("FleetPulse_BackEndDevelopment.Models.Vehicle", b =>
                 {
+                    b.HasOne("FleetPulse_BackEndDevelopment.Models.Accident", "Accident")
+                        .WithMany("Vehicles")
+                        .HasForeignKey("AccidentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("FleetPulse_BackEndDevelopment.Models.FuelRefill", "FType")
                         .WithMany("Vehicles")
                         .HasForeignKey("FuelRefillId")
@@ -342,6 +538,12 @@ namespace FleetPulse_BackEndDevelopment.Migrations
                     b.HasOne("FleetPulse_BackEndDevelopment.Models.Manufacture", "Manufacturer")
                         .WithMany("Vehicles")
                         .HasForeignKey("ManufactureId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("FleetPulse_BackEndDevelopment.Models.Trip", "Trip")
+                        .WithMany("Vehicles")
+                        .HasForeignKey("TripId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -363,11 +565,15 @@ namespace FleetPulse_BackEndDevelopment.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.Navigation("Accident");
+
                     b.Navigation("FType");
 
                     b.Navigation("Manufacturer");
 
                     b.Navigation("Model");
+
+                    b.Navigation("Trip");
 
                     b.Navigation("Type");
 
@@ -385,14 +591,39 @@ namespace FleetPulse_BackEndDevelopment.Migrations
                     b.Navigation("TypeName");
                 });
 
+            modelBuilder.Entity("FleetPulse_BackEndDevelopment.Models.Accident", b =>
+                {
+                    b.Navigation("AccidentUsers");
+
+                    b.Navigation("Vehicles");
+                });
+
             modelBuilder.Entity("FleetPulse_BackEndDevelopment.Models.FuelRefill", b =>
                 {
+                    b.Navigation("FuelRefillUsers");
+
                     b.Navigation("Vehicles");
                 });
 
             modelBuilder.Entity("FleetPulse_BackEndDevelopment.Models.Manufacture", b =>
                 {
                     b.Navigation("Vehicles");
+                });
+
+            modelBuilder.Entity("FleetPulse_BackEndDevelopment.Models.Trip", b =>
+                {
+                    b.Navigation("TripUsers");
+
+                    b.Navigation("Vehicles");
+                });
+
+            modelBuilder.Entity("FleetPulse_BackEndDevelopment.Models.User", b =>
+                {
+                    b.Navigation("AccidentUsers");
+
+                    b.Navigation("FuelRefillUsers");
+
+                    b.Navigation("TripUsers");
                 });
 
             modelBuilder.Entity("FleetPulse_BackEndDevelopment.Models.VehicleMaintenance", b =>

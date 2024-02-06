@@ -2,7 +2,7 @@
 {
     public class Accident
     {
-        public string AccidentId { get; set; }
+        public int AccidentId { get; set; }
         public string Venue { get; set; }
         public DateTime DateTime { get; set; }
         public byte[] Photos { get; set; }
@@ -15,6 +15,9 @@
         
         //Vehicle
         public ICollection<Vehicle> Vehicles { get; set; }
+        
+        //AccidentUser
+        public IList<AccidentUser> AccidentUsers { get; set; }
 
     }
 }

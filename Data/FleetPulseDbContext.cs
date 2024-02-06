@@ -110,6 +110,20 @@ namespace FleetPulse_BackEndDevelopment.Data
                 .HasOne<User>(fru => fru.User)
                 .WithMany(f => f.FuelRefillUsers)
                 .HasForeignKey(fru => fru.UserId);
+            
+            
+            //AccidentUser
+            modelBuilder.Entity<AccidentUser>().HasKey(fru => new { fru.AccidentId, fru.UserId });
+
+            modelBuilder.Entity<AccidentUser>()
+                .HasOne<Accident>(fru => fru.Accident)
+                .WithMany(f => f.AccidentUsers)
+                .HasForeignKey(fru => fru.AccidentId);
+            
+            modelBuilder.Entity<AccidentUser>()
+                .HasOne<User>(fru => fru.User)
+                .WithMany(f => f.AccidentUsers)
+                .HasForeignKey(fru => fru.UserId);
         }
     }
 }
