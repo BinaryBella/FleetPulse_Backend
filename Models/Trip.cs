@@ -14,7 +14,7 @@
         
         //Vehicle
         public ICollection<Vehicle> Vehicles { get; set; }
-        //User
+        //TripUser
         public IList<TripUser> TripUsers { get; set; }
 
     }

@@ -13,5 +13,8 @@
         
         //Vehicle
         public ICollection<Vehicle> Vehicles { get; set; }
+        
+        //FuelRefillUser
+        public IList<FuelRefillUser> FuelRefillUsers { get; set; }
     }
 }

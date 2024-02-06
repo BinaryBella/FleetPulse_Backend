@@ -19,7 +19,10 @@ public class User
     public string JobTitle { get; set; }
     public byte[] ProfilePicture { get; set; }
     public bool Status { get; set; }
-    //Trip
+    //TripUser
     public IList<TripUser> TripUsers { get; set; }
+    
+    //FuelRefillUser
+    public IList<FuelRefillUser> FuelRefillUsers { get; set; }
 
 }
