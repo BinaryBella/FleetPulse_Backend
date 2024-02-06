@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Reflection.Emit;
 using FleetPulse_BackEndDevelopment.Models;
+using FleetPulse_BackEndDevelopment.Models.Configurations;
 
 namespace FleetPulse_BackEndDevelopment.Data
 {
@@ -23,6 +24,7 @@ namespace FleetPulse_BackEndDevelopment.Data
         public DbSet<VehicleMaintenance> VehicleMaintenance { get; set; }
         public DbSet<VehicleMaintenanceType> VehicleMaintenanceType { get; set; }
         public DbSet<TripUser> TripUsers { get; set; }
+        public DbSet<FuelRefillUser> FuelRefillUsers { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -35,6 +37,8 @@ namespace FleetPulse_BackEndDevelopment.Data
             modelBuilder.ApplyConfiguration(new TripConfig());
             modelBuilder.ApplyConfiguration(new VehicleMaintenanceConfig());
             modelBuilder.ApplyConfiguration(new VehicleMaintenanceTypeConfig());
+            modelBuilder.ApplyConfiguration(new TripUserConfig());
+            modelBuilder.ApplyConfiguration(new FuelRefillConfig());
 
             // configures one-to-many relationship
 
@@ -78,6 +82,9 @@ namespace FleetPulse_BackEndDevelopment.Data
                 .HasOne<Trip>(v => v.Trip)
                 .WithMany(t => t.Vehicles)
                 .HasForeignKey(v => v.TripId);
+            
+            //Many To Many Relationship
+            
             //TripUser
             modelBuilder.Entity<TripUser>().HasKey(tu => new { tu.TripId, tu.UserId });
 
@@ -103,8 +110,6 @@ namespace FleetPulse_BackEndDevelopment.Data
                 .HasOne<User>(fru => fru.User)
                 .WithMany(f => f.FuelRefillUsers)
                 .HasForeignKey(fru => fru.UserId);
-            
-            
         }
     }
 }
