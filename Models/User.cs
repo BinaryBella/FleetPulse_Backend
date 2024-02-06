@@ -21,8 +21,8 @@ public class User
     public bool Status { get; set; }
     //TripUser
     public IList<TripUser> TripUsers { get; set; }
-    
     //FuelRefillUser
     public IList<FuelRefillUser> FuelRefillUsers { get; set; }
-
+    //MaintenanceUser
+    public IList<MaintenanceUser> MaintenanceUsers { get; set; }
 }

@@ -2,7 +2,7 @@
 {
     public class Trip
     {
-        public string TripId { get; set; }
+        public int TripId { get; set; }
         public DateTime Date { get; set; }
         public TimeSpan StartTime { get; set; }
         public TimeSpan EndTime { get; set; }
@@ -16,6 +16,5 @@
         public ICollection<Vehicle> Vehicles { get; set; }
         //TripUser
         public IList<TripUser> TripUsers { get; set; }
-
     }
 }

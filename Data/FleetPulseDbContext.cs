@@ -25,6 +25,7 @@ namespace FleetPulse_BackEndDevelopment.Data
         public DbSet<VehicleMaintenanceType> VehicleMaintenanceType { get; set; }
         public DbSet<TripUser> TripUsers { get; set; }
         public DbSet<FuelRefillUser> FuelRefillUsers { get; set; }
+        public DbSet<MaintenanceUser>  MaintenanceUsers { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -38,7 +39,8 @@ namespace FleetPulse_BackEndDevelopment.Data
             modelBuilder.ApplyConfiguration(new VehicleMaintenanceConfig());
             modelBuilder.ApplyConfiguration(new VehicleMaintenanceTypeConfig());
             modelBuilder.ApplyConfiguration(new TripUserConfig());
-            modelBuilder.ApplyConfiguration(new FuelRefillConfig());
+            modelBuilder.ApplyConfiguration(new FuelRefillUserConfig());
+            modelBuilder.ApplyConfiguration(new MaintenanceUserConfig());
 
             // configures one-to-many relationship
 
@@ -110,6 +112,19 @@ namespace FleetPulse_BackEndDevelopment.Data
                 .HasOne<User>(fru => fru.User)
                 .WithMany(f => f.FuelRefillUsers)
                 .HasForeignKey(fru => fru.UserId);
+            
+            // MaintenanceUser
+            modelBuilder.Entity<MaintenanceUser>().HasKey(mu => new { mu.VehicleMaintenanceId, mu.UserId });
+
+            modelBuilder.Entity<MaintenanceUser>()
+                .HasOne<VehicleMaintenance>(mu => mu.VehicleMaintenance)
+                .WithMany(m => m.MaintenanceUsers)
+                .HasForeignKey(mu => mu.VehicleMaintenanceId);
+
+            modelBuilder.Entity<MaintenanceUser>()
+                .HasOne<User>(mu => mu.User)
+                .WithMany(u => u.MaintenanceUsers)
+                .HasForeignKey(mu => mu.UserId);
         }
     }
 }

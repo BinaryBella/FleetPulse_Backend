@@ -2,7 +2,7 @@
 {
     public class Accident
     {
-        public string AccidentId { get; set; }
+        public int AccidentId { get; set; }
         public string Venue { get; set; }
         public DateTime DateTime { get; set; }
         public byte[] Photos { get; set; }

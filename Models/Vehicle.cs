@@ -21,13 +21,13 @@
         public int FuelRefillId { get; set; }
         public FuelRefill FType { get; set; }
         //Vehicle_Maintenance
-        public string VehicleMaintenanceId { get; set; }
+        public int VehicleMaintenanceId { get; set; }
         public VehicleMaintenance VehicleMaintenance { get; set; }
         //Accident
-        public string AccidentId { get; set; }
+        public int AccidentId { get; set; }
         public Accident Accident { get; set; }
         //Trip
-        public string TripId { get; set; }
+        public int TripId { get; set; }
         public Trip Trip { get; set; }
     }
 }

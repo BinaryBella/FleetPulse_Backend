@@ -2,7 +2,7 @@
 {
     public class VehicleMaintenance
     {
-        public string VehicleMaintenanceId { get; set; }
+        public int VehicleMaintenanceId { get; set; }
         public DateTime MaintenanceDate { get; set; }
         public bool MaintenanceStatus { get; set; }
         public string Description { get; set; }
@@ -18,5 +18,7 @@
         //Vehicle_Maintenance_Type
         public int Id { get; set; }
         public VehicleMaintenanceType TypeName { get; set; }
+        //MaintenanceUser
+        public IList<MaintenanceUser> MaintenanceUsers { get; set; }
     }
 }
