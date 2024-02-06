@@ -26,6 +26,7 @@ namespace FleetPulse_BackEndDevelopment.Data
         public DbSet<TripUser> TripUsers { get; set; }
         public DbSet<FuelRefillUser> FuelRefillUsers { get; set; }
         public DbSet<MaintenanceUser>  MaintenanceUsers { get; set; }
+        public DbSet<AccidentUser>  AccidentUsers { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -41,6 +42,7 @@ namespace FleetPulse_BackEndDevelopment.Data
             modelBuilder.ApplyConfiguration(new TripUserConfig());
             modelBuilder.ApplyConfiguration(new FuelRefillUserConfig());
             modelBuilder.ApplyConfiguration(new MaintenanceUserConfig());
+            modelBuilder.ApplyConfiguration(new AccidentUserConfig());
 
             // configures one-to-many relationship
 
@@ -125,6 +127,18 @@ namespace FleetPulse_BackEndDevelopment.Data
                 .HasOne<User>(mu => mu.User)
                 .WithMany(u => u.MaintenanceUsers)
                 .HasForeignKey(mu => mu.UserId);
+            
+            //AccidentUser
+            modelBuilder.Entity<AccidentUser>().HasKey(au => new { au.AccidentId, au.UserId });
+
+            modelBuilder.Entity<AccidentUser>()
+                .HasOne<Accident>(au => au.Accident)
+                .WithMany(a => a.AccidentUsers);
+
+            modelBuilder.Entity<AccidentUser>()
+                .HasOne<User>(au => au.User)
+                .WithMany(a => a.AccidentUsers)
+                .HasForeignKey(au => au.UserId);
         }
     }
 }

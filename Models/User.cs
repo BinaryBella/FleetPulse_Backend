@@ -25,4 +25,6 @@ public class User
     public IList<FuelRefillUser> FuelRefillUsers { get; set; }
     //MaintenanceUser
     public IList<MaintenanceUser> MaintenanceUsers { get; set; }
+    //AccidentUser
+    public IEnumerable<AccidentUser> AccidentUsers { get; set; }
 }
