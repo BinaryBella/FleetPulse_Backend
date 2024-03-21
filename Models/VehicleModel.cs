@@ -1,4 +1,5 @@
-﻿namespace FleetPulse_BackEndDevelopment.Models
+﻿
+namespace FleetPulse_BackEndDevelopment.Models
 {
     public class VehicleModel
     {

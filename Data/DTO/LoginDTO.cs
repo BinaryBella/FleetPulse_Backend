@@ -4,9 +4,8 @@ namespace FleetPulse_BackEndDevelopment.Data.DTO;
 
 public class LoginDTO
 {
-    [EmailAddress]
     [Required]
-    public string EmailAddress { get; set; }
+    public string Username { get; set; }
 
     [Required]
     public string Password { get; set; }

@@ -1,5 +1,6 @@
 using AutoMapper;
 using FleetPulse_BackEndDevelopment.Data.DTO;
+using FleetPulse_BackEndDevelopment.Models;
 using FleetPulse_BackEndDevelopment.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -13,12 +14,14 @@ namespace FleetPulse_BackEndDevelopment.Controllers
         private readonly IMapper mapper;
         private readonly ILogger logger;
         private readonly AuthService authService;
+        private readonly IMailService mailService;
 
-        public AuthController(ILogger logger, AuthService authService, IMapper mapper)
+        public AuthController(ILogger logger, AuthService authService, IMapper mapper, IMailService mailService)
         {
             this.authService = authService;
             this.mapper = mapper;
             this.logger = logger;
+            this.mailService = mailService;
         }
 
         [AllowAnonymous]
@@ -29,14 +32,14 @@ namespace FleetPulse_BackEndDevelopment.Controllers
             {
                 if (ModelState.IsValid)
                 {
-                    if (this.authService.IsAuthenticated(userModel.EmailAddress, userModel.Password))
+                    if (this.authService.IsAuthenticated(userModel.Username, userModel.Password))
                     {
-                        var user = this.authService.GetByEmail(userModel.EmailAddress);
-                        var token = this.authService.GenerateJwtToken(userModel.EmailAddress, user.JobTitle);
+                        var user = this.authService.GetByUsername(userModel.Username);
+                        var token = this.authService.GenerateJwtToken(userModel.Username, user.JobTitle);
                         return Ok(token);
                     }
 
-                    return BadRequest("Email or password are not correct!");
+                    return new JsonResult("Username or password are not correct!");
                 }
 
                 return BadRequest(ModelState);
@@ -46,6 +49,21 @@ namespace FleetPulse_BackEndDevelopment.Controllers
                 logger.LogError(error.Message);
                 return StatusCode(500);
             }
+        }
+
+        [HttpPost("send")]
+        public async Task<IActionResult> SendMail([FromForm]MailRequest request)
+        {
+            try
+            {
+                await mailService.SendEmailAsync(request);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+            
         }
     }
 }

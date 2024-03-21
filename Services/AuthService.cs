@@ -20,15 +20,15 @@ public class AuthService
             this.configuration = configuration;
         }
 
-        public bool IsAuthenticated(string email, string password)
+        public bool IsAuthenticated(string username, string password)
         {
-            var user = this.GetByEmail(email);
-            return this.DoesUserExists(email) && BC.Verify(password, user.HashedPassword);
+            var user = this.GetByUsername(username);
+            return this.DoesUserExists(username) && BC.Verify(password, user.HashedPassword);
         }
 
-        public bool DoesUserExists(string email)
+        public bool DoesUserExists(string username)
         {
-            var user = this.dataContext.Users.FirstOrDefault(x => x.EmailAddress == email);
+            var user = this.dataContext.Users.FirstOrDefault(x => x.UserName == username);
             return user != null;
         }
 
@@ -42,9 +42,9 @@ public class AuthService
             return this.dataContext.Users.ToArray();
         }
 
-        public User GetByEmail(string email)
+        public User GetByUsername(string username)
         {
-            return this.dataContext.Users.FirstOrDefault(c => c.EmailAddress == email);
+            return this.dataContext.Users.FirstOrDefault(c => c.UserName == username);
         }
 
         public User RegisterUser(User model)
@@ -57,7 +57,7 @@ public class AuthService
             return userEntity.Entity;
         }
 
-        public string GenerateJwtToken(string email, string? JobTitle)
+        public string GenerateJwtToken(string username, string JobTitle)
         {
             var issuer = this.configuration["Jwt:Issuer"];
             var audience = this.configuration["Jwt:Audience"];
@@ -67,8 +67,8 @@ public class AuthService
                 Subject = new ClaimsIdentity(new[]
                 {
                             new Claim("Id", Guid.NewGuid().ToString()),
-                            new Claim(JwtRegisteredClaimNames.Sub, email),
-                            new Claim(JwtRegisteredClaimNames.Email, email),
+                            new Claim(JwtRegisteredClaimNames.Sub, username),
+                            new Claim(JwtRegisteredClaimNames.Email, username),
                             new Claim(ClaimTypes.Role, JobTitle),
                             new Claim(JwtRegisteredClaimNames.Jti,
                             Guid.NewGuid().ToString())
@@ -90,12 +90,12 @@ public class AuthService
 
             var t = decodedToken.ReadJwtToken(token.Substring(indexOfTokenValue));
 
-            return t.Payload.FirstOrDefault(x => x.Key == "email").Value.ToString();
+            return t.Payload.FirstOrDefault(x => x.Key == "username").Value.ToString();
         }
 
-        public User ChangeRole(string email, string JobTitle)
+        public User ChangeRole(string username, string JobTitle)
         {
-            var user = this.GetByEmail(email);
+            var user = this.GetByUsername(username);
             user.JobTitle = JobTitle;
             this.dataContext.SaveChanges();
 

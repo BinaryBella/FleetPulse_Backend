@@ -1,3 +1,4 @@
+using System.Configuration;
 using Microsoft.AspNetCore.Mvc;
 using System.Text;
 using Microsoft.OpenApi.Models;
@@ -5,6 +6,7 @@ using FleetPulse_BackEndDevelopment.Data;
 using FleetPulse_BackEndDevelopment.Filters;
 using Microsoft.EntityFrameworkCore;
 using AutoMapper;
+using FleetPulse_BackEndDevelopment.Configuration;
 using FleetPulse_BackEndDevelopment.Helpers;
 using Microsoft.IdentityModel.Tokens;
 using FleetPulse_BackEndDevelopment.Services;
@@ -21,6 +23,12 @@ builder.Services.AddControllers(options =>
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
+
+//email configuration
+builder.Services.Configure<MailSettings>(builder.Configuration.GetSection("MailSettings"));
+
+builder.Services.AddTransient<IMailService,FleetPulse_BackEndDevelopment.Services.MailService>();
+
 
 builder.Services.AddSwaggerGen(option =>
 {
