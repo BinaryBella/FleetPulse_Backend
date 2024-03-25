@@ -2,7 +2,6 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using FleetPulse_BackEndDevelopment.Data;
-using FleetPulse_BackEndDevelopment.Helpers;
 using FleetPulse_BackEndDevelopment.Models;
 using Microsoft.IdentityModel.Tokens;
 using BC = BCrypt.Net.BCrypt;
@@ -44,7 +43,7 @@ public class AuthService
 
         public User GetByUsername(string username)
         {
-            return this.dataContext.Users.FirstOrDefault(c => c.UserName == username);
+            return dataContext.Users.FirstOrDefault(c => c.UserName == username);
         }
 
         public User RegisterUser(User model)

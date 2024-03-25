@@ -10,6 +10,7 @@ using FleetPulse_BackEndDevelopment.Configuration;
 using FleetPulse_BackEndDevelopment.Helpers;
 using Microsoft.IdentityModel.Tokens;
 using FleetPulse_BackEndDevelopment.Services;
+using FleetPulse_BackEndDevelopment.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 var builder = WebApplication.CreateBuilder(args);
