@@ -2,6 +2,8 @@
 {
     public class Trip
     {
+        internal int tripid;
+
         public string TripId { get; set; }
         public DateTime Date { get; set; }
         public TimeSpan StartTime { get; set; }
