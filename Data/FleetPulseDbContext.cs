@@ -7,10 +7,6 @@ namespace FleetPulse_BackEndDevelopment.Data
 {
     public class FleetPulseDbContext : DbContext
     {
-        internal object vehicle;
-        internal object tripUsers;
-        internal object users;
-        internal object vehicleModels;
 
         public FleetPulseDbContext(DbContextOptions<FleetPulseDbContext> options) : base(options)
         {
@@ -28,7 +24,7 @@ namespace FleetPulse_BackEndDevelopment.Data
         public DbSet<TripUser> TripUsers { get; set; }
         public DbSet<FuelRefillUser> FuelRefillUsers { get; set; }
         public DbSet<User> Users { get; set; }
-        public object AccidentUsers { get; internal set; }
+        public DbSet<AccidentUser> AccidentUsers { get; internal set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

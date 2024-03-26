@@ -11,7 +11,7 @@ namespace FleetPulse.Controllers
     public class UserController : ControllerBase
     {
         private readonly FleetPulseDbContext _context;
-        private int tripid;
+        private int UserId;
 
         public UserController(FleetPulseDbContext context)
         {
@@ -20,16 +20,16 @@ namespace FleetPulse.Controllers
         [HttpGet]
         public async Task<IEnumerable<User>> Get()
         {
-            return await _context.users.ToListAsync();
+            return await _context.Users.ToListAsync();
         }
-        [HttpGet("{userid}")]
-        public async Task<IActionResult> Get(int userid)
+        [HttpGet("{UserId}")]
+        public async Task<IActionResult> Get(int UserId)
         {
-            if (userid < 1)
+            if (UserId < 1)
                 return BadRequest();
 
 
-            var User = await _context.users.FirstOrDefaultAsync(m => m.UserId == userid);
+            var User = await _context.Users.FirstOrDefaultAsync(m => m.UserId == UserId);
             if (User == null)
                 return NotFound();
             return Ok(User);
@@ -47,7 +47,7 @@ namespace FleetPulse.Controllers
             if (UserData == null || UserData.UserId == 0)
                 return BadRequest();
 
-            var User = await _context.users.FindAsync(UserData.UserId);
+            var User = await _context.Users.FindAsync(UserData.UserId);
             if (User == null)
                 return NotFound();
             User.UserId = UserData.UserId;
@@ -73,12 +73,12 @@ namespace FleetPulse.Controllers
         [HttpDelete("{userid}")]
         public async Task<IActionResult> Delete(int userid)
         {
-            if (tripid < 1)
+            if (UserId < 1)
                 return BadRequest();
-            var Trip = await _context.users.FindAsync(userid);
+            var Trip = await _context.Users.FindAsync(userid);
             if (Trip == null)
                 return NotFound();
-            _context.users.Remove(Trip);
+            _context.Users.Remove(Trip);
             await _context.SaveChangesAsync();
             return Ok();
 
