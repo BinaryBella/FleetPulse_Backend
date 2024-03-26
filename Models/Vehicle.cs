@@ -8,6 +8,7 @@
         public DateTime LicenseExpireDate { get; set; }
         public string VehicleColor { get; set; }
         public string Status { get; set; }
+        
         //Vehicle_Model
         public int VehicleModelId { get; set; }
         public VehicleModel Model { get; set; }

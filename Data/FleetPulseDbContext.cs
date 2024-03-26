@@ -10,7 +10,7 @@ namespace FleetPulse_BackEndDevelopment.Data
         public FleetPulseDbContext(DbContextOptions<FleetPulseDbContext> options) : base(options)
         {
         }
-
+        
         public DbSet<VehicleModel> VehicleModels { get; set; }
         public DbSet<VehicleType> VehicleType { get; set; }
         public DbSet<Manufacture> Manufacture { get; set; }
@@ -23,6 +23,7 @@ namespace FleetPulse_BackEndDevelopment.Data
         public DbSet<TripUser> TripUsers { get; set; }
         public DbSet<FuelRefillUser> FuelRefillUsers { get; set; }
         public DbSet<User> Users { get; set; }
+        public DbSet<VerificationCode> VerificationCodes { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -40,6 +41,7 @@ namespace FleetPulse_BackEndDevelopment.Data
             modelBuilder.ApplyConfiguration(new TripUserConfig());
             modelBuilder.ApplyConfiguration(new FuelRefillConfig());
             modelBuilder.ApplyConfiguration(new UserConfig());
+            modelBuilder.ApplyConfiguration(new VerificationCodeConfig());
 
             // configures one-to-many relationship
 

@@ -4,6 +4,8 @@ using FleetPulse_BackEndDevelopment.Helpers;
 using FleetPulse_BackEndDevelopment.Models;
 using FleetPulse_BackEndDevelopment.Services;
 using FleetPulse_BackEndDevelopment.Services.Interfaces;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -85,6 +87,16 @@ namespace FleetPulse_BackEndDevelopment.Controllers
             {
                 return BadRequest(500);
             }
+        }
+        
+        [HttpPost("logout")]
+        public IActionResult Logout()
+        {
+            HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+
+            Response.Cookies.Delete("localStorageKey");
+
+            return RedirectToAction("Login");
         }
     }
 }
