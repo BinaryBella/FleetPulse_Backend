@@ -1,8 +1,11 @@
 ﻿
+using System.ComponentModel.DataAnnotations;
+
 namespace FleetPulse_BackEndDevelopment.Models
 {
     public class VehicleModel
     {
+        [Key]
         public int VehicleModelId { get; set; }
         public string Model { get; set; }
         public bool Status { get; set; }

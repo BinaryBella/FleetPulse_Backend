@@ -21,7 +21,7 @@ namespace FleetPulse.Controllers
         [HttpGet]
         public async Task<IEnumerable<VehicleModel>> Get()
         {
-            return await _context.VehicleModels.ToListAsync();
+            return await _context.VehicleModel.ToListAsync();
         }
         [HttpGet("{VehicleModelId}")]
         public async Task<IActionResult> Get(int VehicleModelId)
@@ -30,7 +30,7 @@ namespace FleetPulse.Controllers
                 return BadRequest();
 
 
-            var VehicleModel = await _context.VehicleModels.FirstOrDefaultAsync(m => m.VehicleModelId == VehicleModelId);
+            var VehicleModel = await _context.VehicleModel.FirstOrDefaultAsync(m => m.VehicleModelId == VehicleModelId);
             if (VehicleModel == null)
                 return NotFound();
             return Ok(VehicleModel);
@@ -50,7 +50,7 @@ namespace FleetPulse.Controllers
             if (VehicleModelData == null || VehicleModelData.VehicleModelId == 0)
                 return BadRequest();
 
-            var VehicleModel = await _context.VehicleModels.FindAsync(VehicleModelData.VehicleModelId);
+            var VehicleModel = await _context.VehicleModel.FindAsync(VehicleModelData.VehicleModelId);
             if (VehicleModel == null)
                 return NotFound();
             VehicleModel.VehicleModelId = VehicleModelData.VehicleModelId;
@@ -66,10 +66,10 @@ namespace FleetPulse.Controllers
         {
             if (vehiclemodelid < 1)
                 return BadRequest();
-            var TripUser = await _context.VehicleModels.FindAsync(vehiclemodelid);
+            var TripUser = await _context.VehicleModel.FindAsync(vehiclemodelid);
             if (TripUser == null)
                 return NotFound();
-            _context.VehicleModels.Remove(VehicleModels);
+            _context.VehicleModel.Remove(VehicleModels);
             await _context.SaveChangesAsync();
             return Ok();
 

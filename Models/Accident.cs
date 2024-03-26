@@ -1,9 +1,11 @@
-﻿namespace FleetPulse_BackEndDevelopment.Models
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace FleetPulse_BackEndDevelopment.Models
 {
     public class Accident
     {
         internal int accidentid;
-
+        [Key]
         public int AccidentId { get; set; }
         public string Venue { get; set; }
         public DateTime DateTime { get; set; }
@@ -20,12 +22,12 @@
         
         //AccidentUser
         public IList<AccidentUser> AccidentUsers { get; set; }
-        public object VehicleId { get; internal set; }
-        public object HelperId { get; internal set; }
-        public object LossStatement { get; internal set; }
-        public object Time { get; internal set; }
-        public object DriverId { get; internal set; }
-        public object Date { get; internal set; }
+        public int VehicleId { get; internal set; }
+        public int HelperId { get; internal set; }
+        public string LossStatement { get; internal set; }
+        public DateTime Time { get; internal set; }
+        public int DriverId { get; internal set; }
+        public DateTime Date { get; internal set; }
     }
 }
 

@@ -10,7 +10,8 @@ public class DBSeeder
     public static void Seed(FleetPulseDbContext dbContext)
     {
         ArgumentNullException.ThrowIfNull(dbContext, nameof(dbContext));
-        dbContext.Database.EnsureCreated();
+
+       dbContext.Database.EnsureCreated();
 
         var executionStrategy = dbContext.Database.CreateExecutionStrategy();
 

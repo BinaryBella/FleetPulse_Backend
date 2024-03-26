@@ -1,7 +1,10 @@
-﻿namespace FleetPulse_BackEndDevelopment.Models
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace FleetPulse_BackEndDevelopment.Models
 {
     public class VehicleMaintenance
     {
+        [Key]
         public string VehicleMaintenanceId { get; set; }
         public DateTime MaintenanceDate { get; set; }
         public bool MaintenanceStatus { get; set; }

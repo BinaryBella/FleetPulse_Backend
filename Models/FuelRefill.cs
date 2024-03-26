@@ -1,7 +1,10 @@
-﻿namespace FleetPulse_BackEndDevelopment.Models
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace FleetPulse_BackEndDevelopment.Models
 {
     public class FuelRefill
     {
+        [Key]
         public int FuelRefillId { get; set; }
         public DateTime Date { get; set; }
         public TimeSpan Time { get; set; }

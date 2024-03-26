@@ -56,7 +56,7 @@ namespace FleetPulse.Controllers
             if (ManufactureData == null || ManufactureData.ManufactureId == 0)
                 return BadRequest();
 
-            var Manufacture = await _context.Manufacture.FindAsync(ManufactureData.manufactureid);
+            var Manufacture = await _context.Manufacture.FindAsync(ManufactureData.ManufactureId);
             if (Manufacture == null)
                 return NotFound();
             Manufacture.ManufactureId = ManufactureData.ManufactureId;

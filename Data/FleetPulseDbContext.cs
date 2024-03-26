@@ -12,11 +12,11 @@ namespace FleetPulse_BackEndDevelopment.Data
         {
         }
 
-        public DbSet<VehicleModel> VehicleModels { get; set; }
+        public DbSet<VehicleModel> VehicleModel { get; set; }
         public DbSet<VehicleType> VehicleType { get; set; }
         public DbSet<Manufacture> Manufacture { get; set; }
         public DbSet<FuelRefill> FuelRefill { get; set; }
-        public DbSet<Vehicle> Vehicle { get; set; }
+        public DbSet<Vehicle> Vehicles { get; set; }
         public DbSet<Accident> Accident { get; set; }
         public DbSet<Trip> Trip { get; set; }
         public DbSet<VehicleMaintenance> VehicleMaintenance { get; set; }
@@ -28,7 +28,16 @@ namespace FleetPulse_BackEndDevelopment.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            base.OnModelCreating(modelBuilder);
+            modelBuilder.Entity<AccidentUser>()
+            .HasKey(e => new { e.UserId, e.AccidentId });
+
+            modelBuilder.Entity<FuelRefillUser>()
+            .HasKey(e => new { e.FuelRefillId, e.UserId });
+
+            modelBuilder.Entity<TripUser>()
+            .HasKey(e => new { e.UserId, e.TripId });
+
+             base.OnModelCreating(modelBuilder);
             
             modelBuilder.ApplyConfiguration(new VehicleModelConfig());
             modelBuilder.ApplyConfiguration(new VehicleTypeConfig());
@@ -131,5 +140,6 @@ namespace FleetPulse_BackEndDevelopment.Data
                 .WithMany(f => f.AccidentUsers)
                 .HasForeignKey(fru => fru.UserId);
         }
+        }
     }
-}
+
