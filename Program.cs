@@ -29,6 +29,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.Configure<MailSettings>(builder.Configuration.GetSection("MailSettings"));
 
 builder.Services.AddTransient<IMailService,FleetPulse_BackEndDevelopment.Services.MailService>();
+builder.Services.AddScoped<VehicleService>();
 
 
 builder.Services.AddSwaggerGen(option =>

@@ -37,8 +37,8 @@ namespace FleetPulse_BackEndDevelopment.Data
             modelBuilder.Entity<TripUser>()
             .HasKey(e => new { e.UserId, e.TripId });
 
-             base.OnModelCreating(modelBuilder);
-            
+            base.OnModelCreating(modelBuilder);
+
             modelBuilder.ApplyConfiguration(new VehicleModelConfig());
             modelBuilder.ApplyConfiguration(new VehicleTypeConfig());
             modelBuilder.ApplyConfiguration(new ManufactureConfig());
@@ -97,9 +97,9 @@ namespace FleetPulse_BackEndDevelopment.Data
             //User
             modelBuilder.Entity<User>()
                 .HasKey(u => new { u.UserId });
-            
+
             //Many To Many Relationship
-            
+
             //TripUser
             modelBuilder.Entity<TripUser>().HasKey(tu => new { tu.TripId, tu.UserId });
 
@@ -107,12 +107,12 @@ namespace FleetPulse_BackEndDevelopment.Data
                 .HasOne<Trip>(tu => tu.Trip)
                 .WithMany(v => v.TripUsers)
                 .HasForeignKey(tu => tu.TripId);
-            
+
             modelBuilder.Entity<TripUser>()
                 .HasOne<User>(tu => tu.User)
                 .WithMany(v => v.TripUsers)
                 .HasForeignKey(tu => tu.UserId);
-            
+
             //FuelRefillUser
             modelBuilder.Entity<FuelRefillUser>().HasKey(fru => new { fru.FuelRefillId, fru.UserId });
 
@@ -120,13 +120,13 @@ namespace FleetPulse_BackEndDevelopment.Data
                 .HasOne<FuelRefill>(fru => fru.FuelRefill)
                 .WithMany(f => f.FuelRefillUsers)
                 .HasForeignKey(fru => fru.FuelRefillId);
-            
+
             modelBuilder.Entity<FuelRefillUser>()
                 .HasOne<User>(fru => fru.User)
                 .WithMany(f => f.FuelRefillUsers)
                 .HasForeignKey(fru => fru.UserId);
-            
-            
+
+
             //AccidentUser
             modelBuilder.Entity<AccidentUser>().HasKey(fru => new { fru.AccidentId, fru.UserId });
 
@@ -134,12 +134,12 @@ namespace FleetPulse_BackEndDevelopment.Data
                 .HasOne<Accident>(fru => fru.Accident)
                 .WithMany(f => f.AccidentUsers)
                 .HasForeignKey(fru => fru.AccidentId);
-            
+
             modelBuilder.Entity<AccidentUser>()
                 .HasOne<User>(fru => fru.User)
                 .WithMany(f => f.AccidentUsers)
                 .HasForeignKey(fru => fru.UserId);
         }
-        }
     }
+}
 

@@ -1,83 +1,82 @@
-﻿using FleetPulse_BackEndDevelopment.Data;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+using FleetPulse_BackEndDevelopment.Data;
+using FleetPulse_BackEndDevelopment.Data.DTO;
 using FleetPulse_BackEndDevelopment.Models;
+using FleetPulse_BackEndDevelopment.Services;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
-namespace FleetPulse.Controllers
+namespace FleetPulse_BackEndDevelopment.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
     public class VehicleController : ControllerBase
     {
+        private readonly VehicleService _vehicleService;
         private readonly FleetPulseDbContext _context;
 
-        public VehicleController(FleetPulseDbContext context)
+        public VehicleController(VehicleService vehicleService,FleetPulseDbContext context)
         {
+            _vehicleService = vehicleService;
             _context = context;
+
         }
+
+        // POST: api/Vehicle
+        [HttpPost("for vehicle")]
+        public async Task<ActionResult<VehicleDTO>> PostVehicle(VehicleDTO vehicle)
+        {
+            Vehicle model = new()
+            {
+                VehicleId = vehicle.VehicleId,
+                VehicleRegistrationNo = vehicle.VehicleRegistrationNo,
+                LicenseNo = vehicle.LicenseNo,
+                LicenseExpireDate=vehicle.LicenseExpireDate,
+                VehicleColor = vehicle.VehicleColor,
+                Status = vehicle.Status,
+                VehicleModelId = vehicle.VehicleModelId,
+                VehicleTypeId = vehicle.VehicleTypeId,
+                ManufactureId = vehicle.ManufactureId,
+                FuelRefillId = vehicle.FuelRefillId,
+            };
+            _context.Vehicles.Add(model);
+            _context.SaveChanges();
+            return Ok(model);
+        }
+
+        // GET: api/Vehicle
         [HttpGet]
-        public async Task<IEnumerable<Vehicle>> Get()
+        public async Task<ActionResult<IEnumerable<VehicleDTO>>> GetVehicles()
         {
-            return (IEnumerable<Vehicle>)await _context.Vehicles.AsQueryable().ToListAsync();
+            var vehicles = await _vehicleService.GetAllVehicles();
+            return Ok(vehicles);
         }
-        [HttpGet("{VehicleId}")]
-        public async Task<IActionResult> Get(int vehicleid)
+        // PUT: api/Vehicle/5
+        [HttpPut("{id}")]
+        public async Task<IActionResult> PutVehicle(int id, Vehicle vehicle)
         {
-            if (vehicleid < 1)
-                return BadRequest();
+            var updatedVehicle = await _vehicleService.UpdateVehicle(id, vehicle);
 
-
-            var Vehicle = await _context.Vehicles.FirstOrDefaultAsync(m => m.VehicleId == vehicleid);
-            if (Vehicle == null)
+            if (updatedVehicle == null)
+            {
                 return NotFound();
-            return Ok(Vehicle);
+            }
 
-
-        }
-        [HttpPost]
-        public async Task<IActionResult> Post(Vehicle Vehicle)
-        {
-            _context.Add(Vehicle);
-            await _context.SaveChangesAsync();
-            return Ok();
+            return NoContent();
         }
 
-        [HttpPut]
-        public async Task<IActionResult> Put(Vehicle VehicleData)
+        // DELETE: api/Vehicle/5
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteVehicle(int id)
         {
-            if (VehicleData == null || VehicleData.VehicleId == 0)
-                return BadRequest();
+            var result = await _vehicleService.DeleteVehicleAsync(id);
 
-            var Vehicle = await _context.Vehicles.FindAsync(VehicleData.VehicleId);
-            if (Vehicle == null)
+            if (!result)
+            {
                 return NotFound();
+            }
 
-            Vehicle.VehicleId = VehicleData.VehicleId;
-            Vehicle.VehicleRegistrationNo = VehicleData.VehicleRegistrationNo;
-            Vehicle.LicenseNo = VehicleData.LicenseNo;
-            Vehicle.LicenseExpireDate = VehicleData.LicenseExpireDate;
-            Vehicle.VehicleColor = VehicleData.VehicleColor;
-            Vehicle.Status = VehicleData.Status;
-
-
-
-            await _context.SaveChangesAsync();
-            return Ok();
-        }
-        [HttpDelete("{accidentid}")]
-        public async Task<IActionResult> Delete(int vehicleid)
-
-        {
-            if (vehicleid < 1)
-                return BadRequest();
-            var Vehicle = await _context.Vehicles.FindAsync(vehicleid);
-            if (Vehicle == null)
-                return NotFound();
-            _context.Vehicles.Remove(Vehicle);
-            await _context.SaveChangesAsync();
-            return Ok();
-
+            return NoContent();
         }
     }
 }
-
