@@ -1,6 +1,5 @@
 using AutoMapper;
 using FleetPulse_BackEndDevelopment.Data.DTO;
-using FleetPulse_BackEndDevelopment.Helpers;
 using FleetPulse_BackEndDevelopment.Models;
 using FleetPulse_BackEndDevelopment.Services;
 using FleetPulse_BackEndDevelopment.Services.Interfaces;
@@ -12,23 +11,25 @@ using Microsoft.AspNetCore.Mvc;
 namespace FleetPulse_BackEndDevelopment.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("api/[controller]")]
     public class AuthController : ControllerBase
     {
         private readonly IMapper mapper;
         private readonly ILogger logger;
         private readonly AuthService authService;
         private readonly IMailService mailService;
+        private readonly IVerificationCodeService verificationCodeService;
 
-        public AuthController(ILogger logger, AuthService authService, IMapper mapper, IMailService mailService)
+        public AuthController(ILogger logger, AuthService authService, IMapper mapper, IMailService mailService,
+            IVerificationCodeService verificationCodeService)
         {
             this.authService = authService;
+            this.mailService = mailService;
+            this.verificationCodeService = verificationCodeService;
             this.mapper = mapper;
             this.logger = logger;
-            this.mailService = mailService;
         }
 
-        [AllowAnonymous]
         [HttpPost("login")]
         public ActionResult<ApiResponse> Login(LoginDTO userModel)
         {
@@ -63,32 +64,82 @@ namespace FleetPulse_BackEndDevelopment.Controllers
                 return StatusCode(500);
             }
         }
-        
-        [HttpPost("verification-code")]
-        public async Task<IActionResult> SendMail()
+
+        [AllowAnonymous]
+        [HttpPost("forgot-password")]
+        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordDTO model)
         {
-            var apiResponse = new ApiResponse
+            var response = new ApiResponse
             {
                 Status = true
             };
-            var verificationCode = VerificationCodeGenerator.GenerateCode();
-            var mailRequest = new MailRequest
-            {
-                Subject = "Password Reset Verification",
-                Body = "Your Verification Code is " + verificationCode,
-                ToEmail = "chathushikavindya09@gmail.com"
-            };
+
             try
             {
-                await mailService.SendEmailAsync(mailRequest);
-                return new JsonResult(apiResponse);
+                if (ModelState.IsValid)
+                {
+                    var emailExists = authService.DoesEmailExists(model.Email);
+
+                    if (!emailExists)
+                    {
+                        response.Status = false;
+                        response.Message = "Email not found";
+                        return new JsonResult(response);
+                    }
+
+                    var verificationCode = await verificationCodeService.GenerateVerificationCode(model.Email);
+                    var mailRequest = new MailRequest
+                    {
+                        Subject = "Password Reset Verification",
+                        Body = "Your Verification Code is " + verificationCode.Code,
+                        ToEmail = model.Email
+                    };
+
+
+                    await mailService.SendEmailAsync(mailRequest);
+
+                    response.Message = "Verification code sent successfully";
+                    return new JsonResult(response);
+                }
+                else
+                {
+                    response.Message = "Invalid model state";
+                    return BadRequest(response);
+                }
             }
-            catch (Exception ex)
+            catch (Exception error)
             {
-                return BadRequest(500);
+                return StatusCode(500);
             }
         }
-        
+        [AllowAnonymous]
+        [HttpPost("validate-verification-code")]
+        public async Task<IActionResult> ValidateVerificationCode([FromBody] ValidateVerificationCodeRequest request)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var response = new ApiResponse
+            {
+                Status = true
+            };
+
+            bool isValid = await verificationCodeService.ValidateVerificationCode(request.Email, request.Code);
+
+            if (isValid)
+            {
+                return new JsonResult(response);
+            }
+            else
+            {
+                response.Status = false;
+                response.Error = "Invalid Data";
+                return BadRequest(response);
+            }
+        }
+
         [HttpPost("logout")]
         public IActionResult Logout()
         {

@@ -12,7 +12,7 @@ public class VerificationCodeConfig : IEntityTypeConfiguration<VerificationCode>
 
         builder.HasKey(vc => vc.Id);
         builder.Property(vc => vc.Code).IsRequired();
-        builder.Property(vc => vc.Status).IsRequired();
+        builder.Property(vc => vc.IsActive).IsRequired();
         builder.Property(vc => vc.ExpirationDateTime).IsRequired();
         builder.Property(vc => vc.Email).IsRequired().HasMaxLength(255);
     }

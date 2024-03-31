@@ -3,12 +3,13 @@ using System.Security.Claims;
 using System.Text;
 using FleetPulse_BackEndDevelopment.Data;
 using FleetPulse_BackEndDevelopment.Models;
+using FleetPulse_BackEndDevelopment.Services.Interfaces;
 using Microsoft.IdentityModel.Tokens;
 using BC = BCrypt.Net.BCrypt;
 
 namespace FleetPulse_BackEndDevelopment.Services;
 
-public class AuthService
+public class AuthService : IAuthService
 {
     private readonly FleetPulseDbContext dataContext;
         private readonly IConfiguration configuration;
@@ -27,10 +28,16 @@ public class AuthService
 
         public bool DoesUserExists(string username)
         {
-            var user = this.dataContext.Users.FirstOrDefault(x => x.UserName == username);
+            var user = dataContext.Users.FirstOrDefault(x => x.UserName == username);
             return user != null;
         }
 
+        public bool DoesEmailExists(string email)
+        {
+            var user = dataContext.Users.FirstOrDefault(x => x.EmailAddress == email);
+            return user != null;
+        }
+        
         public User GetById(int id)
         {
             return this.dataContext.Users.FirstOrDefault(c => c.UserId == id);
@@ -45,7 +52,7 @@ public class AuthService
         {
             return dataContext.Users.FirstOrDefault(c => c.UserName == username);
         }
-
+        
         public User RegisterUser(User model)
         {
             model.HashedPassword = BC.HashPassword(model.HashedPassword);
@@ -97,8 +104,7 @@ public class AuthService
             var user = this.GetByUsername(username);
             user.JobTitle = JobTitle;
             this.dataContext.SaveChanges();
-
-
+            
             return user;
         }
 }

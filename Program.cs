@@ -1,4 +1,3 @@
-using System.Configuration;
 using Microsoft.AspNetCore.Mvc;
 using System.Text;
 using Microsoft.OpenApi.Models;
@@ -28,8 +27,11 @@ builder.Services.AddEndpointsApiExplorer();
 //email configuration
 builder.Services.Configure<MailSettings>(builder.Configuration.GetSection("MailSettings"));
 
-builder.Services.AddTransient<IMailService,FleetPulse_BackEndDevelopment.Services.MailService>();
+builder.Services.AddTransient<IMailService,MailService>();
 
+builder.Services.AddTransient<IVerificationCodeService,VerificationCodeService>();
+
+builder.Services.AddTransient<IAuthService, AuthService>();
 
 builder.Services.AddSwaggerGen(option =>
 {
