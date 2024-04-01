@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using FleetPulse_BackEndDevelopment.Data;
 using FleetPulse_BackEndDevelopment.Models;
+using FleetPulse_BackEndDevelopment.Data.DTO;
 
 namespace FleetPulse.Controllers
 {
@@ -18,6 +19,18 @@ namespace FleetPulse.Controllers
         {
             _context = context;
         }
+
+        [HttpPost]
+        public async Task<ActionResult> AddVehicleType(VehicleTypeDTO data)
+        {
+            VehicleType tmp= new VehicleType();
+            tmp.Type = data.Type;
+            tmp.Status=data.Status;
+            await _context.VehicleType.AddAsync(tmp);
+            await _context.SaveChangesAsync();
+            return Ok();
+        }
+
         [HttpGet]
         public async Task<IEnumerable<VehicleType>> Get()
 
