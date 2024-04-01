@@ -53,7 +53,7 @@ namespace FleetPulse_BackEndDevelopment.Controllers
         }
         // PUT: api/Vehicle/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutVehicle(int id, Vehicle vehicle)
+        public async Task<IActionResult> PutVehicle(int id, VehicleDTO vehicle)
         {
             var updatedVehicle = await _vehicleService.UpdateVehicle(id, vehicle);
 
@@ -62,7 +62,7 @@ namespace FleetPulse_BackEndDevelopment.Controllers
                 return NotFound();
             }
 
-            return NoContent();
+            return Ok();
         }
 
         // DELETE: api/Vehicle/5

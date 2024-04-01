@@ -1,4 +1,5 @@
 ﻿using FleetPulse_BackEndDevelopment.Data;
+using FleetPulse_BackEndDevelopment.Data.DTO;
 using FleetPulse_BackEndDevelopment.Models;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.EntityFrameworkCore;
@@ -22,7 +23,9 @@ namespace FleetPulse_BackEndDevelopment.Services
         {
             return await _context.Vehicles.ToListAsync();
         }
-        public async Task<Vehicle> UpdateVehicle(int id,Vehicle updatedVehicle)
+
+
+        public async Task<Vehicle> UpdateVehicle(int id,VehicleDTO updatedVehicle)
         {
             var vehicle = await _context.Vehicles.FindAsync(id);
             if (vehicle == null)
