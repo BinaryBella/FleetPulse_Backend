@@ -5,7 +5,6 @@ using FleetPulse_BackEndDevelopment.Data;
 using FleetPulse_BackEndDevelopment.Models;
 using FleetPulse_BackEndDevelopment.Services.Interfaces;
 using Microsoft.IdentityModel.Tokens;
-using BC = BCrypt.Net.BCrypt;
 
 namespace FleetPulse_BackEndDevelopment.Services;
 
@@ -23,7 +22,7 @@ public class AuthService : IAuthService
         public bool IsAuthenticated(string username, string password)
         {
             var user = this.GetByUsername(username);
-            return this.DoesUserExists(username) && BC.Verify(password, user.HashedPassword);
+            return this.DoesUserExists(username) && BCrypt.Net.BCrypt.Verify(password, user.HashedPassword);
         }
 
         public bool DoesUserExists(string username)
@@ -43,6 +42,7 @@ public class AuthService : IAuthService
             return this.dataContext.Users.FirstOrDefault(c => c.UserId == id);
         }
 
+        
         public User[] GetAll()
         {
             return this.dataContext.Users.ToArray();
@@ -55,7 +55,7 @@ public class AuthService : IAuthService
         
         public User RegisterUser(User model)
         {
-            model.HashedPassword = BC.HashPassword(model.HashedPassword);
+            model.HashedPassword = BCrypt.Net.BCrypt.HashPassword(model.HashedPassword);
 
             var userEntity = dataContext.Users.Add(model);
             dataContext.SaveChanges();
@@ -106,5 +106,25 @@ public class AuthService : IAuthService
             this.dataContext.SaveChanges();
             
             return user;
+        }
+        
+        public User GetByEmail(string email)
+        {
+            return dataContext.Users.FirstOrDefault(c => c.EmailAddress == email);
+        }
+        
+        public bool ResetPassword(string email, string newPassword)
+        {
+            var user = GetByEmail(email);
+            if (user != null)
+            {
+                string hashedPassword = BCrypt.Net.BCrypt.HashPassword(newPassword);
+
+                user.HashedPassword = hashedPassword;
+                dataContext.SaveChanges();
+
+                return true; 
+            }
+            return false; 
         }
 }

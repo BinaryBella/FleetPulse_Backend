@@ -2,7 +2,6 @@ using FleetPulse_BackEndDevelopment.Data;
 using FleetPulse_BackEndDevelopment.Models;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
-using BC = BCrypt.Net.BCrypt;
 
 namespace FleetPulse_BackEndDevelopment.Helpers;
 public class DBSeeder
@@ -20,7 +19,6 @@ public class DBSeeder
                 {
                     try
                     {
-                        // Seed Users
                         if (!dbContext.Users.Any())
                         {
                             var usersData = File.ReadAllText("./Resources/users.json");
@@ -28,7 +26,7 @@ public class DBSeeder
 
                             foreach (var user in parsedUsers)
                             {
-                                user.HashedPassword = BC.HashPassword(user.HashedPassword);
+                                user.HashedPassword = BCrypt.Net.BCrypt.HashPassword(user.HashedPassword);
                             }
 
                             dbContext.Users.AddRange(parsedUsers);

@@ -1,4 +1,5 @@
 using AutoMapper;
+using FleetPulse_BackEndDevelopment.Data;
 using FleetPulse_BackEndDevelopment.Data.DTO;
 using FleetPulse_BackEndDevelopment.Models;
 using FleetPulse_BackEndDevelopment.Services;
@@ -7,6 +8,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace FleetPulse_BackEndDevelopment.Controllers
 {
@@ -82,6 +84,7 @@ namespace FleetPulse_BackEndDevelopment.Controllers
 
                     if (!emailExists)
                     {
+                        
                         response.Status = false;
                         response.Message = "Email not found";
                         return new JsonResult(response);
@@ -112,6 +115,7 @@ namespace FleetPulse_BackEndDevelopment.Controllers
                 return StatusCode(500);
             }
         }
+        
         [AllowAnonymous]
         [HttpPost("validate-verification-code")]
         public async Task<IActionResult> ValidateVerificationCode([FromBody] ValidateVerificationCodeRequest request)
@@ -139,7 +143,56 @@ namespace FleetPulse_BackEndDevelopment.Controllers
                 return BadRequest(response);
             }
         }
+        
+        [HttpPost("reset-password")]
+        public IActionResult ResetPassword([FromBody] ResetPasswordDTO model)
+        {
+            var response = new ApiResponse
+            {
+                Status = true
+            };
 
+            try
+            {
+                if (ModelState.IsValid)
+                {
+                    var emailExists = authService.DoesEmailExists(model.Email);
+
+                    if (!emailExists)
+                    {
+                        
+                        response.Status = false;
+                        response.Message = "Email not found";
+                        return new JsonResult(response);
+                    }
+
+                    bool passwordReset = authService.ResetPassword(model.Email, model.NewPassword);
+
+                    if (passwordReset)
+                    {
+                       
+                        response.Message = "Password reset successfully";
+                        return new JsonResult(response);
+                    }
+                    else
+                    {
+                        response.Status = false;
+                        response.Message = "Failed to reset password";
+                        return new JsonResult(response);
+                    }
+                }
+                else
+                {
+                    response.Message = "Invalid model state";
+                    return BadRequest(response);
+                }
+            }
+            catch (Exception error)
+            {
+                return StatusCode(500);
+            }
+        }
+        
         [HttpPost("logout")]
         public IActionResult Logout()
         {

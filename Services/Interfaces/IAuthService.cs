@@ -14,4 +14,6 @@ public interface IAuthService
     string GenerateJwtToken(string username, string JobTitle);
     string DecodeEmailFromToken(string token);
     User ChangeRole(string username, string JobTitle);
+    bool ResetPassword(string email, string newPassword);
+
 }
