@@ -185,6 +185,7 @@ namespace FleetPulse_BackEndDevelopment.Controllers
                 {
                     response.Message = "Invalid model state";
                     return BadRequest(response);
+                    
                 }
             }
             catch (Exception error)
