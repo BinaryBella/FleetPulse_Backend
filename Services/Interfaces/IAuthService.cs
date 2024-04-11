@@ -15,5 +15,6 @@ public interface IAuthService
     string DecodeEmailFromToken(string token);
     User ChangeRole(string username, string JobTitle);
     bool ResetPassword(string email, string newPassword);
+    string GetUsernameByEmail(string email);
 
 }

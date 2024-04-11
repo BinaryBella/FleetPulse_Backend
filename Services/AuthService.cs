@@ -37,12 +37,17 @@ public class AuthService : IAuthService
             return user != null;
         }
         
+        public string GetUsernameByEmail(string email)
+        {
+            var user = dataContext.Users.FirstOrDefault(x => x.EmailAddress == email);
+            return user != null ? user.UserName : null;
+        }
+
         public User GetById(int id)
         {
             return this.dataContext.Users.FirstOrDefault(c => c.UserId == id);
         }
-
-        
+    
         public User[] GetAll()
         {
             return this.dataContext.Users.ToArray();

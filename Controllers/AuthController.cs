@@ -84,7 +84,6 @@ namespace FleetPulse_BackEndDevelopment.Controllers
 
                     if (!emailExists)
                     {
-                        
                         response.Status = false;
                         response.Message = "Email not found";
                         return new JsonResult(response);
@@ -115,7 +114,7 @@ namespace FleetPulse_BackEndDevelopment.Controllers
                 return StatusCode(500);
             }
         }
-        
+
         [AllowAnonymous]
         [HttpPost("validate-verification-code")]
         public async Task<IActionResult> ValidateVerificationCode([FromBody] ValidateVerificationCodeRequest request)
@@ -143,7 +142,7 @@ namespace FleetPulse_BackEndDevelopment.Controllers
                 return BadRequest(response);
             }
         }
-        
+
         [HttpPost("reset-password")]
         public IActionResult ResetPassword([FromBody] ResetPasswordDTO model)
         {
@@ -160,7 +159,6 @@ namespace FleetPulse_BackEndDevelopment.Controllers
 
                     if (!emailExists)
                     {
-                        
                         response.Status = false;
                         response.Message = "Email not found";
                         return new JsonResult(response);
@@ -170,7 +168,6 @@ namespace FleetPulse_BackEndDevelopment.Controllers
 
                     if (passwordReset)
                     {
-                       
                         response.Message = "Password reset successfully";
                         return new JsonResult(response);
                     }
@@ -185,7 +182,6 @@ namespace FleetPulse_BackEndDevelopment.Controllers
                 {
                     response.Message = "Invalid model state";
                     return BadRequest(response);
-                    
                 }
             }
             catch (Exception error)
@@ -193,7 +189,70 @@ namespace FleetPulse_BackEndDevelopment.Controllers
                 return StatusCode(500);
             }
         }
-        
+
+        [HttpPost("change-password")]
+        public IActionResult ChangePassword([FromBody] ChangePasswordDTO model)
+        {
+            var response = new ApiResponse
+            {
+                Status = true
+            };
+
+            try
+            {
+                if (ModelState.IsValid)
+                {
+                    string username = authService.GetUsernameByEmail(model.Email);
+
+                    if (string.IsNullOrEmpty(username))
+                    {
+                        response.Status = false;
+                        response.Message = "Username not found for the provided email";
+                        return new JsonResult(response);
+                    }
+
+                    bool isOldPasswordValid = authService.IsAuthenticated(username, model.OldPassword);
+
+                    if (!isOldPasswordValid)
+                    {
+                        response.Status = false;
+                        response.Message = "Old password is incorrect";
+                        return new JsonResult(response);
+                    }
+
+                    if (model.OldPassword == model.NewPassword)
+                    {
+                        response.Status = false;
+                        response.Message = "New password must be different from old password";
+                        return new JsonResult(response);
+                    }
+
+                    bool passwordReset = authService.ResetPassword(model.Email, model.NewPassword);
+
+                    if (passwordReset)
+                    {
+                        response.Message = "Password changed successfully";
+                        return new JsonResult(response);
+                    }
+                    else
+                    {
+                        response.Status = false;
+                        response.Message = "Failed to change password";
+                        return new JsonResult(response);
+                    }
+                }
+                else
+                {
+                    response.Message = "Invalid model state";
+                    return BadRequest(response);
+                }
+            }
+            catch (Exception error)
+            {
+                return StatusCode(500);
+            }
+        }
+
         [HttpPost("logout")]
         public IActionResult Logout()
         {
