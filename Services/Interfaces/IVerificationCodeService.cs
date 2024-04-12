@@ -1,5 +1,4 @@
 using FleetPulse_BackEndDevelopment.Models;
-using Microsoft.AspNetCore.Mvc;
 
 namespace FleetPulse_BackEndDevelopment.Services.Interfaces;
 
