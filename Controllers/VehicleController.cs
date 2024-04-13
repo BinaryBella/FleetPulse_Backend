@@ -48,7 +48,7 @@ namespace FleetPulse_BackEndDevelopment.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<VehicleDTO>>> GetVehicles()
         {
-            var vehicles = await _vehicleService.GetAllVehicles();
+            var vehicles = await _vehicleService.GetAllVehicles();           
             return Ok(vehicles);
         }
         // PUT: api/Vehicle/5
