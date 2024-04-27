@@ -6,7 +6,7 @@ namespace FleetPulse_BackEndDevelopment.Services.Interfaces
     {
         Task<IEnumerable<VehicleMaintenance>> GetAllVehicleMaintenancesAsync();
         Task<VehicleMaintenance> GetVehicleMaintenanceByIdAsync(string id);
-        Task<VehicleMaintenance> AddVehicleMaintenanceAsync(VehicleMaintenance maintenance);
+        Task<bool> AddVehicleMaintenanceAsync(VehicleMaintenance maintenance);
         Task<bool> UpdateVehicleMaintenanceAsync(string id, VehicleMaintenance maintenance);
         Task<bool> DeleteVehicleMaintenanceAsync(string id);
     }

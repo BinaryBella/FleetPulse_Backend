@@ -9,7 +9,7 @@ public interface IAuthService
     bool DoesEmailExists(string email);
     User GetById(int id);
     User[] GetAll();
-    User GetByUsername(string username);
+    User? GetByUsername(string username);
     User RegisterUser(User model);
     string GenerateJwtToken(string username, string JobTitle);
     string DecodeEmailFromToken(string token);

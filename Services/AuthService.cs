@@ -53,7 +53,7 @@ public class AuthService : IAuthService
             return this.dataContext.Users.ToArray();
         }
 
-        public User GetByUsername(string username)
+        public User? GetByUsername(string username)
         {
             return dataContext.Users.FirstOrDefault(c => c.UserName == username);
         }

@@ -24,11 +24,11 @@ namespace FleetPulse_BackEndDevelopment.Services
             return await _context.VehicleMaintenance.FindAsync(id);
         }
 
-        public async Task<VehicleMaintenance> AddVehicleMaintenanceAsync(VehicleMaintenance maintenance)
+        public async Task<bool> AddVehicleMaintenanceAsync(VehicleMaintenance maintenance)
         {
             _context.VehicleMaintenance.Add(maintenance);
             await _context.SaveChangesAsync();
-            return maintenance;
+            return true;
         }
 
         public async Task<bool> UpdateVehicleMaintenanceAsync(string id, VehicleMaintenance maintenance)

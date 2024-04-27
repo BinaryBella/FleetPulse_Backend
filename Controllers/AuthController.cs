@@ -46,7 +46,7 @@ namespace FleetPulse_BackEndDevelopment.Controllers
                     if (this.authService.IsAuthenticated(userModel.Username, userModel.Password))
                     {
                         var user = this.authService.GetByUsername(userModel.Username);
-                        var token = this.authService.GenerateJwtToken(userModel.Username, user.JobTitle);
+                        var token = this.authService.GenerateJwtToken(userModel.Username, userModel.Password);
                         response.Data = token;
                         return new JsonResult(response);
                     }
@@ -202,16 +202,16 @@ namespace FleetPulse_BackEndDevelopment.Controllers
             {
                 if (ModelState.IsValid)
                 {
-                    string username = authService.GetUsernameByEmail(model.Email);
+                    var user = authService.GetByUsername(model.Username);
 
-                    if (string.IsNullOrEmpty(username))
+                    if (user == null)
                     {
                         response.Status = false;
-                        response.Message = "Username not found for the provided email";
+                        response.Message = "Username is not found";
                         return new JsonResult(response);
                     }
 
-                    bool isOldPasswordValid = authService.IsAuthenticated(username, model.OldPassword);
+                    bool isOldPasswordValid = authService.IsAuthenticated(user.UserName, model.OldPassword);
 
                     if (!isOldPasswordValid)
                     {
@@ -227,7 +227,7 @@ namespace FleetPulse_BackEndDevelopment.Controllers
                         return new JsonResult(response);
                     }
 
-                    bool passwordReset = authService.ResetPassword(model.Email, model.NewPassword);
+                    bool passwordReset = authService.ResetPassword(user.EmailAddress, model.NewPassword);
 
                     if (passwordReset)
                     {
