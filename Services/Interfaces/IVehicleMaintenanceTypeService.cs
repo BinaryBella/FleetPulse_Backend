@@ -8,6 +8,6 @@ namespace FleetPulse_BackEndDevelopment.Services.Interfaces
         Task<VehicleMaintenanceType?> GetVehicleMaintenanceTypeByIdAsync(int id);
         Task<VehicleMaintenanceType?> AddVehicleMaintenanceTypeAsync(VehicleMaintenanceType? maintenanceType);
         Task<bool> UpdateVehicleMaintenanceTypeAsync(VehicleMaintenanceType maintenanceType);
-        Task<bool> DeleteVehicleMaintenanceTypeAsync(int id);
+        Task<bool> DeactivateVehicleMaintenanceTypeAsync(VehicleMaintenanceType maintenanceType);
     }
 }

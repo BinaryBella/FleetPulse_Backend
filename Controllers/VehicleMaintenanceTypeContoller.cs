@@ -46,14 +46,12 @@ namespace FleetPulse_BackEndDevelopment.Controllers
                 addedMaintenanceType);
         }
 
-        [HttpPut]
-        public async Task<IActionResult> UpdateVehicleMaintenanceType(
-            [FromBody] VehicleMaintenanceTypeDTO maintenanceType)
+        [HttpPut("UpdateVehicleMaintenanceType")]
+        public async Task<IActionResult> UpdateVehicleMaintenanceType([FromBody] VehicleMaintenanceTypeDTO maintenanceType)
         {
             try
             {
-                var existingMaintenanceType =
-                    await _maintenanceTypeService.GetVehicleMaintenanceTypeByIdAsync(maintenanceType.Id);
+                var existingMaintenanceType = await _maintenanceTypeService.GetVehicleMaintenanceTypeByIdAsync(maintenanceType.Id);
                 
 
                 if (existingMaintenanceType == null)
@@ -73,14 +71,23 @@ namespace FleetPulse_BackEndDevelopment.Controllers
             }
         }
 
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteVehicleMaintenanceType(int id)
+        [HttpPut("DeactivateVehicleMaintenanceType")]
+        public async Task<IActionResult> DeactivateVehicleMaintenanceType([FromBody] VehicleMaintenanceTypeDTO maintenanceType)
         {
-            var result = await _maintenanceTypeService.DeleteVehicleMaintenanceTypeAsync(id);
-            if (!result)
-                return NotFound();
+            try
+            {
+                var existingMaintenanceType = await _maintenanceTypeService.GetVehicleMaintenanceTypeByIdAsync(maintenanceType.Id);
 
-            return NoContent();
+                if (existingMaintenanceType == null)
+                    return NotFound("MaintenanceType with Id not found");
+
+                var result = await _maintenanceTypeService.DeactivateVehicleMaintenanceTypeAsync(existingMaintenanceType);
+                return new JsonResult(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An error occurred while deactivating the vehicle maintenance type: {ex.Message}");
+            }
         }
     }
 }

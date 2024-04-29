@@ -111,6 +111,13 @@ builder.Services.AddCors(options =>
         });
 });
 
+builder.Services.AddSwaggerGen(c => {
+    c.ResolveConflictingActions(apiDescriptions => apiDescriptions.First());
+    c.IgnoreObsoleteActions();
+    c.IgnoreObsoleteProperties();
+    c.CustomSchemaIds(type => type.FullName);
+});
+
 // Declared services
 builder.Services.AddScoped<DBSeeder>();
 builder.Services.AddTransient<AuthService>();

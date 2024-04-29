@@ -42,19 +42,24 @@ namespace FleetPulse_BackEndDevelopment.Services
             {
                 return true;
             }
-
             return false;
         }
-
-        public async Task<bool> DeleteVehicleMaintenanceTypeAsync(int id)
+        
+        public async Task<bool> DeactivateVehicleMaintenanceTypeAsync(VehicleMaintenanceType maintenanceType)
         {
-            var maintenanceType = await _context.VehicleMaintenanceType.FindAsync(id);
-            if (maintenanceType == null)
-                return false;
-
-            _context.VehicleMaintenanceType.Remove(maintenanceType);
+            _context.Entry(maintenanceType).State = EntityState.Detached;
+            
+            maintenanceType.Status = false;
+            
+            var result = _context.VehicleMaintenanceType.Update(maintenanceType);
+            
             await _context.SaveChangesAsync();
-            return true;
+            
+            if (result.State == EntityState.Modified)
+            {
+                return true;
+            }
+            return false;       
         }
     }
 }
