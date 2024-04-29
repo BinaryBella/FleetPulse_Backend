@@ -43,10 +43,10 @@ namespace FleetPulse_BackEndDevelopment.Controllers
             {
                 if (ModelState.IsValid)
                 {
-                    if (this.authService.IsAuthenticated(userModel.Username, userModel.Password))
+                    if (authService.IsAuthenticated(userModel.Username, userModel.Password))
                     {
-                        var user = this.authService.GetByUsername(userModel.Username);
-                        var token = this.authService.GenerateJwtToken(userModel.Username, userModel.Password);
+                        var user = authService.GetByUsername(userModel.Username);
+                        var token = authService.GenerateJwtToken(userModel.Username, userModel.Password);
                         response.Data = token;
                         return new JsonResult(response);
                     }

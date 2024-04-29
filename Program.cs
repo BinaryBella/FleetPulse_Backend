@@ -116,6 +116,7 @@ builder.Services.AddScoped<DBSeeder>();
 builder.Services.AddTransient<AuthService>();
 builder.Services.AddScoped<IVehicleMaintenanceService, VehicleMaintenanceService>();
 builder.Services.AddScoped<IVehicleMaintenanceTypeService, VehicleMaintenanceTypeService>();
+builder.Services.AddScoped<IFuelRefillService, FuelRefillService>();
 
 var app = builder.Build();
 

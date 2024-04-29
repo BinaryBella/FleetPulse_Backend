@@ -323,9 +323,9 @@ namespace FleetPulse_BackEndDevelopment.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<string>("VehicleMaintenanceId")
+                    b.Property<int>("VehicleMaintenanceId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("int");
 
                     b.Property<int>("VehicleModelId")
                         .HasColumnType("int");
@@ -359,8 +359,8 @@ namespace FleetPulse_BackEndDevelopment.Migrations
 
             modelBuilder.Entity("FleetPulse_BackEndDevelopment.Models.VehicleMaintenance", b =>
                 {
-                    b.Property<string>("VehicleMaintenanceId")
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<int>("VehicleMaintenanceId")
+                        .HasColumnType("int");
 
                     b.Property<decimal>("Cost")
                         .HasColumnType("decimal(18,2)");

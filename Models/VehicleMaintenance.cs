@@ -1,8 +1,13 @@
-﻿namespace FleetPulse_BackEndDevelopment.Models
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace FleetPulse_BackEndDevelopment.Models
 {
     public class VehicleMaintenance
     {
-        public string VehicleMaintenanceId { get; set; }
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public int MaintenanceId { get; set; }
         public DateTime MaintenanceDate { get; set; }
         public bool MaintenanceStatus { get; set; }
         public string Description { get; set; }
@@ -13,10 +18,11 @@
         public bool Status { get; set; }
         
         //Vehicle
-        public ICollection<Vehicle> Vehicles { get; set; }
+        public int VehicleId { get; set; }
+        public Vehicle Vehicle { get; set; }
         
         //Vehicle_Maintenance_Type
-        public int Id { get; set; }
-        public VehicleMaintenanceType TypeName { get; set; }
+         public int VehicleMaintenanceTypeId { get; set; }
+         public VehicleMaintenanceType VehicleMaintenanceType { get; set; }
     }
 }

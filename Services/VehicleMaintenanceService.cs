@@ -19,7 +19,7 @@ namespace FleetPulse_BackEndDevelopment.Services
             return await _context.VehicleMaintenance.ToListAsync();
         }
 
-        public async Task<VehicleMaintenance> GetVehicleMaintenanceByIdAsync(string id)
+        public async Task<VehicleMaintenance> GetVehicleMaintenanceByIdAsync(int id)
         {
             return await _context.VehicleMaintenance.FindAsync(id);
         }
@@ -29,6 +29,11 @@ namespace FleetPulse_BackEndDevelopment.Services
             _context.VehicleMaintenance.Add(maintenance);
             await _context.SaveChangesAsync();
             return true;
+        }
+        
+        public Vehicle? GetByRegNo(string regNo)
+        {
+            return _context.Vehicle.FirstOrDefault(c => c.VehicleRegistrationNo == regNo);
         }
 
         public async Task<bool> UpdateVehicleMaintenanceAsync(string id, VehicleMaintenance maintenance)
@@ -45,7 +50,7 @@ namespace FleetPulse_BackEndDevelopment.Services
             existingMaintenance.ServiceProvider = maintenance.ServiceProvider;
             existingMaintenance.SpecialNotes = maintenance.SpecialNotes;
             existingMaintenance.Status = maintenance.Status;
-            existingMaintenance.TypeName = maintenance.TypeName;
+            existingMaintenance.VehicleMaintenanceType = maintenance.VehicleMaintenanceType;
 
             await _context.SaveChangesAsync();
             return true;

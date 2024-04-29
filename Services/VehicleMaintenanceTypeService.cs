@@ -1,6 +1,3 @@
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using FleetPulse_BackEndDevelopment.Data;
 using FleetPulse_BackEndDevelopment.Models;
 using FleetPulse_BackEndDevelopment.Services.Interfaces;
@@ -17,34 +14,36 @@ namespace FleetPulse_BackEndDevelopment.Services
             _context = context;
         }
 
-        public async Task<IEnumerable<VehicleMaintenanceType>> GetAllVehicleMaintenanceTypesAsync()
+        public async Task<IEnumerable<VehicleMaintenanceType?>> GetAllVehicleMaintenanceTypesAsync()
         {
             return await _context.VehicleMaintenanceType.ToListAsync();
         }
 
-        public async Task<VehicleMaintenanceType> GetVehicleMaintenanceTypeByIdAsync(int id)
+        public async Task<VehicleMaintenanceType?> GetVehicleMaintenanceTypeByIdAsync(int id)
         {
             return await _context.VehicleMaintenanceType.FindAsync(id);
         }
 
-        public async Task<VehicleMaintenanceType> AddVehicleMaintenanceTypeAsync(VehicleMaintenanceType maintenanceType)
+        public async Task<VehicleMaintenanceType?> AddVehicleMaintenanceTypeAsync(VehicleMaintenanceType? maintenanceType)
         {
             _context.VehicleMaintenanceType.Add(maintenanceType);
             await _context.SaveChangesAsync();
             return maintenanceType;
         }
 
-        public async Task<bool> UpdateVehicleMaintenanceTypeAsync(int id, VehicleMaintenanceType maintenanceType)
+        public async Task<bool> UpdateVehicleMaintenanceTypeAsync(VehicleMaintenanceType maintenanceType)
         {
-            var existingType = await _context.VehicleMaintenanceType.FindAsync(id);
-            if (existingType == null)
-                return false;
-
-            existingType.TypeName = maintenanceType.TypeName;
-            existingType.Status = maintenanceType.Status;
-
+            _context.Entry(maintenanceType).State = EntityState.Detached;
+            var result = _context.VehicleMaintenanceType.Update(maintenanceType);
+            result.State = EntityState.Detached;
             await _context.SaveChangesAsync();
-            return true;
+
+            if (result.State == EntityState.Modified)
+            {
+                return true;
+            }
+
+            return false;
         }
 
         public async Task<bool> DeleteVehicleMaintenanceTypeAsync(int id)

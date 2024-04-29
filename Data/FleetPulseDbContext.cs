@@ -19,7 +19,7 @@ namespace FleetPulse_BackEndDevelopment.Data
         public DbSet<Accident> Accident { get; set; }
         public DbSet<Trip> Trip { get; set; }
         public DbSet<VehicleMaintenance> VehicleMaintenance { get; set; }
-        public DbSet<VehicleMaintenanceType> VehicleMaintenanceType { get; set; }
+        public DbSet<VehicleMaintenanceType?> VehicleMaintenanceType { get; set; }
         public DbSet<TripUser> TripUsers { get; set; }
         public DbSet<FuelRefillUser> FuelRefillUsers { get; set; }
         public DbSet<User> Users { get; set; }
@@ -60,31 +60,23 @@ namespace FleetPulse_BackEndDevelopment.Data
                 .HasOne<Manufacture>(v => v.Manufacturer)
                 .WithMany(vm => vm.Vehicles)
                 .HasForeignKey(v => v.ManufactureId);
+            //Vehicle_Maintenance
+            modelBuilder.Entity<VehicleMaintenance>()
+                .HasOne(v => v.Vehicle)
+                .WithMany(vm => vm.VehicleMaintenance)
+                .HasForeignKey(vm => vm.VehicleId);
             //Vehicle_Maintenance_Type
             modelBuilder.Entity<VehicleMaintenance>()
-                .HasOne<VehicleMaintenanceType>(v => v.TypeName)
+                .HasOne<VehicleMaintenanceType>(v => v.VehicleMaintenanceType)
                 .WithMany(vmt => vmt.VehicleMaintenances)
-                .HasForeignKey(v => v.Id);
-            //FuelRefill
-            modelBuilder.Entity<Vehicle>()
-                .HasOne<FuelRefill>(v => v.FType)
-                .WithMany(fr => fr.Vehicles)
-                .HasForeignKey(v => v.FuelRefillId);
-            //Vehicle_Maintenance
-            modelBuilder.Entity<Vehicle>()
-                .HasOne<VehicleMaintenance>(v => v.VehicleMaintenance)
-                .WithMany(vmain => vmain.Vehicles)
-                .HasForeignKey(v => v.VehicleMaintenanceId);
-            //Accident
-            modelBuilder.Entity<Vehicle>()
-                .HasOne<Accident>(v => v.Accident)
-                .WithMany(vmain => vmain.Vehicles)
-                .HasForeignKey(v => v.AccidentId);
-            //Trip
-            modelBuilder.Entity<Vehicle>()
-                .HasOne<Trip>(v => v.Trip)
-                .WithMany(t => t.Vehicles)
-                .HasForeignKey(v => v.TripId);
+                .HasForeignKey(v => v.VehicleMaintenanceTypeId);
+            
+            //Vehicle_FuelRefill
+            modelBuilder.Entity<FuelRefill>()
+                .HasOne(v=>v.Vehicle)
+                .WithMany(fr => fr.FuelRefills)
+                .HasForeignKey(v => v.VehicleId);
+            
             //User
             modelBuilder.Entity<User>()
                 .HasKey(u => new { u.UserId });
@@ -116,7 +108,6 @@ namespace FleetPulse_BackEndDevelopment.Data
                 .HasOne<User>(fru => fru.User)
                 .WithMany(f => f.FuelRefillUsers)
                 .HasForeignKey(fru => fru.UserId);
-            
             
             //AccidentUser
             modelBuilder.Entity<AccidentUser>().HasKey(fru => new { fru.AccidentId, fru.UserId });

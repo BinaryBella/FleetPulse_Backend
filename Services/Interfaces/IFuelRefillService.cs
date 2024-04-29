@@ -6,7 +6,9 @@ namespace FleetPulse_BackEndDevelopment.Services.Interfaces
     {
         Task<IEnumerable<FuelRefill>> GetAllFuelRefillsAsync();
         Task<FuelRefill> GetFuelRefillByIdAsync(int id);
-        Task<FuelRefill> AddFuelRefillAsync(FuelRefill fuelRefill);
+        Task<bool> AddFuelRefillAsync(FuelRefill fuelRefill);
+        User? GetByNic(string nic);
+        Vehicle? GetByRegNo(string regNo);
         Task<bool> UpdateFuelRefillAsync(int id, FuelRefill fuelRefill);
         Task<bool> DeleteFuelRefillAsync(int id);
     }

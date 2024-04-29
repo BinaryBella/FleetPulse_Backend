@@ -24,11 +24,20 @@ namespace FleetPulse_BackEndDevelopment.Services
             return await _context.FuelRefill.FindAsync(id);
         }
 
-        public async Task<FuelRefill> AddFuelRefillAsync(FuelRefill fuelRefill)
+        public async Task<bool> AddFuelRefillAsync(FuelRefill fuelRefill)
         {
             _context.FuelRefill.Add(fuelRefill);
             await _context.SaveChangesAsync();
-            return fuelRefill;
+            return true;
+        }
+        public User? GetByNic(string nic)
+        {
+            return _context.Users.FirstOrDefault(c => c.NIC == nic);
+        }
+        
+        public Vehicle? GetByRegNo(string regNo)
+        {
+            return _context.Vehicle.FirstOrDefault(c => c.VehicleRegistrationNo == regNo);
         }
 
         public async Task<bool> UpdateFuelRefillAsync(int id, FuelRefill fuelRefill)
