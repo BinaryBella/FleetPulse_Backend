@@ -1,5 +1,6 @@
 using FleetPulse_BackEndDevelopment.Data.DTO;
 using FleetPulse_BackEndDevelopment.Models;
+using FleetPulse_BackEndDevelopment.Services;
 using FleetPulse_BackEndDevelopment.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -32,19 +33,47 @@ namespace FleetPulse_BackEndDevelopment.Controllers
 
             return Ok(maintenanceType);
         }
-
+        
         [HttpPost]
-        public async Task<ActionResult<VehicleMaintenanceType>> AddVehicleMaintenanceType(
-            [FromBody] string maintenanceType)
+        public async Task<ActionResult> AddVehicleMaintenanceTypeAsync([FromBody] VehicleMaintenanceTypeDTO maintenanceType)
         {
-            VehicleMaintenanceType? vehicleMaintenanceType = new VehicleMaintenanceType();
-            vehicleMaintenanceType.TypeName = maintenanceType;
+            var response = new ApiResponse();
+            try
+            {
+                var vehicleMaintenanceType = new VehicleMaintenanceType
+                {
+                    TypeName = maintenanceType.TypeName
+                };
+                
+                var vehicleMaintenanceTypeExists = _maintenanceTypeService.DoesVehicleMaintenanceTypeExists(maintenanceType.TypeName);
+                if (vehicleMaintenanceTypeExists)
+                {
+                    response.Message = "Vehicle Maintenance Type already exist";
+                    return new JsonResult(response);
+                }
+                var addedMaintenanceType = await _maintenanceTypeService.AddVehicleMaintenanceTypeAsync(vehicleMaintenanceType);
 
-            var addedMaintenanceType =
-                await _maintenanceTypeService.AddVehicleMaintenanceTypeAsync(vehicleMaintenanceType);
-            return CreatedAtAction(nameof(GetVehicleMaintenanceTypeById), new { id = addedMaintenanceType.Id },
-                addedMaintenanceType);
+                if (addedMaintenanceType != null)
+                {
+                    response.Status = true;
+                    response.Message = "Added Successfully";
+                    return new JsonResult(response);
+                }
+                else
+                {
+                    response.Status = false;
+                    response.Message = "Failed to add Maintenance Type";
+                }
+            }
+            catch (Exception ex)
+            {
+                response.Status = false;
+                response.Message = $"An error occurred: {ex.Message}";
+            }
+
+            return new JsonResult(response);
         }
+
 
         [HttpPut("UpdateVehicleMaintenanceType")]
         public async Task<IActionResult> UpdateVehicleMaintenanceType([FromBody] VehicleMaintenanceTypeDTO maintenanceType)

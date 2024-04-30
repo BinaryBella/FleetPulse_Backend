@@ -23,6 +23,12 @@ namespace FleetPulse_BackEndDevelopment.Services
         {
             return await _context.VehicleMaintenanceType.FindAsync(id);
         }
+        
+        public bool DoesVehicleMaintenanceTypeExists(string vehicleMaintenanceType)
+        {
+            var maintenanceType = _context.VehicleMaintenanceType.FirstOrDefault(x => x.TypeName == vehicleMaintenanceType);
+            return maintenanceType != null;
+        }
 
         public async Task<VehicleMaintenanceType?> AddVehicleMaintenanceTypeAsync(VehicleMaintenanceType? maintenanceType)
         {

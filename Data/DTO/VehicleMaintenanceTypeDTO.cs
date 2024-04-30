@@ -1,3 +1,5 @@
+using FleetPulse_BackEndDevelopment.Models;
+
 namespace FleetPulse_BackEndDevelopment.Data.DTO;
 
 public class VehicleMaintenanceTypeDTO
