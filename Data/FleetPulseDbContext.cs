@@ -19,7 +19,7 @@ namespace FleetPulse_BackEndDevelopment.Data
         public DbSet<Accident> Accident { get; set; }
         public DbSet<Trip> Trip { get; set; }
         public DbSet<VehicleMaintenance> VehicleMaintenance { get; set; }
-        public DbSet<VehicleMaintenanceType?> VehicleMaintenanceType { get; set; }
+        public DbSet<VehicleMaintenanceType> VehicleMaintenanceType { get; set; }
         public DbSet<TripUser> TripUsers { get; set; }
         public DbSet<FuelRefillUser> FuelRefillUsers { get; set; }
         public DbSet<User> Users { get; set; }

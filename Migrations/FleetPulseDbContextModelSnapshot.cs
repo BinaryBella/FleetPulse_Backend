@@ -34,7 +34,7 @@ namespace FleetPulse_BackEndDevelopment.Migrations
 
                     b.HasIndex("VehiclesVehicleId");
 
-                    b.ToTable("AccidentVehicle");
+                    b.ToTable("AccidentVehicle", (string)null);
                 });
 
             modelBuilder.Entity("FleetPulse_BackEndDevelopment.Models.Accident", b =>
@@ -95,7 +95,7 @@ namespace FleetPulse_BackEndDevelopment.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("AccidentUser");
+                    b.ToTable("AccidentUser", (string)null);
                 });
 
             modelBuilder.Entity("FleetPulse_BackEndDevelopment.Models.FuelRefill", b =>
@@ -148,7 +148,7 @@ namespace FleetPulse_BackEndDevelopment.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("FuelRefillUsers");
+                    b.ToTable("FuelRefillUsers", (string)null);
                 });
 
             modelBuilder.Entity("FleetPulse_BackEndDevelopment.Models.Manufacture", b =>
@@ -222,7 +222,7 @@ namespace FleetPulse_BackEndDevelopment.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("TripUsers");
+                    b.ToTable("TripUsers", (string)null);
                 });
 
             modelBuilder.Entity("FleetPulse_BackEndDevelopment.Models.User", b =>
@@ -505,7 +505,7 @@ namespace FleetPulse_BackEndDevelopment.Migrations
 
                     b.HasIndex("VehiclesVehicleId");
 
-                    b.ToTable("TripVehicle");
+                    b.ToTable("TripVehicle", (string)null);
                 });
 
             modelBuilder.Entity("AccidentVehicle", b =>

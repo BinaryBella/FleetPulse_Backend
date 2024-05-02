@@ -33,9 +33,10 @@ namespace FleetPulse_BackEndDevelopment.Controllers
 
             return Ok(maintenanceType);
         }
-        
+
         [HttpPost]
-        public async Task<ActionResult> AddVehicleMaintenanceTypeAsync([FromBody] VehicleMaintenanceTypeDTO maintenanceType)
+        public async Task<ActionResult> AddVehicleMaintenanceTypeAsync(
+            [FromBody] VehicleMaintenanceTypeDTO maintenanceType)
         {
             var response = new ApiResponse();
             try
@@ -44,14 +45,17 @@ namespace FleetPulse_BackEndDevelopment.Controllers
                 {
                     TypeName = maintenanceType.TypeName
                 };
-                
-                var vehicleMaintenanceTypeExists = _maintenanceTypeService.DoesVehicleMaintenanceTypeExists(maintenanceType.TypeName);
+
+                var vehicleMaintenanceTypeExists =
+                    _maintenanceTypeService.DoesVehicleMaintenanceTypeExists(maintenanceType.TypeName);
                 if (vehicleMaintenanceTypeExists)
                 {
                     response.Message = "Vehicle Maintenance Type already exist";
                     return new JsonResult(response);
                 }
-                var addedMaintenanceType = await _maintenanceTypeService.AddVehicleMaintenanceTypeAsync(vehicleMaintenanceType);
+
+                var addedMaintenanceType =
+                    await _maintenanceTypeService.AddVehicleMaintenanceTypeAsync(vehicleMaintenanceType);
 
                 if (addedMaintenanceType != null)
                 {
@@ -76,15 +80,18 @@ namespace FleetPulse_BackEndDevelopment.Controllers
 
 
         [HttpPut("UpdateVehicleMaintenanceType")]
-        public async Task<IActionResult> UpdateVehicleMaintenanceType([FromBody] VehicleMaintenanceTypeDTO maintenanceType)
+        public async Task<IActionResult> UpdateVehicleMaintenanceType(
+            [FromBody] VehicleMaintenanceTypeDTO maintenanceType)
         {
             try
             {
-                var existingMaintenanceType = await _maintenanceTypeService.GetVehicleMaintenanceTypeByIdAsync(maintenanceType.Id);
-                
+                var existingMaintenanceType = await _maintenanceTypeService.IsVehicleTypeExist(maintenanceType.Id);
 
-                if (existingMaintenanceType == null)
-                    return NotFound($"MaintenanceType with Id not found");
+                if (!existingMaintenanceType)
+                {
+                    return NotFound("MaintenanceType with Id not found");
+                }
+                
                 var vehicleMaintenanceType = new VehicleMaintenanceType
                 {
                     Id = maintenanceType.Id,
@@ -101,21 +108,25 @@ namespace FleetPulse_BackEndDevelopment.Controllers
         }
 
         [HttpPut("DeactivateVehicleMaintenanceType")]
-        public async Task<IActionResult> DeactivateVehicleMaintenanceType([FromBody] VehicleMaintenanceTypeDTO maintenanceType)
+        public async Task<IActionResult> DeactivateVehicleMaintenanceType(
+            [FromBody] VehicleMaintenanceTypeDTO maintenanceType)
         {
             try
             {
-                var existingMaintenanceType = await _maintenanceTypeService.GetVehicleMaintenanceTypeByIdAsync(maintenanceType.Id);
+                var existingMaintenanceType =
+                    await _maintenanceTypeService.GetVehicleMaintenanceTypeByIdAsync(maintenanceType.Id);
 
                 if (existingMaintenanceType == null)
                     return NotFound("MaintenanceType with Id not found");
 
-                var result = await _maintenanceTypeService.DeactivateVehicleMaintenanceTypeAsync(existingMaintenanceType);
+                var result =
+                    await _maintenanceTypeService.DeactivateVehicleMaintenanceTypeAsync(existingMaintenanceType);
                 return new JsonResult(result);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"An error occurred while deactivating the vehicle maintenance type: {ex.Message}");
+                return StatusCode(500,
+                    $"An error occurred while deactivating the vehicle maintenance type: {ex.Message}");
             }
         }
     }

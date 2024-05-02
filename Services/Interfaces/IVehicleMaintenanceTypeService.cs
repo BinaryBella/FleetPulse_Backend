@@ -10,5 +10,6 @@ namespace FleetPulse_BackEndDevelopment.Services.Interfaces
         bool DoesVehicleMaintenanceTypeExists(string vehicleMaintenanceType);
         Task<bool> UpdateVehicleMaintenanceTypeAsync(VehicleMaintenanceType maintenanceType);
         Task<bool> DeactivateVehicleMaintenanceTypeAsync(VehicleMaintenanceType maintenanceType);
+        Task<bool> IsVehicleTypeExist(int id);
     }
 }

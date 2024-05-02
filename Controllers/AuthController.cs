@@ -280,45 +280,59 @@ namespace FleetPulse_BackEndDevelopment.Controllers
             return Ok(User);
         }
         
-        // [HttpPost]
-        // public async Task<ActionResult> AddUserAsync([FromBody] VehicleMaintenanceTypeDTO maintenanceType)
-        // {
-        //     var response = new ApiResponse();
-        //     try
-        //     {
-        //         var vehicleMaintenanceType = new VehicleMaintenanceType
-        //         {
-        //             TypeName = maintenanceType.TypeName
-        //         };
-        //         
-        //         var vehicleMaintenanceTypeExists = _maintenanceTypeService.DoesVehicleMaintenanceTypeExists(maintenanceType.TypeName);
-        //         if (vehicleMaintenanceTypeExists)
-        //         {
-        //             response.Message = "Vehicle Maintenance Type already exist";
-        //             return new JsonResult(response);
-        //         }
-        //         var addedMaintenanceType = await _maintenanceTypeService.AddVehicleMaintenanceTypeAsync(vehicleMaintenanceType);
-        //
-        //         if (addedMaintenanceType != null)
-        //         {
-        //             response.Status = true;
-        //             response.Message = "Added Successfully";
-        //             return new JsonResult(response);
-        //         }
-        //         else
-        //         {
-        //             response.Status = false;
-        //             response.Message = "Failed to add Maintenance Type";
-        //         }
-        //     }
-        //     catch (Exception ex)
-        //     {
-        //         response.Status = false;
-        //         response.Message = $"An error occurred: {ex.Message}";
-        //     }
-        //
-        //     return new JsonResult(response);
-        // }
-        //
+        [HttpPost]
+        public async Task<ActionResult> AddUserAsync([FromBody] UserDTO User)
+        {
+            var response = new ApiResponse();
+            try
+            {
+                var user = new User
+                {
+                    FirstName = User.FirstName,
+                    LastName = User.LastName,
+                    NIC = User.NIC,
+                    DriverLicenseNo = User.DriverLicenseNo,
+                    LicenseExpiryDate = User.LicenseExpiryDate,
+                    BloodGroup = User.BloodGroup,
+                    DateOfBirth = User.DateOfBirth,
+                    PhoneNo = User.PhoneNo,
+                    UserName = User.UserName,
+                    HashedPassword = User.HashedPassword,
+                    EmailAddress = User.EmailAddress,
+                    EmergencyContact = User.EmergencyContact,
+                    JobTitle = User.JobTitle,
+                    ProfilePicture = User.ProfilePicture,
+                    Status = User.Status
+                };
+                
+                var userExists = authService.DoesUserExists(User.UserName);
+                if (userExists)
+                {
+                    response.Message = "User already exist";
+                    return new JsonResult(response);
+                }
+                var addedUser = await authService.AddUserAsync(user);
+        
+                if (addedUser != null)
+                {
+                    response.Status = true;
+                    response.Message = "Added Successfully";
+                    return new JsonResult(response);
+                }
+                else
+                {
+                    response.Status = false;
+                    response.Message = "Failed to add User";
+                }
+            }
+            catch (Exception ex)
+            {
+                response.Status = false;
+                response.Message = $"An error occurred: {ex.Message}";
+            }
+        
+            return new JsonResult(response);
+        }
+        
     }
 }

@@ -23,6 +23,11 @@ namespace FleetPulse_BackEndDevelopment.Services
         {
             return await _context.VehicleMaintenanceType.FindAsync(id);
         }
+
+        public Task<bool> IsVehicleTypeExist(int id)
+        {
+            return Task.FromResult(_context.VehicleMaintenanceType.Any(x => x.Id == id));
+        }
         
         public bool DoesVehicleMaintenanceTypeExists(string vehicleMaintenanceType)
         {
@@ -39,16 +44,17 @@ namespace FleetPulse_BackEndDevelopment.Services
 
         public async Task<bool> UpdateVehicleMaintenanceTypeAsync(VehicleMaintenanceType maintenanceType)
         {
-            _context.Entry(maintenanceType).State = EntityState.Detached;
-            var result = _context.VehicleMaintenanceType.Update(maintenanceType);
-            result.State = EntityState.Detached;
-            await _context.SaveChangesAsync();
-
-            if (result.State == EntityState.Modified)
+            try
             {
+                var result = _context.VehicleMaintenanceType.Update(maintenanceType);
+                result.State = EntityState.Modified;
+                await _context.SaveChangesAsync();
                 return true;
             }
-            return false;
+            catch
+            {
+                return false;
+            }
         }
         
         public async Task<bool> DeactivateVehicleMaintenanceTypeAsync(VehicleMaintenanceType maintenanceType)
