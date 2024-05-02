@@ -12,9 +12,7 @@ namespace FleetPulse_BackEndDevelopment.Data.Config
 
             builder.HasKey(vm => vm.MaintenanceId);
         
-            builder.Property(vm => vm.MaintenanceDate).IsRequired();
-            builder.Property(vm => vm.MaintenanceStatus).IsRequired();
-            builder.Property(vm => vm.Description).HasMaxLength(500);
+            builder.Property(vm => vm.MaintenanceDate).IsRequired(); 
             builder.Property(vm => vm.Cost).HasColumnType("decimal(18, 2)");
             builder.Property(vm => vm.PartsReplaced).HasMaxLength(500);
             builder.Property(vm => vm.ServiceProvider).HasMaxLength(100);

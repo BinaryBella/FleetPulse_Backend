@@ -30,10 +30,6 @@ namespace FleetPulse_BackEndDevelopment.Services
             await _context.SaveChangesAsync();
             return true;
         }
-        public User? GetByNic(string nic)
-        {
-            return _context.Users.FirstOrDefault(c => c.NIC == nic);
-        }
         
         public Vehicle? GetByRegNo(string regNo)
         {

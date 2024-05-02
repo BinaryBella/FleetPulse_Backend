@@ -43,8 +43,6 @@ namespace FleetPulse_BackEndDevelopment.Services
                 return false;
 
             existingMaintenance.MaintenanceDate = maintenance.MaintenanceDate;
-            existingMaintenance.MaintenanceStatus = maintenance.MaintenanceStatus;
-            existingMaintenance.Description = maintenance.Description;
             existingMaintenance.Cost = maintenance.Cost;
             existingMaintenance.PartsReplaced = maintenance.PartsReplaced;
             existingMaintenance.ServiceProvider = maintenance.ServiceProvider;

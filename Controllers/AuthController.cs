@@ -262,5 +262,63 @@ namespace FleetPulse_BackEndDevelopment.Controllers
 
             return RedirectToAction("Login");
         }
+        
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<User>>> GetAllUsersAsync()
+        {
+            var User =authService.GetAllUsersAsync();
+            return Ok(User);
+        }
+        
+        [HttpGet("{id}")]
+        public async Task<ActionResult<User>> GetUserIdAsync(int UserId)
+        {
+            var User = await authService.GetUserIdAsync(UserId);
+            if (User == null)
+                return NotFound();
+        
+            return Ok(User);
+        }
+        
+        // [HttpPost]
+        // public async Task<ActionResult> AddUserAsync([FromBody] VehicleMaintenanceTypeDTO maintenanceType)
+        // {
+        //     var response = new ApiResponse();
+        //     try
+        //     {
+        //         var vehicleMaintenanceType = new VehicleMaintenanceType
+        //         {
+        //             TypeName = maintenanceType.TypeName
+        //         };
+        //         
+        //         var vehicleMaintenanceTypeExists = _maintenanceTypeService.DoesVehicleMaintenanceTypeExists(maintenanceType.TypeName);
+        //         if (vehicleMaintenanceTypeExists)
+        //         {
+        //             response.Message = "Vehicle Maintenance Type already exist";
+        //             return new JsonResult(response);
+        //         }
+        //         var addedMaintenanceType = await _maintenanceTypeService.AddVehicleMaintenanceTypeAsync(vehicleMaintenanceType);
+        //
+        //         if (addedMaintenanceType != null)
+        //         {
+        //             response.Status = true;
+        //             response.Message = "Added Successfully";
+        //             return new JsonResult(response);
+        //         }
+        //         else
+        //         {
+        //             response.Status = false;
+        //             response.Message = "Failed to add Maintenance Type";
+        //         }
+        //     }
+        //     catch (Exception ex)
+        //     {
+        //         response.Status = false;
+        //         response.Message = $"An error occurred: {ex.Message}";
+        //     }
+        //
+        //     return new JsonResult(response);
+        // }
+        //
     }
 }

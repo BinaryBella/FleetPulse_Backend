@@ -4,6 +4,7 @@ using System.Text;
 using FleetPulse_BackEndDevelopment.Data;
 using FleetPulse_BackEndDevelopment.Models;
 using FleetPulse_BackEndDevelopment.Services.Interfaces;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
 namespace FleetPulse_BackEndDevelopment.Services;
@@ -45,7 +46,12 @@ public class AuthService : IAuthService
 
         public User GetById(int id)
         {
-            return this.dataContext.Users.FirstOrDefault(c => c.UserId == id);
+            return dataContext.Users.FirstOrDefault(c => c.UserId == id);
+        }
+        
+        public User? GetByNic(string nic)
+        {
+            return dataContext.Users.FirstOrDefault(c => c.NIC == nic);
         }
     
         public User[] GetAll()
@@ -131,5 +137,51 @@ public class AuthService : IAuthService
                 return true; 
             }
             return false; 
+        }
+        
+        public async Task<IEnumerable<User?>> GetAllUsersAsync()
+        {
+            return await dataContext.Users.ToListAsync();
+        }
+        
+        public async Task<User?> GetUserIdAsync(int UserId)
+        {
+            return await dataContext.Users.FindAsync(UserId);
+        }
+        public async Task<User?> AddUserAsync(User? User)
+        {
+            dataContext.Users.Add(User);
+            await dataContext.SaveChangesAsync();
+            return User;
+        }
+        public async Task<bool> UpdateUserAsync(User User)
+        {
+            dataContext.Entry(User).State = EntityState.Detached;
+            var result = dataContext.Users.Update(User);
+            result.State = EntityState.Detached;
+            await dataContext.SaveChangesAsync();
+
+            if (result.State == EntityState.Modified)
+            {
+                return true;
+            }
+            return false;
+        }
+ 
+        public async Task<bool> DeactivateUserAsync(User User)
+        {
+            dataContext.Entry(User).State = EntityState.Detached;
+            
+            User.Status = false;
+            
+            var result = dataContext.Users.Update(User);
+            
+            await dataContext.SaveChangesAsync();
+            
+            if (result.State == EntityState.Modified)
+            {
+                return true;
+            }
+            return false;       
         }
 }

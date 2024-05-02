@@ -9,8 +9,6 @@ namespace FleetPulse_BackEndDevelopment.Models
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int MaintenanceId { get; set; }
         public DateTime MaintenanceDate { get; set; }
-        public bool MaintenanceStatus { get; set; }
-        public string Description { get; set; }
         public decimal Cost { get; set; }
         public string PartsReplaced { get; set; }
         public string ServiceProvider { get; set; }

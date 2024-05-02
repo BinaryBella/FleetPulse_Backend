@@ -36,7 +36,10 @@ namespace FleetPulse_BackEndDevelopment.Controllers
         [HttpPost("FuelRefill")]
         public async Task<ActionResult> AddFuelRefillAsync([FromBody] FuelRefillDTO fuelRefill)
         {
-            var response = new ApiResponse();
+            var response = new ApiResponse
+            {
+                Status = true
+            };
             try
             {
                 FuelRefill refill = new FuelRefill();

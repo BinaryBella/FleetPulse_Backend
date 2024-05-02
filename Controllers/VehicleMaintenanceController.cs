@@ -51,8 +51,6 @@ namespace FleetPulse_BackEndDevelopment.Controllers
                 var maintenance = new VehicleMaintenance
                 {
                     MaintenanceDate = vehicleMaintenance.MaintenanceDate,
-                    MaintenanceStatus = vehicleMaintenance.MaintenanceStatus,
-                    Description = vehicleMaintenance.Description,
                     PartsReplaced = vehicleMaintenance.PartsReplaced,
                     ServiceProvider = vehicleMaintenance.ServiceProvider,
                     Cost = vehicleMaintenance.Cost,
@@ -94,8 +92,6 @@ namespace FleetPulse_BackEndDevelopment.Controllers
                 var maintenance = new VehicleMaintenance
                 {
                     MaintenanceDate = vehicleMaintenance.MaintenanceDate,
-                    MaintenanceStatus = vehicleMaintenance.MaintenanceStatus,
-                    Description = vehicleMaintenance.Description,
                     PartsReplaced = vehicleMaintenance.PartsReplaced,
                     ServiceProvider = vehicleMaintenance.ServiceProvider,
                     Cost = vehicleMaintenance.Cost,

@@ -364,16 +364,8 @@ namespace FleetPulse_BackEndDevelopment.Migrations
                     b.Property<decimal>("Cost")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
                     b.Property<DateTime>("MaintenanceDate")
                         .HasColumnType("datetime2");
-
-                    b.Property<bool>("MaintenanceStatus")
-                        .HasColumnType("bit");
 
                     b.Property<string>("PartsReplaced")
                         .IsRequired()
