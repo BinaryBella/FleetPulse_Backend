@@ -1,4 +1,3 @@
-using System.Configuration;
 using Microsoft.AspNetCore.Mvc;
 using System.Text;
 using Microsoft.OpenApi.Models;
@@ -10,6 +9,7 @@ using FleetPulse_BackEndDevelopment.Configuration;
 using FleetPulse_BackEndDevelopment.Helpers;
 using Microsoft.IdentityModel.Tokens;
 using FleetPulse_BackEndDevelopment.Services;
+using FleetPulse_BackEndDevelopment.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -27,8 +27,11 @@ builder.Services.AddEndpointsApiExplorer();
 //email configuration
 builder.Services.Configure<MailSettings>(builder.Configuration.GetSection("MailSettings"));
 
-builder.Services.AddTransient<IMailService,FleetPulse_BackEndDevelopment.Services.MailService>();
+builder.Services.AddTransient<IMailService,MailService>();
 
+builder.Services.AddTransient<IVerificationCodeService,VerificationCodeService>();
+
+builder.Services.AddTransient<IAuthService, AuthService>();
 
 builder.Services.AddSwaggerGen(option =>
 {
@@ -108,9 +111,19 @@ builder.Services.AddCors(options =>
         });
 });
 
+builder.Services.AddSwaggerGen(c => {
+    c.ResolveConflictingActions(apiDescriptions => apiDescriptions.First());
+    c.IgnoreObsoleteActions();
+    c.IgnoreObsoleteProperties();
+    c.CustomSchemaIds(type => type.FullName);
+});
+
 // Declared services
 builder.Services.AddScoped<DBSeeder>();
 builder.Services.AddTransient<AuthService>();
+builder.Services.AddScoped<IVehicleMaintenanceService, VehicleMaintenanceService>();
+builder.Services.AddScoped<IVehicleMaintenanceTypeService, VehicleMaintenanceTypeService>();
+builder.Services.AddScoped<IFuelRefillService, FuelRefillService>();
 
 var app = builder.Build();
 

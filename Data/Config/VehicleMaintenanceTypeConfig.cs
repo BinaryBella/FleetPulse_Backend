@@ -14,7 +14,7 @@ namespace FleetPulse_BackEndDevelopment.Data.Config
             builder.HasKey(vmt => vmt.Id);
 
             builder.Property(vmt => vmt.TypeName).IsRequired().HasMaxLength(255);
-            builder.Property(vmt => vmt.Status).IsRequired();
+            builder.Property(vmt => vmt.Status).IsRequired().HasDefaultValue(true);
         }
     }
 }

@@ -2,14 +2,14 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using FleetPulse_BackEndDevelopment.Data;
-using FleetPulse_BackEndDevelopment.Helpers;
 using FleetPulse_BackEndDevelopment.Models;
+using FleetPulse_BackEndDevelopment.Services.Interfaces;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using BC = BCrypt.Net.BCrypt;
 
 namespace FleetPulse_BackEndDevelopment.Services;
 
-public class AuthService
+public class AuthService : IAuthService
 {
     private readonly FleetPulseDbContext dataContext;
         private readonly IConfiguration configuration;
@@ -23,33 +23,50 @@ public class AuthService
         public bool IsAuthenticated(string username, string password)
         {
             var user = this.GetByUsername(username);
-            return this.DoesUserExists(username) && BC.Verify(password, user.HashedPassword);
+            return this.DoesUserExists(username) && BCrypt.Net.BCrypt.Verify(password, user.HashedPassword);
         }
 
         public bool DoesUserExists(string username)
         {
-            var user = this.dataContext.Users.FirstOrDefault(x => x.UserName == username);
+            var user = dataContext.Users.FirstOrDefault(x => x.UserName == username);
             return user != null;
+        }
+
+        public bool DoesEmailExists(string email)
+        {
+            var user = dataContext.Users.FirstOrDefault(x => x.EmailAddress == email);
+            return user != null;
+        }
+        
+        public string GetUsernameByEmail(string email)
+        {
+            var user = dataContext.Users.FirstOrDefault(x => x.EmailAddress == email);
+            return user != null ? user.UserName : null;
         }
 
         public User GetById(int id)
         {
-            return this.dataContext.Users.FirstOrDefault(c => c.UserId == id);
+            return dataContext.Users.FirstOrDefault(c => c.UserId == id);
         }
-
+        
+        public User? GetByNic(string nic)
+        {
+            return dataContext.Users.FirstOrDefault(c => c.NIC == nic);
+        }
+    
         public User[] GetAll()
         {
             return this.dataContext.Users.ToArray();
         }
 
-        public User GetByUsername(string username)
+        public User? GetByUsername(string username)
         {
-            return this.dataContext.Users.FirstOrDefault(c => c.UserName == username);
+            return dataContext.Users.FirstOrDefault(c => c.UserName == username);
         }
-
+        
         public User RegisterUser(User model)
         {
-            model.HashedPassword = BC.HashPassword(model.HashedPassword);
+            model.HashedPassword = BCrypt.Net.BCrypt.HashPassword(model.HashedPassword);
 
             var userEntity = dataContext.Users.Add(model);
             dataContext.SaveChanges();
@@ -98,8 +115,69 @@ public class AuthService
             var user = this.GetByUsername(username);
             user.JobTitle = JobTitle;
             this.dataContext.SaveChanges();
-
-
+            
             return user;
+        }
+        
+        public User GetByEmail(string email)
+        {
+            return dataContext.Users.FirstOrDefault(c => c.EmailAddress == email);
+        }
+        
+        public bool ResetPassword(string email, string newPassword)
+        {
+            var user = GetByEmail(email);
+            if (user != null)
+            {
+                string hashedPassword = BCrypt.Net.BCrypt.HashPassword(newPassword);
+
+                user.HashedPassword = hashedPassword;
+                dataContext.SaveChanges();
+
+                return true; 
+            }
+            return false; 
+        }
+    
+        public async Task<User?> GetUserByUsernameAsync(string username)
+        {
+            return await dataContext.Users.FirstOrDefaultAsync(u => u.UserName == username);
+        }
+        
+        public async Task<User?> AddUserAsync(User? User)
+        {
+            dataContext.Users.Add(User);
+            await dataContext.SaveChangesAsync();
+            return User;
+        }
+        public async Task<bool> UpdateUserAsync(User User)
+        {
+            dataContext.Entry(User).State = EntityState.Detached;
+            var result = dataContext.Users.Update(User);
+            result.State = EntityState.Detached;
+            await dataContext.SaveChangesAsync();
+
+            if (result.State == EntityState.Modified)
+            {
+                return true;
+            }
+            return false;
+        }
+ 
+        public async Task<bool> DeactivateUserAsync(User User)
+        {
+            dataContext.Entry(User).State = EntityState.Detached;
+            
+            User.Status = false;
+            
+            var result = dataContext.Users.Update(User);
+            
+            await dataContext.SaveChangesAsync();
+            
+            if (result.State == EntityState.Modified)
+            {
+                return true;
+            }
+            return false;       
         }
 }

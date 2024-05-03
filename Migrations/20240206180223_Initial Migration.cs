@@ -227,7 +227,7 @@ namespace FleetPulse_BackEndDevelopment.Migrations
                 name: "VehicleMaintenances",
                 columns: table => new
                 {
-                    VehicleMaintenanceId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    VehicleMaintenanceId = table.Column<int>(type: "int", nullable: false),
                     MaintenanceDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     MaintenanceStatus = table.Column<bool>(type: "bit", nullable: false),
                     Description = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
@@ -264,7 +264,7 @@ namespace FleetPulse_BackEndDevelopment.Migrations
                     VehicleTypeId = table.Column<int>(type: "int", nullable: false),
                     ManufactureId = table.Column<int>(type: "int", nullable: false),
                     FuelRefillId = table.Column<int>(type: "int", nullable: false),
-                    VehicleMaintenanceId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    VehicleMaintenanceId = table.Column<int>(type: "int", nullable: false),
                     AccidentId = table.Column<int>(type: "int", nullable: false),
                     TripId = table.Column<string>(type: "nvarchar(450)", nullable: false)
                 },
