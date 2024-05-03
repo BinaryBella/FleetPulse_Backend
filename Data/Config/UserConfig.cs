@@ -1,7 +1,8 @@
+using FleetPulse_BackEndDevelopment.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace FleetPulse_BackEndDevelopment.Models
+namespace FleetPulse_BackEndDevelopment.Data.Config
 {
     public class UserConfig : IEntityTypeConfiguration<User>
     {

@@ -1,6 +1,6 @@
 using FleetPulse_BackEndDevelopment.Models;
 
-namespace FleetPulse_BackEndDevelopment.Services;
+namespace FleetPulse_BackEndDevelopment.Services.Interfaces;
 
 public interface IMailService
 { 

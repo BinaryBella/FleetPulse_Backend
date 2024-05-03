@@ -1,5 +1,4 @@
-﻿using FleetPulse_BackEndDevelopment.Data;
-using FleetPulse_BackEndDevelopment.Models;
+﻿using FleetPulse_BackEndDevelopment.Models;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,9 +9,7 @@ namespace FleetPulse_BackEndDevelopment.Data.Config
         public void Configure(EntityTypeBuilder<FuelRefill> builder)
         {
             builder.ToTable("FuelRefills");
-
             builder.HasKey(fr => fr.FuelRefillId);
-
             builder.Property(fr => fr.Date).IsRequired();
             builder.Property(fr => fr.Time).IsRequired();
             builder.Property(fr => fr.LiterCount).IsRequired();
@@ -20,5 +17,4 @@ namespace FleetPulse_BackEndDevelopment.Data.Config
             builder.Property(fr => fr.Cost).HasColumnType("decimal(18, 2)");
         }
     }
-
 }

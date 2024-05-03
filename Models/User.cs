@@ -18,6 +18,7 @@ public class User
     public string? JobTitle { get; set; }
     public byte[]? ProfilePicture { get; set; }
     public bool Status { get; set; }
+    
     //TripUser
     public IList<TripUser> TripUsers { get; set; }
     
