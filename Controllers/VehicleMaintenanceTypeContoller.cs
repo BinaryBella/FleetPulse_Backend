@@ -80,8 +80,7 @@ namespace FleetPulse_BackEndDevelopment.Controllers
 
 
         [HttpPut("UpdateVehicleMaintenanceType")]
-        public async Task<IActionResult> UpdateVehicleMaintenanceType(
-            [FromBody] VehicleMaintenanceTypeDTO maintenanceType)
+        public async Task<IActionResult> UpdateVehicleMaintenanceType([FromBody] VehicleMaintenanceTypeDTO maintenanceType)
         {
             try
             {
@@ -108,8 +107,7 @@ namespace FleetPulse_BackEndDevelopment.Controllers
         }
 
         [HttpPut("DeactivateVehicleMaintenanceType")]
-        public async Task<IActionResult> DeactivateVehicleMaintenanceType(
-            [FromBody] VehicleMaintenanceTypeDTO maintenanceType)
+        public async Task<IActionResult> DeactivateVehicleMaintenanceType([FromBody] VehicleMaintenanceTypeDTO maintenanceType)
         {
             try
             {

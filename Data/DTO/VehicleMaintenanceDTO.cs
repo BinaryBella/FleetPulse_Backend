@@ -2,6 +2,8 @@ namespace FleetPulse_BackEndDevelopment.Data.DTO
 {
     public class VehicleMaintenanceDTO
     {
+        public int MaintenanceId { get; set; }
+
         public DateTime MaintenanceDate { get; set; }
         public decimal Cost { get; set; }
         public string PartsReplaced { get; set; }

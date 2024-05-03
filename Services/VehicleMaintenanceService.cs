@@ -8,6 +8,7 @@ namespace FleetPulse_BackEndDevelopment.Services
     public class VehicleMaintenanceService : IVehicleMaintenanceService
     {
         private readonly FleetPulseDbContext _context;
+        private IVehicleMaintenanceService _vehicleMaintenanceServiceImplementation;
 
         public VehicleMaintenanceService(FleetPulseDbContext context)
         {
@@ -36,9 +37,30 @@ namespace FleetPulse_BackEndDevelopment.Services
             return _context.Vehicle.FirstOrDefault(c => c.VehicleRegistrationNo == regNo);
         }
 
-        public async Task<bool> UpdateVehicleMaintenanceAsync(string id, VehicleMaintenance maintenance)
+        public Task<bool> IsVehicleMaintenanceExist(int id)
         {
-            var existingMaintenance = await _context.VehicleMaintenance.FindAsync(id);
+            return Task.FromResult(_context.VehicleMaintenance.Any(x => x.MaintenanceId == id));
+        }
+        // public async Task<bool> UpdateVehicleMaintenanceAsync(string id, VehicleMaintenance maintenance)
+        // {
+        //     var existingMaintenance = await _context.VehicleMaintenance.FindAsync(id);
+        //     if (existingMaintenance == null)
+        //         return false;
+        //
+        //     existingMaintenance.MaintenanceDate = maintenance.MaintenanceDate;
+        //     existingMaintenance.Cost = maintenance.Cost;
+        //     existingMaintenance.PartsReplaced = maintenance.PartsReplaced;
+        //     existingMaintenance.ServiceProvider = maintenance.ServiceProvider;
+        //     existingMaintenance.SpecialNotes = maintenance.SpecialNotes;
+        //     existingMaintenance.Status = maintenance.Status;
+        //     existingMaintenance.VehicleMaintenanceType = maintenance.VehicleMaintenanceType;
+        //
+        //     await _context.SaveChangesAsync();
+        //     return true;
+        // }
+        public async Task<bool> UpdateVehicleMaintenanceAsync(VehicleMaintenance maintenance)
+        {
+            var existingMaintenance = await _context.VehicleMaintenance.FindAsync(maintenance.MaintenanceId);
             if (existingMaintenance == null)
                 return false;
 

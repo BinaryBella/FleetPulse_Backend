@@ -84,13 +84,21 @@ namespace FleetPulse_BackEndDevelopment.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateVehicleMaintenance(string id, VehicleMaintenanceDTO vehicleMaintenance)
+        public async Task<IActionResult> UpdateVehicleMaintenance(VehicleMaintenanceDTO vehicleMaintenance)
         {
             var response = new ApiResponse();
             try
             {
+                var existingMaintenance = await _maintenanceService.IsVehicleMaintenanceExist(vehicleMaintenance.MaintenanceId);
+
+                if (!existingMaintenance)
+                {
+                    return NotFound("Maintenance with Id not found.");
+                }
+                
                 var maintenance = new VehicleMaintenance
                 {
+                    MaintenanceId = vehicleMaintenance.MaintenanceId,
                     MaintenanceDate = vehicleMaintenance.MaintenanceDate,
                     PartsReplaced = vehicleMaintenance.PartsReplaced,
                     ServiceProvider = vehicleMaintenance.ServiceProvider,
@@ -100,7 +108,7 @@ namespace FleetPulse_BackEndDevelopment.Controllers
                     VehicleMaintenanceTypeId = vehicleMaintenance.MaintenanceTypeId
                 };
 
-                var result = await _maintenanceService.UpdateVehicleMaintenanceAsync(id, maintenance);
+                var result = await _maintenanceService.UpdateVehicleMaintenanceAsync(maintenance);
                 if (!result)
                     return NotFound();
 
