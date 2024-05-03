@@ -15,9 +15,8 @@ public interface IAuthService
     string DecodeEmailFromToken(string token);
     User ChangeRole(string username, string JobTitle);
     bool ResetPassword(string email, string newPassword);
-    string GetUsernameByEmail(string email);
-    Task<IEnumerable<User?>> GetAllUsersAsync();
-    public Task<User?> GetUserIdAsync(int UserId);
+    string GetUsernameByEmail(string email); 
+    public Task<User?> GetUserByUsernameAsync(string username);
     Task<User?> AddUserAsync(User? User); 
     Task<bool> UpdateUserAsync(User User);
 

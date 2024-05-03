@@ -138,16 +138,12 @@ public class AuthService : IAuthService
             }
             return false; 
         }
-        
-        public async Task<IEnumerable<User?>> GetAllUsersAsync()
+    
+        public async Task<User?> GetUserByUsernameAsync(string username)
         {
-            return await dataContext.Users.ToListAsync();
+            return await dataContext.Users.FirstOrDefaultAsync(u => u.UserName == username);
         }
         
-        public async Task<User?> GetUserIdAsync(int UserId)
-        {
-            return await dataContext.Users.FindAsync(UserId);
-        }
         public async Task<User?> AddUserAsync(User? User)
         {
             dataContext.Users.Add(User);
