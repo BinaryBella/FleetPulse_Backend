@@ -1,5 +1,4 @@
-﻿using FleetPulse_BackEndDevelopment.Data;
-using FleetPulse_BackEndDevelopment.Models;
+﻿using FleetPulse_BackEndDevelopment.Models;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,11 +10,9 @@ namespace FleetPulse_BackEndDevelopment.Data.Config
         {
             builder.ToTable("VehicleMaintenances");
 
-            builder.HasKey(vm => vm.VehicleMaintenanceId);
-
-            builder.Property(vm => vm.MaintenanceDate).IsRequired();
-            builder.Property(vm => vm.MaintenanceStatus).IsRequired();
-            builder.Property(vm => vm.Description).HasMaxLength(500);
+            builder.HasKey(vm => vm.MaintenanceId);
+        
+            builder.Property(vm => vm.MaintenanceDate).IsRequired(); 
             builder.Property(vm => vm.Cost).HasColumnType("decimal(18, 2)");
             builder.Property(vm => vm.PartsReplaced).HasMaxLength(500);
             builder.Property(vm => vm.ServiceProvider).HasMaxLength(100);

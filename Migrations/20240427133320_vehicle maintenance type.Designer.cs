@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FleetPulse_BackEndDevelopment.Migrations
 {
     [DbContext(typeof(FleetPulseDbContext))]
-    [Migration("20240206180223_Initial Migration")]
-    partial class InitialMigration
+    [Migration("20240427133320_vehicle maintenance type")]
+    partial class vehiclemaintenancetype
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -216,57 +216,59 @@ namespace FleetPulse_BackEndDevelopment.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("UserId"), 1L, 1);
 
                     b.Property<string>("BloodGroup")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ConfirmPassword")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(5)
+                        .HasColumnType("nvarchar(5)");
 
                     b.Property<DateTime>("DateOfBirth")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("DriverLicenseNo")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.Property<string>("EmailAddress")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("EmergencyContact")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(15)
+                        .HasColumnType("nvarchar(15)");
 
                     b.Property<string>("FirstName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("HashedPassword")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("JobTitle")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("LastName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
-                    b.Property<DateTime>("LicenseExpiryDate")
+                    b.Property<DateTime?>("LicenseExpiryDate")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("NIC")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Password")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(12)
+                        .HasColumnType("nvarchar(12)");
 
                     b.Property<string>("PhoneNo")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(15)
+                        .HasColumnType("nvarchar(15)");
 
                     b.Property<byte[]>("ProfilePicture")
-                        .IsRequired()
                         .HasColumnType("varbinary(max)");
 
                     b.Property<bool>("Status")
@@ -274,11 +276,12 @@ namespace FleetPulse_BackEndDevelopment.Migrations
 
                     b.Property<string>("UserName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.HasKey("UserId");
 
-                    b.ToTable("User");
+                    b.ToTable("Users", (string)null);
                 });
 
             modelBuilder.Entity("FleetPulse_BackEndDevelopment.Models.Vehicle", b =>
@@ -321,7 +324,6 @@ namespace FleetPulse_BackEndDevelopment.Migrations
                         .HasColumnType("nvarchar(50)");
 
                     b.Property<int>("VehicleMaintenanceId")
-                        .IsRequired()
                         .HasColumnType("int");
 
                     b.Property<int>("VehicleModelId")
@@ -356,8 +358,11 @@ namespace FleetPulse_BackEndDevelopment.Migrations
 
             modelBuilder.Entity("FleetPulse_BackEndDevelopment.Models.VehicleMaintenance", b =>
                 {
-                    b.Property<int>("VehicleMaintenanceId")
+                    b.Property<int>("MaintenanceId")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MaintenanceId"), 1L, 1);
 
                     b.Property<decimal>("Cost")
                         .HasColumnType("decimal(18,2)");
@@ -366,9 +371,6 @@ namespace FleetPulse_BackEndDevelopment.Migrations
                         .IsRequired()
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
-
-                    b.Property<int>("Id")
-                        .HasColumnType("int");
 
                     b.Property<DateTime>("MaintenanceDate")
                         .HasColumnType("datetime2");
@@ -394,9 +396,12 @@ namespace FleetPulse_BackEndDevelopment.Migrations
                     b.Property<bool>("Status")
                         .HasColumnType("bit");
 
-                    b.HasKey("VehicleMaintenanceId");
+                    b.Property<int>("VehicleMaintenanceTypeId")
+                        .HasColumnType("int");
 
-                    b.HasIndex("Id");
+                    b.HasKey("MaintenanceId");
+
+                    b.HasIndex("VehicleMaintenanceTypeId");
 
                     b.ToTable("VehicleMaintenances", (string)null);
                 });
@@ -462,6 +467,34 @@ namespace FleetPulse_BackEndDevelopment.Migrations
                     b.HasKey("VehicleTypeId");
 
                     b.ToTable("VehicleType", (string)null);
+                });
+
+            modelBuilder.Entity("FleetPulse_BackEndDevelopment.Models.VerificationCode", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<DateTime>("ExpirationDateTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("VerificationCodes", (string)null);
                 });
 
             modelBuilder.Entity("FleetPulse_BackEndDevelopment.Models.AccidentUser", b =>
@@ -582,13 +615,13 @@ namespace FleetPulse_BackEndDevelopment.Migrations
 
             modelBuilder.Entity("FleetPulse_BackEndDevelopment.Models.VehicleMaintenance", b =>
                 {
-                    b.HasOne("FleetPulse_BackEndDevelopment.Models.VehicleMaintenanceType", "TypeName")
+                    b.HasOne("FleetPulse_BackEndDevelopment.Models.VehicleMaintenanceType", "VehicleMaintenanceType")
                         .WithMany("VehicleMaintenances")
-                        .HasForeignKey("Id")
+                        .HasForeignKey("VehicleMaintenanceTypeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("TypeName");
+                    b.Navigation("VehicleMaintenanceType");
                 });
 
             modelBuilder.Entity("FleetPulse_BackEndDevelopment.Models.Accident", b =>

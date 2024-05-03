@@ -98,5 +98,25 @@
     "TripUsers": [],
     "FuelRefillUsers": [],
     "AccidentUsers": []
+  },
+  {
+    "FirstName": "Chathushi",
+    "LastName": "Kavindya",
+    "NIC": "654324498",
+    "DriverLicenseNo": "DL583210",
+    "LicenseExpiryDate": "2023-09-20T00:00:00",
+    "BloodGroup": "B+",
+    "DateOfBirth": "1988-09-03T00:00:00",
+    "PhoneNo": "+5544332211",
+    "UserName": "chathuk",
+    "HashedPassword": "mypass",
+    "EmailAddress": "chathushikavindya09@gmail.com",
+    "EmergencyContact": "+6677889900",
+    "JobTitle": "Admin",
+    "ProfilePicture": null,
+    "Status": true,
+    "TripUsers": [],
+    "FuelRefillUsers": [],
+    "AccidentUsers": []
   }
 ]

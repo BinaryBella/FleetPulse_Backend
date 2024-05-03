@@ -2,7 +2,6 @@ using FleetPulse_BackEndDevelopment.Configuration;
 using FleetPulse_BackEndDevelopment.Models;
 using FleetPulse_BackEndDevelopment.Services.Interfaces;
 using MailKit.Net.Smtp;
-using MailKit.Security;
 using Microsoft.Extensions.Options;
 using MimeKit;
 
