@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.IO;
 
 namespace FleetPulse_BackEndDevelopment.Controllers
 {
@@ -253,6 +254,51 @@ namespace FleetPulse_BackEndDevelopment.Controllers
             }
         }
 
+        [HttpPut("UpdateUser")]
+        public async Task<IActionResult> UpdateUser([FromBody] StaffDTO staff)
+        {
+            try
+            {
+                var oldUser = authService.GetByUsername(staff.UserName);
+
+                if (oldUser is null)
+                {
+                    return NotFound("User not found");
+                }
+                
+                oldUser.FirstName = staff.FirstName;
+                oldUser.LastName = staff.LastName;
+                oldUser.NIC = staff.NIC;
+                oldUser.DateOfBirth = staff.DateOfBirth;
+                oldUser.PhoneNo = staff.PhoneNo;
+                oldUser.EmailAddress = staff.EmailAddress;
+                
+                if (string.IsNullOrEmpty(staff.ProfilePicture))
+                { 
+                    oldUser.ProfilePicture = null;
+                }
+                else
+                {
+                    oldUser.ProfilePicture = Convert.FromBase64String(staff.ProfilePicture);
+                }
+        
+                var result = await authService.UpdateUserAsync(oldUser);
+
+                if (result)
+                {
+                    return Ok("User updated successfully.");
+                }
+                else
+                {
+                    return StatusCode(500, "Failed to update user.");
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An error occurred while updating the user: {ex.Message}");
+            }
+        }
+        
         [HttpPost("logout")]
         public IActionResult Logout()
         {
@@ -262,15 +308,30 @@ namespace FleetPulse_BackEndDevelopment.Controllers
 
             return RedirectToAction("Login");
         }
-
+       
         [HttpGet("userProfile")]
-        public async Task<ActionResult<User>> GetUserByUsernameAsync(string username)
+        public async Task<ActionResult<StaffDTO>> GetUserByUsernameAsync(string username)
         {
             var user = await authService.GetUserByUsernameAsync(username);
+    
             if (user == null)
                 return NotFound();
 
-            return Ok(user);
+            var profilePictureBase64 = user.ProfilePicture != null ? Convert.ToBase64String(user.ProfilePicture) : null;
+
+            var StaffDTO = new StaffDTO
+            {
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                DateOfBirth = user.DateOfBirth,
+                EmailAddress = user.EmailAddress,
+                PhoneNo = user.PhoneNo,
+                NIC = user.NIC,
+                ProfilePicture = profilePictureBase64
+            };
+
+            return Ok(StaffDTO);
         }
+
     }
 }
