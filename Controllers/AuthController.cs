@@ -1,5 +1,4 @@
 using AutoMapper;
-using FleetPulse_BackEndDevelopment.Data;
 using FleetPulse_BackEndDevelopment.Data.DTO;
 using FleetPulse_BackEndDevelopment.Models;
 using FleetPulse_BackEndDevelopment.Services;
@@ -8,8 +7,6 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using System.IO;
 
 namespace FleetPulse_BackEndDevelopment.Controllers
 {
@@ -298,16 +295,6 @@ namespace FleetPulse_BackEndDevelopment.Controllers
                 return StatusCode(500, $"An error occurred while updating the user: {ex.Message}");
             }
         }
-        
-        [HttpPost("logout")]
-        public IActionResult Logout()
-        {
-            HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-
-            Response.Cookies.Delete("localStorageKey");
-
-            return RedirectToAction("Login");
-        }
        
         [HttpGet("userProfile")]
         public async Task<ActionResult<StaffDTO>> GetUserByUsernameAsync(string username)
@@ -333,5 +320,15 @@ namespace FleetPulse_BackEndDevelopment.Controllers
             return Ok(StaffDTO);
         }
 
+        
+        [HttpPost("logout")]
+        public IActionResult Logout()
+        {
+            HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+
+            Response.Cookies.Delete("localStorageKey");
+
+            return RedirectToAction("Login");
+        }
     }
 }
