@@ -205,45 +205,32 @@ namespace FleetPulse_BackEndDevelopment.Controllers
                     if (user == null)
                     {
                         response.Status = false;
-                        response.Message = "Username is not found";
+                        response.Error = "Failed to change password";
                         return new JsonResult(response);
                     }
 
-                    bool isOldPasswordValid = authService.IsAuthenticated(user.UserName, model.OldPassword);
+                    var isOldPasswordValid = authService.IsAuthenticated(user.UserName, model.OldPassword);
 
                     if (!isOldPasswordValid)
                     {
                         response.Status = false;
-                        response.Message = "Old password is incorrect";
+                        response.Error = "Old password is incorrect";
                         return new JsonResult(response);
                     }
-
-                    if (model.OldPassword == model.NewPassword)
-                    {
-                        response.Status = false;
-                        response.Message = "New password must be different from old password";
-                        return new JsonResult(response);
-                    }
-
-                    bool passwordReset = authService.ResetPassword(user.EmailAddress, model.NewPassword);
+                    
+                    var passwordReset = authService.ResetPassword(user.EmailAddress, model.NewPassword);
 
                     if (passwordReset)
                     {
                         response.Message = "Password changed successfully";
                         return new JsonResult(response);
                     }
-                    else
-                    {
-                        response.Status = false;
-                        response.Message = "Failed to change password";
-                        return new JsonResult(response);
-                    }
+                    response.Status = false;
+                    response.Error = "Failed to change password";
+                    return new JsonResult(response);
                 }
-                else
-                {
-                    response.Message = "Invalid model state";
-                    return BadRequest(response);
-                }
+                response.Error = "Invalid model state";
+                return BadRequest(response);
             }
             catch (Exception error)
             {
