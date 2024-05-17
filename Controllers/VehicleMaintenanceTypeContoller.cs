@@ -1,6 +1,5 @@
 using FleetPulse_BackEndDevelopment.Data.DTO;
 using FleetPulse_BackEndDevelopment.Models;
-using FleetPulse_BackEndDevelopment.Services;
 using FleetPulse_BackEndDevelopment.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -35,8 +34,7 @@ namespace FleetPulse_BackEndDevelopment.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult> AddVehicleMaintenanceTypeAsync(
-            [FromBody] VehicleMaintenanceTypeDTO maintenanceType)
+        public async Task<ActionResult> AddVehicleMaintenanceTypeAsync([FromBody] VehicleMaintenanceTypeDTO maintenanceType)
         {
             var response = new ApiResponse();
             try

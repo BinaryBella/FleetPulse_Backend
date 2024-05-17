@@ -14,54 +14,65 @@ namespace FleetPulse_BackEndDevelopment.Services
             _context = context;
         }
 
-        public async Task<IEnumerable<FuelRefill>> GetAllFuelRefillsAsync()
+        public async Task<IEnumerable<FuelRefill?>> GetAllFuelRefillsAsync()
         {
             return await _context.FuelRefill.ToListAsync();
         }
 
-        public async Task<FuelRefill> GetFuelRefillByIdAsync(int id)
+        public async Task<FuelRefill?> GetFuelRefillByIdAsync(int FuelRefillId)
         {
-            return await _context.FuelRefill.FindAsync(id);
+            return await _context.FuelRefill.FindAsync(FuelRefillId);
+        }
+        
+        public Task<bool> IsFuelRefillExist(int FuelRefillId)
+        {
+            return Task.FromResult(_context.FuelRefill.Any(x => x.FuelRefillId == FuelRefillId));
+        }
+        
+        public bool DoesFuelRefillExists(string FType)
+        {
+            var fuelRefillType = _context.FuelRefill.FirstOrDefault(x => x.FType == FType);
+            return fuelRefillType != null;
         }
 
-        public async Task<bool> AddFuelRefillAsync(FuelRefill fuelRefill)
+        public async Task<FuelRefill?> AddFuelRefillAsync(FuelRefill? fuelRefill)
         {
             _context.FuelRefill.Add(fuelRefill);
             await _context.SaveChangesAsync();
-            return true;
+            return fuelRefill;
         }
         
-        public Vehicle? GetByRegNo(string regNo)
+        public async Task<bool> UpdateFuelRefillAsync(FuelRefill fuelRefill)
         {
-            return _context.Vehicle.FirstOrDefault(c => c.VehicleRegistrationNo == regNo);
-        }
-
-        public async Task<bool> UpdateFuelRefillAsync(int id, FuelRefill fuelRefill)
-        {
-            var existingFuelRefill = await _context.FuelRefill.FindAsync(id);
-            if (existingFuelRefill == null)
+            try
+            {
+                var result = _context.FuelRefill.Update(fuelRefill);
+                result.State = EntityState.Modified;
+                await _context.SaveChangesAsync();
+                return true;
+            }
+            catch
+            {
                 return false;
-
-            existingFuelRefill.Date = fuelRefill.Date;
-            existingFuelRefill.Time = fuelRefill.Time;
-            existingFuelRefill.LiterCount = fuelRefill.LiterCount;
-            existingFuelRefill.FType = fuelRefill.FType;
-            existingFuelRefill.Cost = fuelRefill.Cost;
-            existingFuelRefill.Status = fuelRefill.Status;
-
-            await _context.SaveChangesAsync();
-            return true;
+            }
         }
-
-        public async Task<bool> DeleteFuelRefillAsync(int id)
+        
+        public async Task<bool> DeactivateFuelRefillAsync(FuelRefill fuelRefill)
         {
-            var fuelRefill = await _context.FuelRefill.FindAsync(id);
-            if (fuelRefill == null)
-                return false;
-
-            _context.FuelRefill.Remove(fuelRefill);
+            _context.Entry(fuelRefill).State = EntityState.Detached;
+            
+            fuelRefill.Status = false;
+            
+            var result = _context.FuelRefill.Update(fuelRefill);
+            
             await _context.SaveChangesAsync();
-            return true;
+            
+            if (result.State == EntityState.Modified)
+            {
+                return true;
+            }
+            return false;       
         }
+        
     }
 }

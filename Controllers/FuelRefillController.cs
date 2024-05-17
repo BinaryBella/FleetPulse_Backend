@@ -17,7 +17,7 @@ namespace FleetPulse_BackEndDevelopment.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult> GetAllFuelRefillsAsync()
+        public async Task<ActionResult<IEnumerable<FuelRefill>>> GetAllFuelRefillsAsync()
         {
             var fuelRefills = await _fuelRefillService.GetAllFuelRefillsAsync();
             return Ok(fuelRefills);
@@ -32,33 +32,27 @@ namespace FleetPulse_BackEndDevelopment.Controllers
 
             return Ok(fuelRefill);
         }
-        
-        [HttpPost("FuelRefill")]
-        public async Task<ActionResult> AddFuelRefillAsync([FromBody] FuelRefillDTO fuelRefill)
+
+        [HttpPost]
+        public async Task<ActionResult> AddFuelRefillAsync([FromBody] FuelRefillDTO fuelRefillDTO)
         {
-            var response = new ApiResponse
-            {
-                Status = true
-            };
+            var response = new ApiResponse();
             try
             {
-                FuelRefill refill = new FuelRefill();
+                var fuelRefill = new FuelRefill
+                {
+                    Date = fuelRefillDTO.Date,
+                    Time = fuelRefillDTO.Time,
+                    LiterCount = fuelRefillDTO.LiterCount,
+                    FType = fuelRefillDTO.FType,
+                    Cost = fuelRefillDTO.Cost,
+                    Status = fuelRefillDTO.Status,
+                    VehicleId = fuelRefillDTO.VehicleId
+                };
 
-                refill.Date = fuelRefill.Date;
-                refill.Time = fuelRefill.Time;
-                refill.LiterCount = fuelRefill.LiterCount;
-                refill.FType = fuelRefill.FType;
-                refill.Cost = fuelRefill.Cost;
-                refill.Status = fuelRefill.Status;
-                refill.VehicleId = fuelRefill.VehicleId;
-                // refill.DriverNic = fuelRefill.DriverNic;
-                // refill.HelperNic = fuelRefill.HelperNic;
-                //
-                // var user = _fuelRefillService.GetByNic(fuelRefill.DriverNic);
+                var addedFuelRefill = await _fuelRefillService.AddFuelRefillAsync(fuelRefill);
 
-                var addedFuelRefill = await _fuelRefillService.AddFuelRefillAsync(refill);
-
-                if (addedFuelRefill)
+                if (addedFuelRefill != null)
                 {
                     response.Status = true;
                     response.Message = "Added Successfully";
@@ -67,38 +61,70 @@ namespace FleetPulse_BackEndDevelopment.Controllers
                 else
                 {
                     response.Status = false;
-                    response.Message = "Failed to add Details";
+                    response.Message = "Failed to add Fuel Refill";
                 }
             }
             catch (Exception ex)
             {
                 response.Status = false;
                 response.Message = $"An error occurred: {ex.Message}";
-                return new JsonResult(response);
             }
 
             return new JsonResult(response);
         }
 
-
-        [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateFuelRefill(int id, FuelRefill fuelRefill)
+        [HttpPut("UpdateFuelRefill")]
+        public async Task<IActionResult> UpdateFuelRefillAsync([FromBody] FuelRefillDTO fuelRefillDTO)
         {
-            var result = await _fuelRefillService.UpdateFuelRefillAsync(id, fuelRefill);
-            if (!result)
-                return NotFound();
+            try
+            {
+                var existingFuelRefill = await _fuelRefillService.IsFuelRefillExist(fuelRefillDTO.FuelRefillId);
 
-            return NoContent();
+                if (!existingFuelRefill)
+                {
+                    return NotFound("Fuel Refill with Id not found");
+                }
+
+                var fuelRefill = new FuelRefill
+                {
+                    FuelRefillId = fuelRefillDTO.FuelRefillId,
+                    Date = fuelRefillDTO.Date,
+                    Time = fuelRefillDTO.Time,
+                    LiterCount = fuelRefillDTO.LiterCount,
+                    FType = fuelRefillDTO.FType,
+                    Cost = fuelRefillDTO.Cost,
+                    Status = fuelRefillDTO.Status,
+                    VehicleId = fuelRefillDTO.VehicleId
+                };
+
+                var result = await _fuelRefillService.UpdateFuelRefillAsync(fuelRefill);
+                return new JsonResult(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An error occurred while updating the Fuel Refill: {ex.Message}");
+            }
         }
 
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteFuelRefill(int id)
+        [HttpPut("DeactivateFuelRefill")]
+        public async Task<IActionResult> DeactivateFuelRefillAsync([FromBody] FuelRefillDTO fuelRefillDTO)
         {
-            var result = await _fuelRefillService.DeleteFuelRefillAsync(id);
-            if (!result)
-                return NotFound();
+            try
+            {
+                var existingFuelRefill = await _fuelRefillService.GetFuelRefillByIdAsync(fuelRefillDTO.FuelRefillId);
 
-            return NoContent();
+                if (existingFuelRefill == null)
+                    return NotFound("Fuel Refill with Id not found");
+
+                existingFuelRefill.Status = false;
+
+                var result = await _fuelRefillService.DeactivateFuelRefillAsync(existingFuelRefill);
+                return new JsonResult(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An error occurred while deactivating the Fuel Refill: {ex.Message}");
+            }
         }
     }
 }
