@@ -19,7 +19,6 @@ namespace FleetPulse_BackEndDevelopment.Models
         public int VehicleId { get; set; }
         public Vehicle Vehicle { get; set; }
 
-        
         //FuelRefillUser
         public IList<FuelRefillUser> FuelRefillUsers { get; set; }
     }

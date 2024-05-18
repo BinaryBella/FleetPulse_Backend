@@ -2,6 +2,8 @@ using FleetPulse_BackEndDevelopment.Data.DTO;
 using FleetPulse_BackEndDevelopment.Models;
 using FleetPulse_BackEndDevelopment.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using System.Threading.Tasks;
+using System;
 
 namespace FleetPulse_BackEndDevelopment.Controllers
 {
@@ -13,7 +15,7 @@ namespace FleetPulse_BackEndDevelopment.Controllers
 
         public VehicleMaintenanceController(IVehicleMaintenanceService maintenanceService)
         {
-            _maintenanceService= maintenanceService;
+            _maintenanceService = maintenanceService;
         }
 
         [HttpGet]
@@ -24,9 +26,9 @@ namespace FleetPulse_BackEndDevelopment.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult> GetVehicleMaintenanceByIdAsync(int id)
+        public async Task<ActionResult> GetVehicleMaintenanceByIdAsync(int MaintenanceId)
         {
-            var maintenance = await _maintenanceService.GetVehicleMaintenanceByIdAsync(id);
+            var maintenance = await _maintenanceService.GetVehicleMaintenanceByIdAsync(MaintenanceId);
             if (maintenance == null)
                 return NotFound();
 
@@ -36,7 +38,7 @@ namespace FleetPulse_BackEndDevelopment.Controllers
         [HttpPost("vehiclemaintenance")]
         public async Task<ActionResult> AddVehicleMaintenanceAsync([FromBody] VehicleMaintenanceDTO vehicleMaintenance)
         {
-            var response = new ApiResponse(); 
+            var response = new ApiResponse();
             try
             {
                 var vehicle = _maintenanceService.GetByRegNo(vehicleMaintenance.VehicleRegistrationNo);
@@ -47,7 +49,7 @@ namespace FleetPulse_BackEndDevelopment.Controllers
                     response.Message = "Vehicle is not found";
                     return new JsonResult(response);
                 }
-                
+
                 var maintenance = new VehicleMaintenance
                 {
                     MaintenanceDate = vehicleMaintenance.MaintenanceDate,
@@ -56,12 +58,11 @@ namespace FleetPulse_BackEndDevelopment.Controllers
                     Cost = vehicleMaintenance.Cost,
                     Status = vehicleMaintenance.Status,
                     SpecialNotes = vehicleMaintenance.SpecialNotes,
-                    VehicleMaintenanceTypeId = vehicleMaintenance.MaintenanceTypeId,
                     VehicleId = vehicle.VehicleId
                 };
 
                 var addedMaintenance = await _maintenanceService.AddVehicleMaintenanceAsync(maintenance);
-                
+
                 if (addedMaintenance)
                 {
                     response.Status = true;
@@ -79,12 +80,12 @@ namespace FleetPulse_BackEndDevelopment.Controllers
                 response.Status = false;
                 response.Message = $"An error occurred: {ex.Message}";
             }
-    
+
             return new JsonResult(response);
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateVehicleMaintenance(VehicleMaintenanceDTO vehicleMaintenance)
+        public async Task<IActionResult> UpdateVehicleMaintenance(int id, [FromBody] VehicleMaintenanceDTO vehicleMaintenance)
         {
             var response = new ApiResponse();
             try
@@ -95,7 +96,7 @@ namespace FleetPulse_BackEndDevelopment.Controllers
                 {
                     return NotFound("Maintenance with Id not found.");
                 }
-                
+
                 var maintenance = new VehicleMaintenance
                 {
                     MaintenanceId = vehicleMaintenance.MaintenanceId,
@@ -105,7 +106,6 @@ namespace FleetPulse_BackEndDevelopment.Controllers
                     Cost = vehicleMaintenance.Cost,
                     Status = vehicleMaintenance.Status,
                     SpecialNotes = vehicleMaintenance.SpecialNotes,
-                    VehicleMaintenanceTypeId = vehicleMaintenance.MaintenanceTypeId
                 };
 
                 var result = await _maintenanceService.UpdateVehicleMaintenanceAsync(maintenance);
@@ -123,9 +123,9 @@ namespace FleetPulse_BackEndDevelopment.Controllers
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteVehicleMaintenance(string id)
+        public async Task<IActionResult> DeleteVehicleMaintenance(int id)
         {
-            var result = await _maintenanceService.DeleteVehicleMaintenanceAsync(id);
+            var result = await _maintenanceService.DeleteVehicleMaintenanceAsync(id.ToString());
             if (!result)
                 return NotFound();
 

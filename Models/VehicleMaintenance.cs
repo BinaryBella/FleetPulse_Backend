@@ -22,5 +22,6 @@ namespace FleetPulse_BackEndDevelopment.Models
         //Vehicle_Maintenance_Type
          public int VehicleMaintenanceTypeId { get; set; }
          public VehicleMaintenanceType VehicleMaintenanceType { get; set; }
+         
     }
 }

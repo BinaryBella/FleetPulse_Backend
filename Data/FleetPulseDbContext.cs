@@ -14,16 +14,17 @@ namespace FleetPulse_BackEndDevelopment.Data
         public DbSet<VehicleModel> VehicleModels { get; set; }
         public DbSet<VehicleType> VehicleType { get; set; }
         public DbSet<Manufacture> Manufacture { get; set; }
-        public DbSet<FuelRefill> FuelRefill { get; set; }
-        public DbSet<Vehicle> Vehicle { get; set; }
+        public DbSet<FuelRefill> FuelRefills { get; set; }
+        public DbSet<Vehicle> Vehicles { get; set; }
         public DbSet<Accident> Accident { get; set; }
         public DbSet<Trip> Trip { get; set; }
-        public DbSet<VehicleMaintenance> VehicleMaintenance { get; set; }
+        public DbSet<VehicleMaintenance> VehicleMaintenances { get; set; }
         public DbSet<VehicleMaintenanceType> VehicleMaintenanceType { get; set; }
         public DbSet<TripUser> TripUsers { get; set; }
         public DbSet<FuelRefillUser> FuelRefillUsers { get; set; }
         public DbSet<User> Users { get; set; }
         public DbSet<VerificationCode> VerificationCodes { get; set; }
+        public DbSet<Notification> Notifications { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
