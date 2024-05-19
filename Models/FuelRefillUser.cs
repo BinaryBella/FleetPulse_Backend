@@ -7,4 +7,6 @@ public class FuelRefillUser
 
     public int FuelRefillId { get; set; }
     public FuelRefill FuelRefill { get; set; }
+    
+    
 }

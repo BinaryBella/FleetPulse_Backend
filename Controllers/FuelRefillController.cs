@@ -37,7 +37,7 @@ namespace FleetPulse_BackEndDevelopment.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<FuelRefill>> AddFuelRefill(FuelRefill fuelRefill)
+        public async Task<ActionResult<FuelRefill>> AddFuelRefill([FromBody]FuelRefillDTO fuelRefill)
         {
             var addedFuelRefill = await _fuelRefillService.AddFuelRefillAsync(fuelRefill);
             return CreatedAtAction(nameof(GetFuelRefillById), new { id = addedFuelRefill.FuelRefillId }, addedFuelRefill);

@@ -17,10 +17,9 @@ namespace FleetPulse_BackEndDevelopment.Services
         {
             _context = context;
         }
-
         public async Task<List<VehicleMaintenanceDTO>> GetAllVehicleMaintenancesAsync()
         {
-            var maintenances = await _context.VehicleMaintenances
+            return await _context.VehicleMaintenances
                 .Include(vm => vm.Vehicle)
                 .Include(vm => vm.VehicleMaintenanceType)
                 .Select(vm => new VehicleMaintenanceDTO
@@ -31,34 +30,36 @@ namespace FleetPulse_BackEndDevelopment.Services
                     PartsReplaced = vm.PartsReplaced,
                     ServiceProvider = vm.ServiceProvider,
                     SpecialNotes = vm.SpecialNotes,
+                    VehicleId = vm.VehicleId,
                     VehicleRegistrationNo = vm.Vehicle.VehicleRegistrationNo,
-                    VehicleMaintenanceTypeName = vm.VehicleMaintenanceType.TypeName,
-                    Status = vm.Status
+                    VehicleMaintenanceTypeId = vm.VehicleMaintenanceTypeId,
+                    TypeName = vm.VehicleMaintenanceType.TypeName,
+                    Status = vm.Status,
                 }).ToListAsync();
-    
-            return maintenances;
         }
+
+
 
         public async Task<VehicleMaintenance> GetVehicleMaintenanceByIdAsync(int MaintenanceId)
         {
             return await _context.VehicleMaintenances.FindAsync(MaintenanceId);
         }
 
-        public async Task<bool> AddVehicleMaintenanceAsync(VehicleMaintenance maintenance)
+        public async Task<VehicleMaintenance> AddVehicleMaintenanceAsync(VehicleMaintenance maintenance)
         {
             _context.VehicleMaintenances.Add(maintenance);
             await _context.SaveChangesAsync();
-            return true;
-        }
-        
-        public Vehicle? GetByRegNo(string regNo)
-        {
-            return _context.Vehicles.FirstOrDefault(c => c.VehicleRegistrationNo == regNo);
+            return maintenance;
         }
 
-        public Task<bool> IsVehicleMaintenanceExist(int id)
+        public async Task<Vehicle> GetByRegNoAsync(string regNo)
         {
-            return Task.FromResult(_context.VehicleMaintenances.Any(x => x.MaintenanceId == id));
+            return await _context.Vehicles.FirstOrDefaultAsync(c => c.VehicleRegistrationNo == regNo);
+        }
+
+        public async Task<bool> IsVehicleMaintenanceExistAsync(int id)
+        {
+            return await _context.VehicleMaintenances.AnyAsync(x => x.MaintenanceId == id);
         }
 
         public async Task<bool> UpdateVehicleMaintenanceAsync(VehicleMaintenance maintenance)
@@ -73,13 +74,13 @@ namespace FleetPulse_BackEndDevelopment.Services
             existingMaintenance.ServiceProvider = maintenance.ServiceProvider;
             existingMaintenance.SpecialNotes = maintenance.SpecialNotes;
             existingMaintenance.Status = maintenance.Status;
-            existingMaintenance.VehicleMaintenanceType = maintenance.VehicleMaintenanceType;
+            existingMaintenance.VehicleMaintenanceTypeId = maintenance.VehicleMaintenanceTypeId;
 
             await _context.SaveChangesAsync();
             return true;
         }
 
-        public async Task<bool> DeleteVehicleMaintenanceAsync(string id)
+        public async Task<bool> DeleteVehicleMaintenanceAsync(int id)
         {
             var maintenance = await _context.VehicleMaintenances.FindAsync(id);
             if (maintenance == null)
