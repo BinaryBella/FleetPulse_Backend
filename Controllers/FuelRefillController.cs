@@ -37,9 +37,13 @@ namespace FleetPulse_BackEndDevelopment.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<FuelRefill>> AddFuelRefill([FromBody]FuelRefillDTO fuelRefill)
+        public async Task<ActionResult<FuelRefill>> AddFuelRefill([FromBody] FuelRefillDTO fuelRefillDto)
         {
-            var addedFuelRefill = await _fuelRefillService.AddFuelRefillAsync(fuelRefill);
+            var addedFuelRefill = await _fuelRefillService.AddFuelRefillAsync(fuelRefillDto);
+            if (addedFuelRefill == null)
+            {
+                return BadRequest("User or Vehicle not found");
+            }
             return CreatedAtAction(nameof(GetFuelRefillById), new { id = addedFuelRefill.FuelRefillId }, addedFuelRefill);
         }
 
@@ -51,7 +55,7 @@ namespace FleetPulse_BackEndDevelopment.Controllers
                 return BadRequest();
             }
 
-            var updated = await _fuelRefillService.UpdateFuelRefillAsync(fuelRefill);
+            var updated = await _fuelRefillService.UpdateFuelRefillAsync(id, fuelRefill);
             if (!updated)
             {
                 return NotFound();
@@ -59,17 +63,19 @@ namespace FleetPulse_BackEndDevelopment.Controllers
             return NoContent();
         }
 
-        [HttpDelete("{id}")]
+
+        [HttpPut("{id}/deactivate")]
         public async Task<IActionResult> DeactivateFuelRefill(int id)
         {
-            var fuelRefill = await _fuelRefillService.GetFuelRefillByIdAsync(id);
-            if (fuelRefill == null)
+            try
             {
-                return NotFound();
+                await _fuelRefillService.DeactivateFuelRefillAsync(id);
+                return Ok("Fuel refill deactivated successfully.");
             }
-
-            await _fuelRefillService.DeactivateFuelRefillAsync(fuelRefill);
-            return NoContent();
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
     }
 }

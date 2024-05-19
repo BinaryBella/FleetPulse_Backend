@@ -11,5 +11,6 @@ public class FuelRefill
     public bool Status { get; set; }
     public int VehicleId { get; set; }
     public Vehicle Vehicle { get; set; }
-    public ICollection<FuelRefillUser> FuelRefillUsers { get; set; }
+    public int UserId { get; set; } 
+    public User User { get; set; }
 }

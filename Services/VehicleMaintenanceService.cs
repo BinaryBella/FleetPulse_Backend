@@ -80,15 +80,28 @@ namespace FleetPulse_BackEndDevelopment.Services
             return true;
         }
 
-        public async Task<bool> DeleteVehicleMaintenanceAsync(int id)
+        public async Task DeactivateMaintenanceAsync(int maintenanceId)
         {
-            var maintenance = await _context.VehicleMaintenances.FindAsync(id);
-            if (maintenance == null)
-                return false;
+            var maintenance = await _context.VehicleMaintenances.FindAsync(maintenanceId);
 
-            _context.VehicleMaintenances.Remove(maintenance);
+            if (maintenance == null)
+            {
+                throw new InvalidOperationException("Maintenance not found.");
+            }
+
+            if (MaintenanceIsAssociatedWithVehicle(maintenance))
+            {
+                throw new InvalidOperationException("Maintenance is associated with a vehicle. Cannot deactivate.");
+            }
+
+            maintenance.Status = false;
             await _context.SaveChangesAsync();
-            return true;
+        }
+
+        private bool MaintenanceIsAssociatedWithVehicle(VehicleMaintenance maintenance)
+        {
+            // Check if the maintenance is associated with any vehicle
+            return _context.Vehicles.Any(v => v.VehicleMaintenance.Any(vm => vm.MaintenanceId == maintenance.MaintenanceId));
         }
     }
 }

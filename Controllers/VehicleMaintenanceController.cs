@@ -100,14 +100,18 @@ namespace FleetPulse_BackEndDevelopment.Controllers
         //     }
         // }
 
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteVehicleMaintenance(int id)
+        [HttpPut("{id}/deactivate")]
+        public async Task<IActionResult> DeactivateMaintenance(int id)
         {
-            var result = await _maintenanceService.DeleteVehicleMaintenanceAsync(id);
-            if (!result)
-                return NotFound();
-
-            return NoContent();
+            try
+            {
+                await _maintenanceService.DeactivateMaintenanceAsync(id);
+                return Ok("Maintenance deactivated successfully.");
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
     }
 }

@@ -13,6 +13,6 @@ namespace FleetPulse_BackEndDevelopment.Services.Interfaces
         Task<Vehicle> GetByRegNoAsync(string regNo);
         Task<bool> IsVehicleMaintenanceExistAsync(int id);
         Task<bool> UpdateVehicleMaintenanceAsync(VehicleMaintenance maintenance);
-        Task<bool> DeleteVehicleMaintenanceAsync(int id);
+        Task DeactivateMaintenanceAsync(int maintenanceId);
     }
 }

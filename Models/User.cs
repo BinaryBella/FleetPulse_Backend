@@ -19,13 +19,9 @@ public class User
     public byte[]? ProfilePicture { get; set; }
     public bool Status { get; set; }
     
-    //TripUser
     public IList<TripUser> TripUsers { get; set; }
-    
-    //FuelRefillUser
-    public IList<FuelRefillUser> FuelRefillUsers { get; set; }
-    
-    //AccidentUser
     public IList<AccidentUser> AccidentUsers { get; set; }
+    public IList<FuelRefill> FuelRefills { get; set; } // One-to-many relationship with FuelRefill
+
 
 }
