@@ -118,5 +118,19 @@ namespace FleetPulse_BackEndDevelopment.Controllers
                 return BadRequest(ex.Message);
             }
         }
+        
+        [HttpPut("{id}/activate")]
+        public async Task<IActionResult> ActivateVehicleMaintenanceType(int id)
+        {
+            try
+            {
+                await _maintenanceTypeService.ActivateVehicleMaintenanceTypeAsync(id);
+                return NoContent();
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
     }
 }

@@ -78,5 +78,17 @@ namespace FleetPulse_BackEndDevelopment.Services
         {
             return _context.VehicleMaintenances.Any(vm => vm.VehicleMaintenanceTypeId == maintenanceType.Id);
         }
+        
+        public async Task ActivateVehicleMaintenanceTypeAsync(int id)
+        {
+            var vehicleMaintenanceType = await _context.VehicleMaintenanceType.FindAsync(id);
+            if (vehicleMaintenanceType == null)
+            {
+                throw new KeyNotFoundException("Vehicle Maintenance Type not found.");
+            }
+
+            vehicleMaintenanceType.Status = true;
+            await _context.SaveChangesAsync();
+        }
     }
 }

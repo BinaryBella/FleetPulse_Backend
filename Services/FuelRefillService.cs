@@ -93,7 +93,6 @@ namespace FleetPulse_BackEndDevelopment.Services
             return true;
         }
 
-
         public async Task DeactivateFuelRefillAsync(int fuelRefillId)
         {
             var fuelRefill = await _context.FuelRefills.FindAsync(fuelRefillId);
