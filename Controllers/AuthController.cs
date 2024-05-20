@@ -1,5 +1,4 @@
 using AutoMapper;
-using FleetPulse_BackEndDevelopment.Data;
 using FleetPulse_BackEndDevelopment.Data.DTO;
 using FleetPulse_BackEndDevelopment.Models;
 using FleetPulse_BackEndDevelopment.Services;
@@ -8,7 +7,6 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace FleetPulse_BackEndDevelopment.Controllers
 {
@@ -207,45 +205,32 @@ namespace FleetPulse_BackEndDevelopment.Controllers
                     if (user == null)
                     {
                         response.Status = false;
-                        response.Message = "Username is not found";
+                        response.Error = "Failed to change password";
                         return new JsonResult(response);
                     }
 
-                    bool isOldPasswordValid = authService.IsAuthenticated(user.UserName, model.OldPassword);
+                    var isOldPasswordValid = authService.IsAuthenticated(user.UserName, model.OldPassword);
 
                     if (!isOldPasswordValid)
                     {
                         response.Status = false;
-                        response.Message = "Old password is incorrect";
+                        response.Error = "Old password is incorrect";
                         return new JsonResult(response);
                     }
-
-                    if (model.OldPassword == model.NewPassword)
-                    {
-                        response.Status = false;
-                        response.Message = "New password must be different from old password";
-                        return new JsonResult(response);
-                    }
-
-                    bool passwordReset = authService.ResetPassword(user.EmailAddress, model.NewPassword);
+                    
+                    var passwordReset = authService.ResetPassword(user.EmailAddress, model.NewPassword);
 
                     if (passwordReset)
                     {
                         response.Message = "Password changed successfully";
                         return new JsonResult(response);
                     }
-                    else
-                    {
-                        response.Status = false;
-                        response.Message = "Failed to change password";
-                        return new JsonResult(response);
-                    }
+                    response.Status = false;
+                    response.Error = "Failed to change password";
+                    return new JsonResult(response);
                 }
-                else
-                {
-                    response.Message = "Invalid model state";
-                    return BadRequest(response);
-                }
+                response.Error = "Invalid model state";
+                return BadRequest(response);
             }
             catch (Exception error)
             {
@@ -253,6 +238,76 @@ namespace FleetPulse_BackEndDevelopment.Controllers
             }
         }
 
+        [HttpPut("UpdateUser")]
+        public async Task<IActionResult> UpdateUser([FromBody] StaffDTO staff)
+        {
+            try
+            {
+                var oldUser = authService.GetByUsername(staff.UserName);
+
+                if (oldUser is null)
+                {
+                    return NotFound("User not found");
+                }
+                
+                oldUser.FirstName = staff.FirstName;
+                oldUser.LastName = staff.LastName;
+                oldUser.NIC = staff.NIC;
+                oldUser.DateOfBirth = staff.DateOfBirth;
+                oldUser.PhoneNo = staff.PhoneNo;
+                oldUser.EmailAddress = staff.EmailAddress;
+                
+                if (string.IsNullOrEmpty(staff.ProfilePicture))
+                { 
+                    oldUser.ProfilePicture = null;
+                }
+                else
+                {
+                    oldUser.ProfilePicture = Convert.FromBase64String(staff.ProfilePicture);
+                }
+        
+                var result = await authService.UpdateUserAsync(oldUser);
+
+                if (result)
+                {
+                    return Ok("User updated successfully.");
+                }
+                else
+                {
+                    return StatusCode(500, "Failed to update user.");
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An error occurred while updating the user: {ex.Message}");
+            }
+        }
+       
+        [HttpGet("userProfile")]
+        public async Task<ActionResult<StaffDTO>> GetUserByUsernameAsync(string username)
+        {
+            var user = await authService.GetUserByUsernameAsync(username);
+    
+            if (user == null)
+                return NotFound();
+
+            var profilePictureBase64 = user.ProfilePicture != null ? Convert.ToBase64String(user.ProfilePicture) : null;
+
+            var StaffDTO = new StaffDTO
+            {
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                DateOfBirth = user.DateOfBirth,
+                EmailAddress = user.EmailAddress,
+                PhoneNo = user.PhoneNo,
+                NIC = user.NIC,
+                ProfilePicture = profilePictureBase64
+            };
+
+            return Ok(StaffDTO);
+        }
+
+        
         [HttpPost("logout")]
         public IActionResult Logout()
         {
@@ -261,16 +316,6 @@ namespace FleetPulse_BackEndDevelopment.Controllers
             Response.Cookies.Delete("localStorageKey");
 
             return RedirectToAction("Login");
-        }
-
-        [HttpGet("userProfile")]
-        public async Task<ActionResult<User>> GetUserByUsernameAsync(string username)
-        {
-            var user = await authService.GetUserByUsernameAsync(username);
-            if (user == null)
-                return NotFound();
-
-            return Ok(user);
         }
     }
 }

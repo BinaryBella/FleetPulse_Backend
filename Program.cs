@@ -124,6 +124,7 @@ builder.Services.AddTransient<AuthService>();
 builder.Services.AddScoped<IVehicleMaintenanceService, VehicleMaintenanceService>();
 builder.Services.AddScoped<IVehicleMaintenanceTypeService, VehicleMaintenanceTypeService>();
 builder.Services.AddScoped<IFuelRefillService, FuelRefillService>();
+builder.Services.AddScoped<INotificationService, NotificationService>();
 
 var app = builder.Build();
 

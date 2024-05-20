@@ -35,10 +35,6 @@ namespace FleetPulse_BackEndDevelopment.Data.Config
                    .WithOne(tu => tu.User)
                    .HasForeignKey(tu => tu.UserId);
 
-            builder.HasMany(u => u.FuelRefillUsers)
-                   .WithOne(fru => fru.User)
-                   .HasForeignKey(fru => fru.UserId);
-
             builder.HasMany(u => u.AccidentUsers)
                    .WithOne(au => au.User)
                    .HasForeignKey(au => au.UserId);

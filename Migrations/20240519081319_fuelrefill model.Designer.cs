@@ -4,6 +4,7 @@ using FleetPulse_BackEndDevelopment.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FleetPulse_BackEndDevelopment.Migrations
 {
     [DbContext(typeof(FleetPulseDbContext))]
-    partial class FleetPulseDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240519081319_fuelrefill model")]
+    partial class fuelrefillmodel
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -96,6 +98,21 @@ namespace FleetPulse_BackEndDevelopment.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("AccidentUser");
+                });
+
+            modelBuilder.Entity("FleetPulse_BackEndDevelopment.Models.FuelRefillUser", b =>
+                {
+                    b.Property<int>("FuelRefillId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("FuelRefillId", "UserId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("FuelRefillUsers");
                 });
 
             modelBuilder.Entity("FleetPulse_BackEndDevelopment.Models.Manufacture", b =>
@@ -503,15 +520,10 @@ namespace FleetPulse_BackEndDevelopment.Migrations
                     b.Property<TimeSpan>("Time")
                         .HasColumnType("time");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
                     b.Property<int>("VehicleId")
                         .HasColumnType("int");
 
                     b.HasKey("FuelRefillId");
-
-                    b.HasIndex("UserId");
 
                     b.HasIndex("VehicleId");
 
@@ -563,6 +575,25 @@ namespace FleetPulse_BackEndDevelopment.Migrations
                         .IsRequired();
 
                     b.Navigation("Accident");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("FleetPulse_BackEndDevelopment.Models.FuelRefillUser", b =>
+                {
+                    b.HasOne("FuelRefill", "FuelRefill")
+                        .WithMany("FuelRefillUsers")
+                        .HasForeignKey("FuelRefillId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("FleetPulse_BackEndDevelopment.Models.User", "User")
+                        .WithMany("FuelRefillUsers")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("FuelRefill");
 
                     b.Navigation("User");
                 });
@@ -634,19 +665,11 @@ namespace FleetPulse_BackEndDevelopment.Migrations
 
             modelBuilder.Entity("FuelRefill", b =>
                 {
-                    b.HasOne("FleetPulse_BackEndDevelopment.Models.User", "User")
-                        .WithMany("FuelRefills")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("FleetPulse_BackEndDevelopment.Models.Vehicle", "Vehicle")
                         .WithMany("FuelRefills")
                         .HasForeignKey("VehicleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("User");
 
                     b.Navigation("Vehicle");
                 });
@@ -685,7 +708,7 @@ namespace FleetPulse_BackEndDevelopment.Migrations
                 {
                     b.Navigation("AccidentUsers");
 
-                    b.Navigation("FuelRefills");
+                    b.Navigation("FuelRefillUsers");
 
                     b.Navigation("TripUsers");
                 });
@@ -710,6 +733,11 @@ namespace FleetPulse_BackEndDevelopment.Migrations
             modelBuilder.Entity("FleetPulse_BackEndDevelopment.Models.VehicleType", b =>
                 {
                     b.Navigation("Vehicles");
+                });
+
+            modelBuilder.Entity("FuelRefill", b =>
+                {
+                    b.Navigation("FuelRefillUsers");
                 });
 #pragma warning restore 612, 618
         }

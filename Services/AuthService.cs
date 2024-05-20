@@ -154,8 +154,8 @@ public class AuthService : IAuthService
         {
             dataContext.Entry(User).State = EntityState.Detached;
             var result = dataContext.Users.Update(User);
-            result.State = EntityState.Detached;
             await dataContext.SaveChangesAsync();
+            result.State = EntityState.Modified;
 
             if (result.State == EntityState.Modified)
             {

@@ -1,12 +1,18 @@
+using FleetPulse_BackEndDevelopment.Data.DTO;
 using FleetPulse_BackEndDevelopment.Models;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
-public interface IVehicleMaintenanceService
+namespace FleetPulse_BackEndDevelopment.Services.Interfaces
 {
-    Task<IEnumerable<VehicleMaintenance>> GetAllVehicleMaintenancesAsync();
-    Task<VehicleMaintenance> GetVehicleMaintenanceByIdAsync(int id);
-    Task<bool> AddVehicleMaintenanceAsync(VehicleMaintenance maintenance);
-    Vehicle? GetByRegNo(string regNo);
-    Task<bool> UpdateVehicleMaintenanceAsync(VehicleMaintenance maintenance);
-    Task<bool> DeleteVehicleMaintenanceAsync(string id);
-    Task<bool> IsVehicleMaintenanceExist(int id);
+    public interface IVehicleMaintenanceService
+    {
+        Task<List<VehicleMaintenanceDTO>> GetAllVehicleMaintenancesAsync();
+        Task<VehicleMaintenance> GetVehicleMaintenanceByIdAsync(int MaintenanceId);
+        Task<VehicleMaintenance> AddVehicleMaintenanceAsync(VehicleMaintenance maintenance); 
+        Task<Vehicle> GetByRegNoAsync(string regNo);
+        Task<bool> IsVehicleMaintenanceExistAsync(int id);
+        Task<bool> UpdateVehicleMaintenanceAsync(VehicleMaintenance maintenance);
+        Task DeactivateMaintenanceAsync(int maintenanceId);
+    }
 }

@@ -56,22 +56,27 @@ namespace FleetPulse_BackEndDevelopment.Services
                 return false;
             }
         }
-        
-        public async Task<bool> DeactivateVehicleMaintenanceTypeAsync(VehicleMaintenanceType maintenanceType)
+        public async Task DeactivateMaintenanceTypeAsync(int maintenanceTypeId)
         {
-            _context.Entry(maintenanceType).State = EntityState.Detached;
-            
-            maintenanceType.Status = false;
-            
-            var result = _context.VehicleMaintenanceType.Update(maintenanceType);
-            
-            await _context.SaveChangesAsync();
-            
-            if (result.State == EntityState.Modified)
+            var maintenanceType = await _context.VehicleMaintenanceType.FindAsync(maintenanceTypeId);
+
+            if (maintenanceType == null)
             {
-                return true;
+                throw new InvalidOperationException("MaintenanceType not found.");
             }
-            return false;       
+
+            if (MaintenanceTypeIsActive(maintenanceType))
+            {
+                throw new InvalidOperationException("MaintenanceType is active and associated with maintenance records. Cannot deactivate.");
+            }
+
+            maintenanceType.Status = false;
+            await _context.SaveChangesAsync();
+        }
+
+        private bool MaintenanceTypeIsActive(VehicleMaintenanceType maintenanceType)
+        {
+            return _context.VehicleMaintenances.Any(vm => vm.VehicleMaintenanceTypeId == maintenanceType.Id);
         }
     }
 }
