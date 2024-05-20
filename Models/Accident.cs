@@ -15,10 +15,8 @@
         
         //Vehicle
         public ICollection<Vehicle> Vehicles { get; set; }
-        
         //AccidentUser
         public IList<AccidentUser> AccidentUsers { get; set; }
-
     }
 }
 
