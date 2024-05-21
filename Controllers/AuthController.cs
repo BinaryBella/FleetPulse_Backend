@@ -30,6 +30,7 @@ namespace FleetPulse_BackEndDevelopment.Controllers
             this.logger = logger;
         }
 
+
         [HttpPost("login")]
         public ActionResult<ApiResponse> Login(LoginDTO userModel)
         {
@@ -41,12 +42,22 @@ namespace FleetPulse_BackEndDevelopment.Controllers
             {
                 if (ModelState.IsValid)
                 {
-                    if (authService.IsAuthenticated(userModel.Username, userModel.Password))
+                    var user = authService.IsAuthenticated(userModel.Username, userModel.Password);
+
+                    if (user != null)
                     {
-                        var user = authService.GetByUsername(userModel.Username);
-                        var token = authService.GenerateJwtToken(userModel.Username, userModel.Password);
-                        response.Data = token;
-                        return new JsonResult(response);
+                        if (user.JobTitle == "Admin" || user.JobTitle == "Staff")
+                        {
+                            var token = authService.GenerateJwtToken(user.UserName, user.JobTitle);
+                            response.Data = new { token, user.JobTitle }; // Include JobTitle in the response
+                            return new JsonResult(response);
+                        }
+                        else
+                        {
+                            response.Status = false;
+                            response.Message = "Unauthorized: Only Admin or Staff can login";
+                            return new JsonResult(response);
+                        }
                     }
 
                     response.Status = false;
@@ -211,7 +222,7 @@ namespace FleetPulse_BackEndDevelopment.Controllers
 
                     var isOldPasswordValid = authService.IsAuthenticated(user.UserName, model.OldPassword);
 
-                    if (!isOldPasswordValid)
+                    if (isOldPasswordValid == null)
                     {
                         response.Status = false;
                         response.Error = "Old password is incorrect";

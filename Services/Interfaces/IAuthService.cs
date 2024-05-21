@@ -4,7 +4,7 @@ namespace FleetPulse_BackEndDevelopment.Services.Interfaces;
 
 public interface IAuthService
 {
-    bool IsAuthenticated(string username, string password);
+    User IsAuthenticated(string username, string password);
     bool DoesUserExists(string username);
     bool DoesEmailExists(string email);
     User GetById(int id);
@@ -15,10 +15,8 @@ public interface IAuthService
     string DecodeEmailFromToken(string token);
     User ChangeRole(string username, string JobTitle);
     bool ResetPassword(string email, string newPassword);
-    string GetUsernameByEmail(string email); 
+    string GetUsernameByEmail(string email);
     public Task<User?> GetUserByUsernameAsync(string username);
-    Task<User?> AddUserAsync(User? User); 
+    Task<User?> AddUserAsync(User? User);
     Task<bool> UpdateUserAsync(User User);
-
-
 }
