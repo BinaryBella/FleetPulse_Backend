@@ -4,6 +4,7 @@ using FleetPulse_BackEndDevelopment.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FleetPulse_BackEndDevelopment.Migrations
 {
     [DbContext(typeof(FleetPulseDbContext))]
-    partial class FleetPulseDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240519112345_convert user and fuel refill one to many relationship")]
+    partial class convertuserandfuelrefillonetomanyrelationship
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -247,7 +249,6 @@ namespace FleetPulse_BackEndDevelopment.Migrations
                         .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("JobTitle")
-                        .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 

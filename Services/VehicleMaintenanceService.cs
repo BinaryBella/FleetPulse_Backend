@@ -1,66 +1,70 @@
 using FleetPulse_BackEndDevelopment.Data;
+using FleetPulse_BackEndDevelopment.Data.DTO;
 using FleetPulse_BackEndDevelopment.Models;
 using FleetPulse_BackEndDevelopment.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace FleetPulse_BackEndDevelopment.Services
 {
     public class VehicleMaintenanceService : IVehicleMaintenanceService
     {
         private readonly FleetPulseDbContext _context;
-        private IVehicleMaintenanceService _vehicleMaintenanceServiceImplementation;
 
         public VehicleMaintenanceService(FleetPulseDbContext context)
         {
             _context = context;
         }
-
-        public async Task<IEnumerable<VehicleMaintenance>> GetAllVehicleMaintenancesAsync()
+        public async Task<List<VehicleMaintenanceDTO>> GetAllVehicleMaintenancesAsync()
         {
-            return await _context.VehicleMaintenance.ToListAsync();
+            return await _context.VehicleMaintenances
+                .Include(vm => vm.Vehicle)
+                .Include(vm => vm.VehicleMaintenanceType)
+                .Select(vm => new VehicleMaintenanceDTO
+                {
+                    MaintenanceId = vm.MaintenanceId,
+                    MaintenanceDate = vm.MaintenanceDate,
+                    Cost = vm.Cost,
+                    PartsReplaced = vm.PartsReplaced,
+                    ServiceProvider = vm.ServiceProvider,
+                    SpecialNotes = vm.SpecialNotes,
+                    VehicleId = vm.VehicleId,
+                    VehicleRegistrationNo = vm.Vehicle.VehicleRegistrationNo,
+                    VehicleMaintenanceTypeId = vm.VehicleMaintenanceTypeId,
+                    TypeName = vm.VehicleMaintenanceType.TypeName,
+                    Status = vm.Status,
+                }).ToListAsync();
         }
 
-        public async Task<VehicleMaintenance> GetVehicleMaintenanceByIdAsync(int id)
+
+
+        public async Task<VehicleMaintenance> GetVehicleMaintenanceByIdAsync(int MaintenanceId)
         {
-            return await _context.VehicleMaintenance.FindAsync(id);
+            return await _context.VehicleMaintenances.FindAsync(MaintenanceId);
         }
 
-        public async Task<bool> AddVehicleMaintenanceAsync(VehicleMaintenance maintenance)
+        public async Task<VehicleMaintenance> AddVehicleMaintenanceAsync(VehicleMaintenance maintenance)
         {
-            _context.VehicleMaintenance.Add(maintenance);
+            _context.VehicleMaintenances.Add(maintenance);
             await _context.SaveChangesAsync();
-            return true;
-        }
-        
-        public Vehicle? GetByRegNo(string regNo)
-        {
-            return _context.Vehicle.FirstOrDefault(c => c.VehicleRegistrationNo == regNo);
+            return maintenance;
         }
 
-        public Task<bool> IsVehicleMaintenanceExist(int id)
+        public async Task<Vehicle> GetByRegNoAsync(string regNo)
         {
-            return Task.FromResult(_context.VehicleMaintenance.Any(x => x.MaintenanceId == id));
+            return await _context.Vehicles.FirstOrDefaultAsync(c => c.VehicleRegistrationNo == regNo);
         }
-        // public async Task<bool> UpdateVehicleMaintenanceAsync(string id, VehicleMaintenance maintenance)
-        // {
-        //     var existingMaintenance = await _context.VehicleMaintenance.FindAsync(id);
-        //     if (existingMaintenance == null)
-        //         return false;
-        //
-        //     existingMaintenance.MaintenanceDate = maintenance.MaintenanceDate;
-        //     existingMaintenance.Cost = maintenance.Cost;
-        //     existingMaintenance.PartsReplaced = maintenance.PartsReplaced;
-        //     existingMaintenance.ServiceProvider = maintenance.ServiceProvider;
-        //     existingMaintenance.SpecialNotes = maintenance.SpecialNotes;
-        //     existingMaintenance.Status = maintenance.Status;
-        //     existingMaintenance.VehicleMaintenanceType = maintenance.VehicleMaintenanceType;
-        //
-        //     await _context.SaveChangesAsync();
-        //     return true;
-        // }
+
+        public async Task<bool> IsVehicleMaintenanceExistAsync(int id)
+        {
+            return await _context.VehicleMaintenances.AnyAsync(x => x.MaintenanceId == id);
+        }
+
         public async Task<bool> UpdateVehicleMaintenanceAsync(VehicleMaintenance maintenance)
         {
-            var existingMaintenance = await _context.VehicleMaintenance.FindAsync(maintenance.MaintenanceId);
+            var existingMaintenance = await _context.VehicleMaintenances.FindAsync(maintenance.MaintenanceId);
             if (existingMaintenance == null)
                 return false;
 
@@ -70,21 +74,34 @@ namespace FleetPulse_BackEndDevelopment.Services
             existingMaintenance.ServiceProvider = maintenance.ServiceProvider;
             existingMaintenance.SpecialNotes = maintenance.SpecialNotes;
             existingMaintenance.Status = maintenance.Status;
-            existingMaintenance.VehicleMaintenanceType = maintenance.VehicleMaintenanceType;
+            existingMaintenance.VehicleMaintenanceTypeId = maintenance.VehicleMaintenanceTypeId;
 
             await _context.SaveChangesAsync();
             return true;
         }
 
-        public async Task<bool> DeleteVehicleMaintenanceAsync(string id)
+        public async Task DeactivateMaintenanceAsync(int maintenanceId)
         {
-            var maintenance = await _context.VehicleMaintenance.FindAsync(id);
-            if (maintenance == null)
-                return false;
+            var maintenance = await _context.VehicleMaintenances.FindAsync(maintenanceId);
 
-            _context.VehicleMaintenance.Remove(maintenance);
+            if (maintenance == null)
+            {
+                throw new InvalidOperationException("Maintenance not found.");
+            }
+
+            if (MaintenanceIsAssociatedWithVehicle(maintenance))
+            {
+                throw new InvalidOperationException("Maintenance is associated with a vehicle. Cannot deactivate.");
+            }
+
+            maintenance.Status = false;
             await _context.SaveChangesAsync();
-            return true;
+        }
+
+        private bool MaintenanceIsAssociatedWithVehicle(VehicleMaintenance maintenance)
+        {
+            // Check if the maintenance is associated with any vehicle
+            return _context.Vehicles.Any(v => v.VehicleMaintenance.Any(vm => vm.MaintenanceId == maintenance.MaintenanceId));
         }
     }
 }

@@ -1,6 +1,5 @@
 using FleetPulse_BackEndDevelopment.Data.DTO;
 using FleetPulse_BackEndDevelopment.Models;
-using FleetPulse_BackEndDevelopment.Services;
 using FleetPulse_BackEndDevelopment.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -35,8 +34,7 @@ namespace FleetPulse_BackEndDevelopment.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult> AddVehicleMaintenanceTypeAsync(
-            [FromBody] VehicleMaintenanceTypeDTO maintenanceType)
+        public async Task<ActionResult> AddVehicleMaintenanceTypeAsync([FromBody] VehicleMaintenanceTypeDTO maintenanceType)
         {
             var response = new ApiResponse();
             try
@@ -90,7 +88,7 @@ namespace FleetPulse_BackEndDevelopment.Controllers
                 {
                     return NotFound("MaintenanceType with Id not found");
                 }
-                
+
                 var vehicleMaintenanceType = new VehicleMaintenanceType
                 {
                     Id = maintenanceType.Id,
@@ -106,25 +104,32 @@ namespace FleetPulse_BackEndDevelopment.Controllers
             }
         }
 
-        [HttpPut("DeactivateVehicleMaintenanceType")]
-        public async Task<IActionResult> DeactivateVehicleMaintenanceType([FromBody] VehicleMaintenanceTypeDTO maintenanceType)
+        
+        [HttpPut("{id}/deactivate")]
+        public async Task<IActionResult> DeactivateMaintenanceType(int id)
         {
             try
             {
-                var existingMaintenanceType =
-                    await _maintenanceTypeService.GetVehicleMaintenanceTypeByIdAsync(maintenanceType.Id);
-
-                if (existingMaintenanceType == null)
-                    return NotFound("MaintenanceType with Id not found");
-
-                var result =
-                    await _maintenanceTypeService.DeactivateVehicleMaintenanceTypeAsync(existingMaintenanceType);
-                return new JsonResult(result);
+                await _maintenanceTypeService.DeactivateMaintenanceTypeAsync(id);
+                return Ok("MaintenanceType deactivated successfully.");
             }
-            catch (Exception ex)
+            catch (InvalidOperationException ex)
             {
-                return StatusCode(500,
-                    $"An error occurred while deactivating the vehicle maintenance type: {ex.Message}");
+                return BadRequest(ex.Message);
+            }
+        }
+        
+        [HttpPut("{id}/activate")]
+        public async Task<IActionResult> ActivateVehicleMaintenanceType(int id)
+        {
+            try
+            {
+                await _maintenanceTypeService.ActivateVehicleMaintenanceTypeAsync(id);
+                return NoContent();
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
             }
         }
     }

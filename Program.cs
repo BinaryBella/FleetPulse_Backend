@@ -24,7 +24,6 @@ builder.Services.AddControllers(options =>
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 
-//email configuration
 builder.Services.Configure<MailSettings>(builder.Configuration.GetSection("MailSettings"));
 
 builder.Services.AddTransient<IMailService,MailService>();
@@ -124,6 +123,7 @@ builder.Services.AddTransient<AuthService>();
 builder.Services.AddScoped<IVehicleMaintenanceService, VehicleMaintenanceService>();
 builder.Services.AddScoped<IVehicleMaintenanceTypeService, VehicleMaintenanceTypeService>();
 builder.Services.AddScoped<IFuelRefillService, FuelRefillService>();
+builder.Services.AddScoped<INotificationService, NotificationService>();
 
 var app = builder.Build();
 

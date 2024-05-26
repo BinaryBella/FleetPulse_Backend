@@ -2,6 +2,8 @@ using FleetPulse_BackEndDevelopment.Data.DTO;
 using FleetPulse_BackEndDevelopment.Models;
 using FleetPulse_BackEndDevelopment.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace FleetPulse_BackEndDevelopment.Controllers
 {
@@ -17,88 +19,63 @@ namespace FleetPulse_BackEndDevelopment.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult> GetAllFuelRefillsAsync()
+        public async Task<ActionResult<List<FuelRefillDTO>>> GetAllFuelRefills()
         {
             var fuelRefills = await _fuelRefillService.GetAllFuelRefillsAsync();
             return Ok(fuelRefills);
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<FuelRefill>> GetFuelRefillByIdAsync(int id)
+        public async Task<ActionResult<FuelRefill>> GetFuelRefillById(int id)
         {
             var fuelRefill = await _fuelRefillService.GetFuelRefillByIdAsync(id);
             if (fuelRefill == null)
+            {
                 return NotFound();
-
+            }
             return Ok(fuelRefill);
         }
-        
-        [HttpPost("FuelRefill")]
-        public async Task<ActionResult> AddFuelRefillAsync([FromBody] FuelRefillDTO fuelRefill)
+
+        [HttpPost]
+        public async Task<ActionResult<FuelRefill>> AddFuelRefill([FromBody] FuelRefillDTO fuelRefillDto)
         {
-            var response = new ApiResponse
+            var addedFuelRefill = await _fuelRefillService.AddFuelRefillAsync(fuelRefillDto);
+            if (addedFuelRefill == null)
             {
-                Status = true
-            };
-            try
-            {
-                FuelRefill refill = new FuelRefill();
-
-                refill.Date = fuelRefill.Date;
-                refill.Time = fuelRefill.Time;
-                refill.LiterCount = fuelRefill.LiterCount;
-                refill.FType = fuelRefill.FType;
-                refill.Cost = fuelRefill.Cost;
-                refill.Status = fuelRefill.Status;
-                refill.VehicleId = fuelRefill.VehicleId;
-                // refill.DriverNic = fuelRefill.DriverNic;
-                // refill.HelperNic = fuelRefill.HelperNic;
-                //
-                // var user = _fuelRefillService.GetByNic(fuelRefill.DriverNic);
-
-                var addedFuelRefill = await _fuelRefillService.AddFuelRefillAsync(refill);
-
-                if (addedFuelRefill)
-                {
-                    response.Status = true;
-                    response.Message = "Added Successfully";
-                    return new JsonResult(response);
-                }
-                else
-                {
-                    response.Status = false;
-                    response.Message = "Failed to add Details";
-                }
+                return BadRequest("User or Vehicle not found");
             }
-            catch (Exception ex)
-            {
-                response.Status = false;
-                response.Message = $"An error occurred: {ex.Message}";
-                return new JsonResult(response);
-            }
-
-            return new JsonResult(response);
+            return CreatedAtAction(nameof(GetFuelRefillById), new { id = addedFuelRefill.FuelRefillId }, addedFuelRefill);
         }
-
 
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateFuelRefill(int id, FuelRefill fuelRefill)
         {
-            var result = await _fuelRefillService.UpdateFuelRefillAsync(id, fuelRefill);
-            if (!result)
-                return NotFound();
+            if (id != fuelRefill.FuelRefillId)
+            {
+                return BadRequest();
+            }
 
+            var updated = await _fuelRefillService.UpdateFuelRefillAsync(id, fuelRefill);
+            if (!updated)
+            {
+                return NotFound();
+            }
             return NoContent();
         }
 
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteFuelRefill(int id)
-        {
-            var result = await _fuelRefillService.DeleteFuelRefillAsync(id);
-            if (!result)
-                return NotFound();
 
-            return NoContent();
+        [HttpPut("{id}/deactivate")]
+        public async Task<IActionResult> DeactivateFuelRefill(int id)
+        {
+            try
+            {
+                await _fuelRefillService.DeactivateFuelRefillAsync(id);
+                return Ok("Fuel refill deactivated successfully.");
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
     }
 }

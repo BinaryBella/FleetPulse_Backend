@@ -13,7 +13,7 @@ namespace FleetPulse_BackEndDevelopment.Controllers
 
         public VehicleMaintenanceController(IVehicleMaintenanceService maintenanceService)
         {
-            _maintenanceService= maintenanceService;
+            _maintenanceService = maintenanceService;
         }
 
         [HttpGet]
@@ -33,86 +33,29 @@ namespace FleetPulse_BackEndDevelopment.Controllers
             return Ok(maintenance);
         }
 
-        [HttpPost("vehiclemaintenance")]
+        [HttpPost]
         public async Task<ActionResult> AddVehicleMaintenanceAsync([FromBody] VehicleMaintenanceDTO vehicleMaintenance)
-        {
-            var response = new ApiResponse(); 
-            try
-            {
-                var vehicle = _maintenanceService.GetByRegNo(vehicleMaintenance.VehicleRegistrationNo);
-
-                if (vehicle == null)
-                {
-                    response.Status = false;
-                    response.Message = "Vehicle is not found";
-                    return new JsonResult(response);
-                }
-                
-                var maintenance = new VehicleMaintenance
-                {
-                    MaintenanceDate = vehicleMaintenance.MaintenanceDate,
-                    PartsReplaced = vehicleMaintenance.PartsReplaced,
-                    ServiceProvider = vehicleMaintenance.ServiceProvider,
-                    Cost = vehicleMaintenance.Cost,
-                    Status = vehicleMaintenance.Status,
-                    SpecialNotes = vehicleMaintenance.SpecialNotes,
-                    VehicleMaintenanceTypeId = vehicleMaintenance.MaintenanceTypeId,
-                    VehicleId = vehicle.VehicleId
-                };
-
-                var addedMaintenance = await _maintenanceService.AddVehicleMaintenanceAsync(maintenance);
-                
-                if (addedMaintenance)
-                {
-                    response.Status = true;
-                    response.Message = "Added Successfully";
-                    return new JsonResult(response);
-                }
-                else
-                {
-                    response.Status = false;
-                    response.Message = "Failed to add Details";
-                }
-            }
-            catch (Exception ex)
-            {
-                response.Status = false;
-                response.Message = $"An error occurred: {ex.Message}";
-            }
-    
-            return new JsonResult(response);
-        }
-
-        [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateVehicleMaintenance(VehicleMaintenanceDTO vehicleMaintenance)
         {
             var response = new ApiResponse();
             try
             {
-                var existingMaintenance = await _maintenanceService.IsVehicleMaintenanceExist(vehicleMaintenance.MaintenanceId);
-
-                if (!existingMaintenance)
-                {
-                    return NotFound("Maintenance with Id not found.");
-                }
-                
                 var maintenance = new VehicleMaintenance
                 {
-                    MaintenanceId = vehicleMaintenance.MaintenanceId,
                     MaintenanceDate = vehicleMaintenance.MaintenanceDate,
                     PartsReplaced = vehicleMaintenance.PartsReplaced,
                     ServiceProvider = vehicleMaintenance.ServiceProvider,
                     Cost = vehicleMaintenance.Cost,
                     Status = vehicleMaintenance.Status,
                     SpecialNotes = vehicleMaintenance.SpecialNotes,
-                    VehicleMaintenanceTypeId = vehicleMaintenance.MaintenanceTypeId
+                    VehicleId = vehicleMaintenance.VehicleId,
+                    VehicleMaintenanceTypeId = vehicleMaintenance.VehicleMaintenanceTypeId,
                 };
 
-                var result = await _maintenanceService.UpdateVehicleMaintenanceAsync(maintenance);
-                if (!result)
-                    return NotFound();
+                var addedMaintenance = await _maintenanceService.AddVehicleMaintenanceAsync(maintenance);
 
-                return NoContent();
+                response.Status = true;
+                response.Message = "Added Successfully";
+                return new JsonResult(response);
             }
             catch (Exception ex)
             {
@@ -122,14 +65,53 @@ namespace FleetPulse_BackEndDevelopment.Controllers
             }
         }
 
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteVehicleMaintenance(string id)
-        {
-            var result = await _maintenanceService.DeleteVehicleMaintenanceAsync(id);
-            if (!result)
-                return NotFound();
+        // [HttpPut("{id}")]
+        // public async Task<IActionResult> UpdateVehicleMaintenance(int id, [FromBody] VehicleMaintenanceDTO vehicleMaintenance)
+        // {
+        //     var response = new ApiResponse();
+        //     try
+        //     {
+        //         var existingMaintenance = await _maintenanceService.GetVehicleMaintenanceByIdAsync(id);
+        //
+        //         if (existingMaintenance == null)
+        //         {
+        //             return NotFound("Maintenance with Id not found.");
+        //         }
+        //
+        //         existingMaintenance.MaintenanceDate = vehicleMaintenance.MaintenanceDate;
+        //         existingMaintenance.PartsReplaced = vehicleMaintenance.PartsReplaced;
+        //         existingMaintenance.ServiceProvider = vehicleMaintenance.ServiceProvider;
+        //         existingMaintenance.Cost = vehicleMaintenance.Cost;
+        //         existingMaintenance.Status = vehicleMaintenance.Status;
+        //         existingMaintenance.SpecialNotes = vehicleMaintenance.SpecialNotes;
+        //         existingMaintenance.VehicleMaintenanceTypeId = vehicleMaintenance.Id; // Corrected property usage
+        //
+        //         var result = await _maintenanceService.UpdateVehicleMaintenanceAsync(existingMaintenance);
+        //         if (!result)
+        //             return NotFound();
+        //
+        //         return NoContent();
+        //     }
+        //     catch (Exception ex)
+        //     {
+        //         response.Status = false;
+        //         response.Message = $"An error occurred: {ex.Message}";
+        //         return new JsonResult(response);
+        //     }
+        // }
 
-            return NoContent();
+        [HttpPut("{id}/deactivate")]
+        public async Task<IActionResult> DeactivateMaintenance(int id)
+        {
+            try
+            {
+                await _maintenanceService.DeactivateMaintenanceAsync(id);
+                return Ok("Maintenance deactivated successfully.");
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
     }
 }

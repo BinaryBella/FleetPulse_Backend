@@ -1,7 +1,8 @@
-using FleetPulse_BackEndDevelopment.Models;
 using FleetPulse_BackEndDevelopment.Data;
+using FleetPulse_BackEndDevelopment.Data.DTO;
 using FleetPulse_BackEndDevelopment.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
+
 
 namespace FleetPulse_BackEndDevelopment.Services
 {
@@ -14,31 +15,69 @@ namespace FleetPulse_BackEndDevelopment.Services
             _context = context;
         }
 
-        public async Task<IEnumerable<FuelRefill>> GetAllFuelRefillsAsync()
+        public async Task<List<FuelRefillDTO>> GetAllFuelRefillsAsync()
         {
-            return await _context.FuelRefill.ToListAsync();
+            return await _context.FuelRefills
+                .Include(fr => fr.Vehicle)
+                .Include(fr => fr.User)
+                .Select(fr => new FuelRefillDTO
+                {
+                    FuelRefillId = fr.FuelRefillId,
+                    Date = fr.Date,
+                    Time = fr.Time,
+                    LiterCount = fr.LiterCount,
+                    FType = fr.FType,
+                    Cost = fr.Cost,
+                    VehicleRegistrationNo = fr.Vehicle.VehicleRegistrationNo,
+                    NIC = fr.User.NIC,
+                    Status = fr.Status
+                })
+                .ToListAsync();
         }
 
-        public async Task<FuelRefill> GetFuelRefillByIdAsync(int id)
+        public async Task<FuelRefill> GetFuelRefillByIdAsync(int fuelRefillId)
         {
-            return await _context.FuelRefill.FindAsync(id);
+            return await _context.FuelRefills
+                .Include(fr => fr.Vehicle)
+                .Include(fr => fr.User)
+                .FirstOrDefaultAsync(fr => fr.FuelRefillId == fuelRefillId);
         }
 
-        public async Task<bool> AddFuelRefillAsync(FuelRefill fuelRefill)
+        public bool DoesFuelRefillExist(string fType)
         {
-            _context.FuelRefill.Add(fuelRefill);
+            return _context.FuelRefills.Any(fr => fr.FType == fType);
+        }
+
+        public async Task<FuelRefill?> AddFuelRefillAsync(FuelRefillDTO fuelRefillDto)
+        {
+            var user = await _context.Users.FindAsync(fuelRefillDto.UserId);
+            if (user == null) return null;
+
+            var vehicle = await _context.Vehicles.FindAsync(fuelRefillDto.VehicleId);
+            if (vehicle == null) return null;
+
+            var fuelRefill = new FuelRefill
+            {
+                Date = fuelRefillDto.Date,
+                Time = fuelRefillDto.Time,
+                LiterCount = fuelRefillDto.LiterCount,
+                FType = fuelRefillDto.FType,
+                Cost = fuelRefillDto.Cost,
+                Status = fuelRefillDto.Status,
+                UserId = fuelRefillDto.UserId,
+                VehicleId = fuelRefillDto.VehicleId,
+                User = user,
+                Vehicle = vehicle
+            };
+
+            _context.FuelRefills.Add(fuelRefill);
             await _context.SaveChangesAsync();
-            return true;
+            return fuelRefill;
         }
         
-        public Vehicle? GetByRegNo(string regNo)
+        public async Task<bool> UpdateFuelRefillAsync(int fuelRefillId, FuelRefill fuelRefill)
         {
-            return _context.Vehicle.FirstOrDefault(c => c.VehicleRegistrationNo == regNo);
-        }
-
-        public async Task<bool> UpdateFuelRefillAsync(int id, FuelRefill fuelRefill)
-        {
-            var existingFuelRefill = await _context.FuelRefill.FindAsync(id);
+            var existingFuelRefill = await _context.FuelRefills.FindAsync(fuelRefillId);
             if (existingFuelRefill == null)
                 return false;
 
@@ -49,19 +88,35 @@ namespace FleetPulse_BackEndDevelopment.Services
             existingFuelRefill.Cost = fuelRefill.Cost;
             existingFuelRefill.Status = fuelRefill.Status;
 
+            _context.FuelRefills.Update(existingFuelRefill);
             await _context.SaveChangesAsync();
             return true;
         }
 
-        public async Task<bool> DeleteFuelRefillAsync(int id)
+        public async Task DeactivateFuelRefillAsync(int fuelRefillId)
         {
-            var fuelRefill = await _context.FuelRefill.FindAsync(id);
-            if (fuelRefill == null)
-                return false;
+            var fuelRefill = await _context.FuelRefills.FindAsync(fuelRefillId);
 
-            _context.FuelRefill.Remove(fuelRefill);
+            if (fuelRefill == null)
+            {
+                throw new InvalidOperationException("Fuel refill not found.");
+            }
+
+            if (FuelRefillIsAssociatedWithUser(fuelRefill))
+            {
+                throw new InvalidOperationException("Fuel refill is associated with a user. Cannot deactivate.");
+            }
+
+            fuelRefill.Status = false;
             await _context.SaveChangesAsync();
-            return true;
+        }
+        public async Task<bool> IsFuelRefillExist(int fuelRefillId)
+        {
+            return await _context.FuelRefills.AnyAsync(fr => fr.FuelRefillId == fuelRefillId);
+        }
+        private bool FuelRefillIsAssociatedWithUser(FuelRefill fuelRefill)
+        {
+            return _context.Users.Any(u => u.FuelRefills.Any(fr => fr.FuelRefillId == fuelRefill.FuelRefillId));
         }
     }
 }

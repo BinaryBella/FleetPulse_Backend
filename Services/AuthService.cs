@@ -19,13 +19,12 @@ public class AuthService : IAuthService
             this.dataContext = dataContext;
             this.configuration = configuration;
         }
-
-        public bool IsAuthenticated(string username, string password)
+        
+        public User IsAuthenticated(string username, string password)
         {
             var user = this.GetByUsername(username);
-            return this.DoesUserExists(username) && BCrypt.Net.BCrypt.Verify(password, user.HashedPassword);
+            return this.DoesUserExists(username) && BCrypt.Net.BCrypt.Verify(password, user.HashedPassword) ? user : null;
         }
-
         public bool DoesUserExists(string username)
         {
             var user = dataContext.Users.FirstOrDefault(x => x.UserName == username);
@@ -74,7 +73,33 @@ public class AuthService : IAuthService
             return userEntity.Entity;
         }
 
-        public string GenerateJwtToken(string username, string JobTitle)
+        // public string GenerateJwtToken(string username, string JobTitle)
+        // {
+        //     var issuer = this.configuration["Jwt:Issuer"];
+        //     var audience = this.configuration["Jwt:Audience"];
+        //     var key = Encoding.ASCII.GetBytes(this.configuration["Jwt:Key"]);
+        //     var tokenDescriptor = new SecurityTokenDescriptor
+        //     {
+        //         Subject = new ClaimsIdentity(new[]
+        //         {
+        //                     new Claim("Id", Guid.NewGuid().ToString()),
+        //                     new Claim(JwtRegisteredClaimNames.Sub, username),
+        //                     new Claim(JwtRegisteredClaimNames.Email, username),
+        //                     new Claim(ClaimTypes.Role, JobTitle),
+        //                     new Claim(JwtRegisteredClaimNames.Jti,
+        //                     Guid.NewGuid().ToString())
+        //                 }),
+        //         Expires = DateTime.UtcNow.AddMinutes(5),
+        //         Issuer = issuer,
+        //         Audience = audience,
+        //         SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha512Signature)
+        //     };
+        //     var tokenHandler = new JwtSecurityTokenHandler();
+        //     var token = tokenHandler.CreateToken(tokenDescriptor);
+        //     return tokenHandler.WriteToken(token);
+        // }
+
+        public string GenerateJwtToken(string username, string jobTitle)
         {
             var issuer = this.configuration["Jwt:Issuer"];
             var audience = this.configuration["Jwt:Audience"];
@@ -83,13 +108,12 @@ public class AuthService : IAuthService
             {
                 Subject = new ClaimsIdentity(new[]
                 {
-                            new Claim("Id", Guid.NewGuid().ToString()),
-                            new Claim(JwtRegisteredClaimNames.Sub, username),
-                            new Claim(JwtRegisteredClaimNames.Email, username),
-                            new Claim(ClaimTypes.Role, JobTitle),
-                            new Claim(JwtRegisteredClaimNames.Jti,
-                            Guid.NewGuid().ToString())
-                        }),
+                    new Claim("Id", Guid.NewGuid().ToString()),
+                    new Claim(JwtRegisteredClaimNames.Sub, username),
+                    new Claim(JwtRegisteredClaimNames.Email, username),
+                    new Claim(ClaimTypes.Role, jobTitle),
+                    new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+                }),
                 Expires = DateTime.UtcNow.AddMinutes(5),
                 Issuer = issuer,
                 Audience = audience,
@@ -154,8 +178,8 @@ public class AuthService : IAuthService
         {
             dataContext.Entry(User).State = EntityState.Detached;
             var result = dataContext.Users.Update(User);
-            result.State = EntityState.Detached;
             await dataContext.SaveChangesAsync();
+            result.State = EntityState.Modified;
 
             if (result.State == EntityState.Modified)
             {

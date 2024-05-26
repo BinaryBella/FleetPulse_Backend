@@ -1,15 +1,19 @@
+// IFuelRefillService.cs
 using FleetPulse_BackEndDevelopment.Models;
+using FleetPulse_BackEndDevelopment.Data.DTO;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace FleetPulse_BackEndDevelopment.Services.Interfaces
 {
     public interface IFuelRefillService
     {
-        Task<IEnumerable<FuelRefill>> GetAllFuelRefillsAsync();
-        Task<FuelRefill> GetFuelRefillByIdAsync(int id);
-        Task<bool> AddFuelRefillAsync(FuelRefill fuelRefill);
-
-        Vehicle? GetByRegNo(string regNo);
-        Task<bool> UpdateFuelRefillAsync(int id, FuelRefill fuelRefill);
-        Task<bool> DeleteFuelRefillAsync(int id);
+        Task<List<FuelRefillDTO>> GetAllFuelRefillsAsync();
+        Task<FuelRefill> GetFuelRefillByIdAsync(int fuelRefillId);
+        bool DoesFuelRefillExist(string fType);
+        Task<FuelRefill?> AddFuelRefillAsync(FuelRefillDTO fuelRefillDto);
+        Task<bool> UpdateFuelRefillAsync(int fuelRefillId, FuelRefill fuelRefill);
+        Task DeactivateFuelRefillAsync(int fuelRefillId);
+        Task<bool> IsFuelRefillExist(int fuelRefillId);
     }
 }
