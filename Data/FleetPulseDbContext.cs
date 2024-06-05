@@ -23,7 +23,8 @@ namespace FleetPulse_BackEndDevelopment.Data
         public DbSet<TripUser> TripUsers { get; set; }
         public DbSet<User> Users { get; set; }
         public DbSet<VerificationCode> VerificationCodes { get; set; }
-        public DbSet<Notification> Notifications { get; set; }
+
+        public DbSet<FCMNotification> FCMNotification { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -42,6 +43,7 @@ namespace FleetPulse_BackEndDevelopment.Data
             modelBuilder.ApplyConfiguration(new FuelRefillConfig());
             modelBuilder.ApplyConfiguration(new UserConfig());
             modelBuilder.ApplyConfiguration(new VerificationCodeConfig());
+            modelBuilder.ApplyConfiguration(new FCMNotificationConfig());
 
             // Configures one-to-many relationship
 

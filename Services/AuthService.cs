@@ -73,32 +73,6 @@ public class AuthService : IAuthService
             return userEntity.Entity;
         }
 
-        // public string GenerateJwtToken(string username, string JobTitle)
-        // {
-        //     var issuer = this.configuration["Jwt:Issuer"];
-        //     var audience = this.configuration["Jwt:Audience"];
-        //     var key = Encoding.ASCII.GetBytes(this.configuration["Jwt:Key"]);
-        //     var tokenDescriptor = new SecurityTokenDescriptor
-        //     {
-        //         Subject = new ClaimsIdentity(new[]
-        //         {
-        //                     new Claim("Id", Guid.NewGuid().ToString()),
-        //                     new Claim(JwtRegisteredClaimNames.Sub, username),
-        //                     new Claim(JwtRegisteredClaimNames.Email, username),
-        //                     new Claim(ClaimTypes.Role, JobTitle),
-        //                     new Claim(JwtRegisteredClaimNames.Jti,
-        //                     Guid.NewGuid().ToString())
-        //                 }),
-        //         Expires = DateTime.UtcNow.AddMinutes(5),
-        //         Issuer = issuer,
-        //         Audience = audience,
-        //         SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha512Signature)
-        //     };
-        //     var tokenHandler = new JwtSecurityTokenHandler();
-        //     var token = tokenHandler.CreateToken(tokenDescriptor);
-        //     return tokenHandler.WriteToken(token);
-        // }
-
         public string GenerateJwtToken(string username, string jobTitle)
         {
             var issuer = this.configuration["Jwt:Issuer"];

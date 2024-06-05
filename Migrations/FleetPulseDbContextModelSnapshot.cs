@@ -98,6 +98,39 @@ namespace FleetPulse_BackEndDevelopment.Migrations
                     b.ToTable("AccidentUser");
                 });
 
+            modelBuilder.Entity("FleetPulse_BackEndDevelopment.Models.FCMNotification", b =>
+                {
+                    b.Property<string>("NotificationId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<bool>("Status")
+                        .HasColumnType("bit");
+
+                    b.Property<TimeSpan>("Time")
+                        .HasColumnType("time");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("NotificationId");
+
+                    b.ToTable("Notifications", (string)null);
+                });
+
             modelBuilder.Entity("FleetPulse_BackEndDevelopment.Models.Manufacture", b =>
                 {
                     b.Property<int>("ManufactureId")
@@ -117,41 +150,6 @@ namespace FleetPulse_BackEndDevelopment.Migrations
                     b.HasKey("ManufactureId");
 
                     b.ToTable("Manufacture", (string)null);
-                });
-
-            modelBuilder.Entity("FleetPulse_BackEndDevelopment.Models.Notification", b =>
-                {
-                    b.Property<string>("NotificationId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<DateTime>("Date")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Message")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("NotificationType")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("Status")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTime>("Time")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("NotificationId");
-
-                    b.ToTable("Notifications");
                 });
 
             modelBuilder.Entity("FleetPulse_BackEndDevelopment.Models.Trip", b =>

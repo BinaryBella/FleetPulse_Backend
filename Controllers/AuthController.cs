@@ -14,20 +14,16 @@ namespace FleetPulse_BackEndDevelopment.Controllers
     [Route("api/[controller]")]
     public class AuthController : ControllerBase
     {
-        private readonly IMapper mapper;
-        private readonly ILogger logger;
-        private readonly AuthService authService;
+        private readonly IAuthService authService;
         private readonly IMailService mailService;
         private readonly IVerificationCodeService verificationCodeService;
 
-        public AuthController(ILogger logger, AuthService authService, IMapper mapper, IMailService mailService,
+        public AuthController(IAuthService authService, IMapper mapper, IMailService mailService,
             IVerificationCodeService verificationCodeService)
         {
             this.authService = authService;
             this.mailService = mailService;
             this.verificationCodeService = verificationCodeService;
-            this.mapper = mapper;
-            this.logger = logger;
         }
 
 
@@ -71,7 +67,6 @@ namespace FleetPulse_BackEndDevelopment.Controllers
             }
             catch (Exception error)
             {
-                logger.LogError(error.Message);
                 return StatusCode(500);
             }
         }
@@ -199,7 +194,7 @@ namespace FleetPulse_BackEndDevelopment.Controllers
             }
         }
 
-        [HttpPost("change-password")]
+        [HttpPost("change-password-staff")]
         public IActionResult ChangePassword([FromBody] ChangePasswordDTO model)
         {
             var response = new ApiResponse
@@ -248,8 +243,8 @@ namespace FleetPulse_BackEndDevelopment.Controllers
                 return StatusCode(500);
             }
         }
-
-        [HttpPut("UpdateUser")]
+        
+       [HttpPut("UpdateUser")]
         public async Task<IActionResult> UpdateUser([FromBody] StaffDTO staff)
         {
             try
