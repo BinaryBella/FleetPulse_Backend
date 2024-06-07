@@ -23,8 +23,7 @@ namespace FleetPulse_BackEndDevelopment.Models
         public ICollection<Vehicle> Vehicles { get; set; }
        // TripUser
         public IList<TripUser> TripUsers { get; set; }
-        
-
+        public object DriverFirstName { get; internal set; }
     }
 }
         
