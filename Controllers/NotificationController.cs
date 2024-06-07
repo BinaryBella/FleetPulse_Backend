@@ -1,5 +1,5 @@
 using FleetPulse_BackEndDevelopment.Models;
-using FleetPulse_BackEndDevelopment.Services;
+using FleetPulse_BackEndDevelopment.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FleetPulse_BackEndDevelopment.Controllers
@@ -8,10 +8,10 @@ namespace FleetPulse_BackEndDevelopment.Controllers
     [ApiController]
     public class NotificationController : ControllerBase
     {
-        private readonly PushNotificationService _pushNotificationService;
+        private readonly IPushNotificationService _pushNotificationService;
         private readonly IConfiguration _configuration;
 
-        public NotificationController(PushNotificationService pushNotificationService, IConfiguration configuration)
+        public NotificationController(IPushNotificationService pushNotificationService, IConfiguration configuration)
         {
             _pushNotificationService = pushNotificationService;
             _configuration = configuration;

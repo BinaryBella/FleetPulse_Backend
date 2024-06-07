@@ -178,4 +178,23 @@ public class AuthService : IAuthService
             }
             return false;       
         }
+        
+        public async Task<bool> ResetPasswordAsync(string email, string newPassword)
+        {
+            var user = await GetByEmailAsync(email);
+            if (user != null)
+            {
+                string hashedPassword = BCrypt.Net.BCrypt.HashPassword(newPassword);
+                user.HashedPassword = hashedPassword;
+                await dataContext.SaveChangesAsync();
+                return true;
+            }
+            return false;
+        }
+
+        private async Task<User> GetByEmailAsync(string email)
+        {
+            return await dataContext.Users.FirstOrDefaultAsync(c => c.EmailAddress == email);
+        }
+
 }

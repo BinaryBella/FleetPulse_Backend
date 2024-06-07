@@ -26,6 +26,9 @@ namespace FleetPulse_BackEndDevelopment.Data
 
         public DbSet<FCMNotification> FCMNotification { get; set; }
 
+        public DbSet<PasswordResetRequest> PasswordResetRequests { get; set; }
+
+        
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);

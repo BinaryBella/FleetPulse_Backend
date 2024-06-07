@@ -1,12 +1,12 @@
-using AutoMapper;
+using FleetPulse_BackEndDevelopment.Data;
 using FleetPulse_BackEndDevelopment.Data.DTO;
 using FleetPulse_BackEndDevelopment.Models;
-using FleetPulse_BackEndDevelopment.Services;
 using FleetPulse_BackEndDevelopment.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace FleetPulse_BackEndDevelopment.Controllers
 {
@@ -14,18 +14,26 @@ namespace FleetPulse_BackEndDevelopment.Controllers
     [Route("api/[controller]")]
     public class AuthController : ControllerBase
     {
-        private readonly IAuthService authService;
-        private readonly IMailService mailService;
-        private readonly IVerificationCodeService verificationCodeService;
+        private readonly IAuthService _authService;
+        private readonly IMailService _mailService;
+        private readonly IVerificationCodeService _verificationCodeService;
+        private readonly IPushNotificationService _pushNotificationService;
+        private readonly FleetPulseDbContext _context;
+        private readonly IConfiguration _configuration;
 
-        public AuthController(IAuthService authService, IMapper mapper, IMailService mailService,
-            IVerificationCodeService verificationCodeService)
+        public AuthController(IAuthService authService, IMailService mailService, 
+                              IVerificationCodeService verificationCodeService, 
+                              IPushNotificationService pushNotificationService, 
+                              FleetPulseDbContext context,
+                              IConfiguration configuration)
         {
-            this.authService = authService;
-            this.mailService = mailService;
-            this.verificationCodeService = verificationCodeService;
+            _authService = authService;
+            _mailService = mailService;
+            _verificationCodeService = verificationCodeService;
+            _pushNotificationService = pushNotificationService;
+            _context = context;
+            _configuration = configuration;
         }
-
 
         [HttpPost("login")]
         public ActionResult<ApiResponse> Login(LoginDTO userModel)
@@ -38,14 +46,14 @@ namespace FleetPulse_BackEndDevelopment.Controllers
             {
                 if (ModelState.IsValid)
                 {
-                    var user = authService.IsAuthenticated(userModel.Username, userModel.Password);
+                    var user = _authService.IsAuthenticated(userModel.Username, userModel.Password);
 
                     if (user != null)
                     {
                         if (user.JobTitle == "Admin" || user.JobTitle == "Staff")
                         {
-                            var token = authService.GenerateJwtToken(user.UserName, user.JobTitle);
-                            response.Data = new { token, user.JobTitle }; // Include JobTitle in the response
+                            var token = _authService.GenerateJwtToken(user.UserName, user.JobTitle);
+                            response.Data = new { token, user.JobTitle };
                             return new JsonResult(response);
                         }
                         else
@@ -84,7 +92,7 @@ namespace FleetPulse_BackEndDevelopment.Controllers
             {
                 if (ModelState.IsValid)
                 {
-                    var emailExists = authService.DoesEmailExists(model.Email);
+                    var emailExists = _authService.DoesEmailExists(model.Email);
 
                     if (!emailExists)
                     {
@@ -93,7 +101,7 @@ namespace FleetPulse_BackEndDevelopment.Controllers
                         return new JsonResult(response);
                     }
 
-                    var verificationCode = await verificationCodeService.GenerateVerificationCode(model.Email);
+                    var verificationCode = await _verificationCodeService.GenerateVerificationCode(model.Email);
                     var mailRequest = new MailRequest
                     {
                         Subject = "Password Reset Verification",
@@ -101,8 +109,7 @@ namespace FleetPulse_BackEndDevelopment.Controllers
                         ToEmail = model.Email
                     };
 
-
-                    await mailService.SendEmailAsync(mailRequest);
+                    await _mailService.SendEmailAsync(mailRequest);
 
                     response.Message = "Verification code sent successfully";
                     return new JsonResult(response);
@@ -133,7 +140,7 @@ namespace FleetPulse_BackEndDevelopment.Controllers
                 Status = true
             };
 
-            bool isValid = await verificationCodeService.ValidateVerificationCode(request.Email, request.Code);
+            bool isValid = await _verificationCodeService.ValidateVerificationCode(request.Email, request.Code);
 
             if (isValid)
             {
@@ -159,7 +166,7 @@ namespace FleetPulse_BackEndDevelopment.Controllers
             {
                 if (ModelState.IsValid)
                 {
-                    var emailExists = authService.DoesEmailExists(model.Email);
+                    var emailExists = _authService.DoesEmailExists(model.Email);
 
                     if (!emailExists)
                     {
@@ -168,7 +175,7 @@ namespace FleetPulse_BackEndDevelopment.Controllers
                         return new JsonResult(response);
                     }
 
-                    bool passwordReset = authService.ResetPassword(model.Email, model.NewPassword);
+                    bool passwordReset = _authService.ResetPassword(model.Email, model.NewPassword);
 
                     if (passwordReset)
                     {
@@ -206,7 +213,7 @@ namespace FleetPulse_BackEndDevelopment.Controllers
             {
                 if (ModelState.IsValid)
                 {
-                    var user = authService.GetByUsername(model.Username);
+                    var user = _authService.GetByUsername(model.Username);
 
                     if (user == null)
                     {
@@ -215,7 +222,7 @@ namespace FleetPulse_BackEndDevelopment.Controllers
                         return new JsonResult(response);
                     }
 
-                    var isOldPasswordValid = authService.IsAuthenticated(user.UserName, model.OldPassword);
+                    var isOldPasswordValid = _authService.IsAuthenticated(user.UserName, model.OldPassword);
 
                     if (isOldPasswordValid == null)
                     {
@@ -224,7 +231,7 @@ namespace FleetPulse_BackEndDevelopment.Controllers
                         return new JsonResult(response);
                     }
                     
-                    var passwordReset = authService.ResetPassword(user.EmailAddress, model.NewPassword);
+                    var passwordReset = _authService.ResetPassword(user.EmailAddress, model.NewPassword);
 
                     if (passwordReset)
                     {
@@ -243,13 +250,13 @@ namespace FleetPulse_BackEndDevelopment.Controllers
                 return StatusCode(500);
             }
         }
-        
-       [HttpPut("UpdateUser")]
+
+        [HttpPut("UpdateUser")]
         public async Task<IActionResult> UpdateUser([FromBody] StaffDTO staff)
         {
             try
             {
-                var oldUser = authService.GetByUsername(staff.UserName);
+                var oldUser = _authService.GetByUsername(staff.UserName);
 
                 if (oldUser is null)
                 {
@@ -272,7 +279,7 @@ namespace FleetPulse_BackEndDevelopment.Controllers
                     oldUser.ProfilePicture = Convert.FromBase64String(staff.ProfilePicture);
                 }
         
-                var result = await authService.UpdateUserAsync(oldUser);
+                var result = await _authService.UpdateUserAsync(oldUser);
 
                 if (result)
                 {
@@ -292,14 +299,14 @@ namespace FleetPulse_BackEndDevelopment.Controllers
         [HttpGet("userProfile")]
         public async Task<ActionResult<StaffDTO>> GetUserByUsernameAsync(string username)
         {
-            var user = await authService.GetUserByUsernameAsync(username);
+            var user = await _authService.GetUserByUsernameAsync(username);
     
             if (user == null)
                 return NotFound();
 
             var profilePictureBase64 = user.ProfilePicture != null ? Convert.ToBase64String(user.ProfilePicture) : null;
 
-            var StaffDTO = new StaffDTO
+            var staffDTO = new StaffDTO
             {
                 FirstName = user.FirstName,
                 LastName = user.LastName,
@@ -310,7 +317,7 @@ namespace FleetPulse_BackEndDevelopment.Controllers
                 ProfilePicture = profilePictureBase64
             };
 
-            return Ok(StaffDTO);
+            return Ok(staffDTO);
         }
 
         
@@ -322,6 +329,126 @@ namespace FleetPulse_BackEndDevelopment.Controllers
             Response.Cookies.Delete("localStorageKey");
 
             return RedirectToAction("Login");
+        }
+
+         [HttpPost("request-password-reset")]
+        public async Task<IActionResult> RequestPasswordReset([FromBody] ForgotPasswordDTO model)
+        {
+            var response = new ApiResponse
+            {
+                Status = true
+            };
+
+            try
+            {
+                if (ModelState.IsValid)
+                {
+                    var user = _context.Users.FirstOrDefault(u => u.EmailAddress == model.Email);
+                    if (user == null)
+                    {
+                        response.Status = false;
+                        response.Message = "Email not found";
+                        return new JsonResult(response);
+                    }
+
+                    var resetRequest = new PasswordResetRequest
+                    {
+                        Email = model.Email,
+                        RequestedAt = DateTime.UtcNow,
+                        IsProcessed = false
+                    };
+
+                    _context.PasswordResetRequests.Add(resetRequest);
+                    await _context.SaveChangesAsync();
+
+                    var userToken = GetUserToken(user.UserName);
+
+                    var notification = new FCMNotification
+                    {
+                        NotificationId = Guid.NewGuid().ToString(),
+                        UserId = "6",
+                        Title = "Password Reset Request",
+                        Message = $"Password reset requested for {user.UserName}",
+                        Date = DateTime.UtcNow.Date,
+                        Time = DateTime.UtcNow.TimeOfDay,
+                        Status = false
+                    };
+
+                    await _pushNotificationService.SaveNotificationAsync(notification);
+                    await _pushNotificationService.SendNotificationAsync(userToken, notification.Title, notification.Message, user.UserName); 
+
+                    response.Message = "Password reset request sent successfully.";
+                    return new JsonResult(response);
+                }
+                else
+                {
+                    response.Message = "Invalid model state";
+                    return BadRequest(response);
+                }
+            }
+            catch (Exception error)
+            {
+                return StatusCode(500);
+            }
+        }
+
+        private string GetUserToken(string username)
+        {
+            // Fetch the device token for the given username from configuration
+            return _configuration["FCMDeviceTokens:" + username];
+        }
+    
+        [HttpGet("password-reset-requests")]
+        public async Task<IActionResult> GetPasswordResetRequests()
+        {
+            var requests = await _context.PasswordResetRequests.Where(r => !r.IsProcessed).ToListAsync();
+            return Ok(requests);
+        }
+
+        [HttpPost("reset-password-admin/{id}")]
+        public async Task<IActionResult> ResetPasswordByAdmin(int id)
+        {
+            var response = new ApiResponse
+            {
+                Status = true
+            };
+
+            try
+            {
+                var resetRequest = await _context.PasswordResetRequests.FindAsync(id);
+                if (resetRequest == null || resetRequest.IsProcessed)
+                {
+                    response.Status = false;
+                    response.Message = "Password reset request not found or already processed.";
+                    return new JsonResult(response);
+                }
+                var newPassword = GenerateNewPassword();
+                var result = await _authService.ResetPasswordAsync(resetRequest.Email, newPassword);
+
+                if (result)
+                {
+                    resetRequest.IsProcessed = true;
+                    await _context.SaveChangesAsync();
+                    response.Message = "Password reset successfully by admin.";
+                    return new JsonResult(response);
+                }
+                else
+                {
+                    response.Status = false;
+                    response.Message = "Failed to reset password.";
+                    return new JsonResult(response);
+                }
+            }
+            catch (Exception error)
+            {
+                return StatusCode(500);
+            }
+        }
+
+        private string GenerateNewPassword()
+        {
+            // Implement password generation logic here
+            return "NewSecurePassword123!";
         }
     }
 }

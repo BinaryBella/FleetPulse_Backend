@@ -11,14 +11,12 @@ namespace FleetPulse_BackEndDevelopment.Controllers
     public class VehicleMaintenanceTypeController : ControllerBase
     {
         private readonly IVehicleMaintenanceTypeService _maintenanceTypeService;
-        private readonly PushNotificationService _pushNotificationService;
-        private readonly IConfiguration _configuration;
 
-        public VehicleMaintenanceTypeController(IVehicleMaintenanceTypeService maintenanceTypeService, PushNotificationService pushNotificationService, IConfiguration configuration)
+
+        public VehicleMaintenanceTypeController(IVehicleMaintenanceTypeService maintenanceTypeService)
         {
             _maintenanceTypeService = maintenanceTypeService;
-            _pushNotificationService = pushNotificationService;
-            _configuration = configuration;
+
         }
 
         [HttpGet]
@@ -60,18 +58,6 @@ namespace FleetPulse_BackEndDevelopment.Controllers
 
                 if (addedMaintenanceType != null)
                 {
-                    var fcmDeviceTokens = _configuration.GetSection("FCMDeviceTokens").Get<string[]>();
-                    if (fcmDeviceTokens != null && fcmDeviceTokens.Length > 0)
-                    {
-                        var title = "New Vehicle Maintenance Type Added";
-                        var message = $"The maintenance type '{maintenanceType.TypeName}' has been added.";
-
-                        foreach (var fcmDeviceToken in fcmDeviceTokens)
-                        {
-                            await _pushNotificationService.SendNotificationAsync(fcmDeviceToken, title, message);
-                        }
-                    }
-
                     response.Status = true;
                     response.Message = "Added Successfully";
                     return new JsonResult(response);
@@ -90,6 +76,7 @@ namespace FleetPulse_BackEndDevelopment.Controllers
 
             return new JsonResult(response);
         }
+
     
         [HttpPut("UpdateVehicleMaintenanceType")]
         public async Task<IActionResult> UpdateVehicleMaintenanceType([FromBody] VehicleMaintenanceTypeDTO maintenanceType)

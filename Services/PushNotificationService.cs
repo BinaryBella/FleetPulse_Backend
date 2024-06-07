@@ -5,10 +5,7 @@ using FleetPulse_BackEndDevelopment.Data;
 using FleetPulse_BackEndDevelopment.Models;
 using FleetPulse_BackEndDevelopment.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+
 
 namespace FleetPulse_BackEndDevelopment.Services
 {
@@ -30,7 +27,7 @@ namespace FleetPulse_BackEndDevelopment.Services
             }
         }
 
-        public async Task SendNotificationAsync(string fcmDeviceToken, string title, string message)
+        public async Task SendNotificationAsync(string fcmDeviceToken, string title, string message, string username)
         {
             if (string.IsNullOrEmpty(fcmDeviceToken))
             {
@@ -45,6 +42,10 @@ namespace FleetPulse_BackEndDevelopment.Services
                 {
                     Title = title,
                     Body = message
+                },
+                Data = new Dictionary<string, string>
+                {
+                    { "username", username }
                 }
             };
 
