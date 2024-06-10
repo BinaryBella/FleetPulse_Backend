@@ -1,88 +1,141 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using FleetPulse_BackEndDevelopment.Data;
+﻿using FleetPulse_BackEndDevelopment.Data.DTO;
 using FleetPulse_BackEndDevelopment.Models;
-using FleetPulse_BackEndDevelopment.Data.DTO;
+using FleetPulse_BackEndDevelopment.Services.Interfaces;
+using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
-namespace FleetPulse.Controllers
+namespace FleetPulse_BackEndDevelopment.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-
     public class VehicleTypeController : ControllerBase
     {
-        private readonly FleetPulseDbContext _context;
-        public object Status { get; private set; }
-        public object VehicleTypeId { get; private set; }
+        private readonly IVehicleTypeService _vehicleTypeService;
 
-        public VehicleTypeController(FleetPulseDbContext context)
+        public VehicleTypeController(IVehicleTypeService vehicleTypeService)
         {
-            _context = context;
-        }
-
-        [HttpPost]
-        public async Task<ActionResult> AddVehicleType(VehicleTypeDTO data)
-        {
-            VehicleType tmp= new VehicleType();
-            tmp.Type = data.Type;
-            tmp.Status=data.Status;
-            await _context.VehicleType.AddAsync(tmp);
-            await _context.SaveChangesAsync();
-            return Ok();
+            _vehicleTypeService = vehicleTypeService;
         }
 
         [HttpGet]
-        public async Task<IEnumerable<VehicleType>> Get()
-
+        public async Task<ActionResult<IEnumerable<VehicleType>>> GetAllVehicleTypes()
         {
-            return await _context.VehicleType.ToListAsync();
+            var vehicleTypes = await _vehicleTypeService.GetAllVehicleTypesAsync();
+            return Ok(vehicleTypes);
         }
 
-        [HttpGet("{vehicletypeid}")]
-
-        public async Task<IActionResult> Get(int vehicletypeid)
+        [HttpGet("{id}")]
+        public async Task<ActionResult<VehicleType>> GetVehicleTypeById(int id)
         {
-            if (vehicletypeid < 1)
-                return BadRequest();
-
-            var VehicleType = await _context.VehicleType.FirstOrDefaultAsync(m => m.VehicleTypeId == vehicletypeid);
-            if (VehicleType == null)
+            var vehicleType = await _vehicleTypeService.GetVehicleTypeByIdAsync(id);
+            if (vehicleType == null)
                 return NotFound();
-            return Ok(VehicleType);
+
+            return Ok(vehicleType);
         }
 
-        [HttpPut]
-        public async Task<IActionResult> Put(VehicleType VehicleTypeData)
+        [HttpPost]
+        public async Task<ActionResult> AddVehicleTypeAsync([FromBody] VehicleTypeDTO Type)
         {
-            if (VehicleTypeData == null || VehicleTypeData.VehicleTypeId == 0)
-                return BadRequest();
-            var VehicleType = await _context.VehicleType.FindAsync(VehicleTypeId);
-            if (VehicleType == null)
-                return NotFound();
-            VehicleType.VehicleTypeId = VehicleTypeData.VehicleTypeId;
-            VehicleType.Type = VehicleTypeData.Type;
-            VehicleType.Status = VehicleTypeData.Status;
+            var response = new ApiResponse();
+            try
+            {
+                var vehicleType = new VehicleType
+                {
+                    Type = Type.Type
+                };
 
+                var vehicleTypeExists = _vehicleTypeService.DoesVehicleTypeExists(vehicleType.Type);
+                if (vehicleTypeExists)
+                {
+                    response.Message = "Vehicle Type already exists";
+                    return new JsonResult(response);
+                }
 
-            await _context.SaveChangesAsync();
-            return Ok();
+                var addedVehicleType = await _vehicleTypeService.AddVehicleTypeAsync(vehicleType);
+
+                if (addedVehicleType != null)
+                {
+                    response.Status = true;
+                    response.Message = "Added Successfully";
+                    return new JsonResult(response);
+                }
+                else
+                {
+                    response.Status = false;
+                    response.Message = "Failed to add Vehicle Type";
+                }
+            }
+            catch (Exception ex)
+            {
+                response.Status = false;
+                response.Message = $"An error occurred: {ex.Message}";
+            }
+
+            return new JsonResult(response);
+        }
+        [HttpPut("UpdateVehicleType")]
+        public async Task<IActionResult> UpdateVehicleType([FromBody] VehicleTypeDTO vehicleTypeDto)
+        {
+            try
+            {
+                var existingVehicleType = await _vehicleTypeService.IsVehicleTypeExist(vehicleTypeDto.VehicleTypeId);
+
+                if (!existingVehicleType)
+                {
+                    return NotFound("Vehicle Type with Id not found");
+                }
+
+                var vehicleType = new VehicleType
+                {
+                    VehicleTypeId = vehicleTypeDto.VehicleTypeId,
+                    Type = vehicleTypeDto.Type,
+                    Status = vehicleTypeDto.Status
+                };
+
+                var result = await _vehicleTypeService.UpdateVehicleTypeAsync(vehicleType);
+                if (result)
+                {
+                    return Ok("Vehicle Type updated successfully.");
+                }
+                else
+                {
+                    return StatusCode(500, "Failed to update Vehicle Type.");
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An error occurred while updating the vehicle type: {ex.Message}");
+            }
         }
 
-        [HttpDelete("{vehicletypeid}")]
-
-        public async Task<IActionResult> Delete(int vehicletypeid)
+        [HttpPut("{id}/deactivate")]
+        public async Task<IActionResult> DeactivateVehicleType(int id)
         {
-            if (vehicletypeid < 1)
-                return BadRequest();
-            var VehicleType = await _context.VehicleType.FindAsync(vehicletypeid);
-            if (VehicleType == null)
-                return NotFound();
-            _context.VehicleType.Remove(VehicleType);
-            await _context.SaveChangesAsync();
-            return Ok();
+            try
+            {
+                await _vehicleTypeService.DeactivateVehicleTypeAsync(id);
+                return Ok("Vehicle Type deactivated successfully.");
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
 
+        [HttpPut("{id}/activate")]
+        public async Task<IActionResult> ActivateVehicleType(int id)
+        {
+            try
+            {
+                await _vehicleTypeService.ActivateVehicleTypeAsync(id);
+                return NoContent();
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
         }
     }
 }
-
-

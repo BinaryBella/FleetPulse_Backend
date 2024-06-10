@@ -11,9 +11,7 @@ namespace FleetPulse_BackEndDevelopment.Models
         public DateTime LicenseExpireDate { get; set; }
         public string? VehicleColor { get; set; }
         public string? Status { get; set; }
-        //Vehicle_Model
-        public int VehicleModelId { get; set; }
-        public VehicleModel? Model { get; set; }
+        
         //Vehicle_Type
         public int VehicleTypeId { get; set; }
         public VehicleType? Type { get; set; }

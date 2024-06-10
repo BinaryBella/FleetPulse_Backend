@@ -1,86 +1,135 @@
-﻿using FleetPulse_BackEndDevelopment.Data;
+﻿using FleetPulse_BackEndDevelopment.Data.DTO;
 using FleetPulse_BackEndDevelopment.Models;
+using FleetPulse_BackEndDevelopment.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
-
-namespace FleetPulse.Controllers
+namespace FleetPulse_BackEndDevelopment.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-
     public class ManufactureController : ControllerBase
-
     {
-        private readonly FleetPulseDbContext _context;
-        private object context;
+        private readonly IManufactureService _manufactureService;
 
-        public ManufactureController(FleetPulseDbContext context)
+        public ManufactureController(IManufactureService manufactureService)
         {
-            _context = context;
+            _manufactureService = manufactureService;
         }
+
         [HttpGet]
-        public async Task<IEnumerable<Manufacture>> Get()
+        public async Task<ActionResult<IEnumerable<Manufacture>>> GetAllManufactures()
         {
-            return await _context.Manufacture.ToListAsync();
+            var manufactures = await _manufactureService.GetAllManufacturesAsync();
+            return Ok(manufactures);
         }
 
-        [HttpGet("{manufactureid}")]
-        public async Task<IActionResult> Get(int manufactureid)
-
+        [HttpGet("{id}")]
+        public async Task<ActionResult<Manufacture>> GetManufactureById(int id)
         {
-            if (manufactureid < 1)
-                return BadRequest();
-
-
-
-
-            var Manufacture = await _context.Manufacture.FirstOrDefaultAsync(m => m.ManufactureId == manufactureid);
-            if (Manufacture == null)
+            var manufacture = await _manufactureService.GetManufactureByIdAsync(id);
+            if (manufacture == null)
                 return NotFound();
-            return Ok(Manufacture);
+
+            return Ok(manufacture);
         }
 
         [HttpPost]
-
-        public async Task<IActionResult> Post(Manufacture Manufacture)
+        public async Task<ActionResult> AddManufactureAsync([FromBody] ManufactureDTO manufactureDto)
         {
-            _context.Add(Manufacture);
-            await _context.SaveChangesAsync();
-            return Ok();
+            var response = new ApiResponse();
+            try
+            {
+                var manufacture = new Manufacture
+                {
+                    Manufacturer = manufactureDto.Manufacturer,
+                    Status = manufactureDto.Status
+                };
+
+                var manufactureExists = _manufactureService.DoesManufactureExists(manufacture.Manufacturer);
+                if (manufactureExists)
+                {
+                    response.Message = "Manufacturer already exists";
+                    return new JsonResult(response);
+                }
+
+                var addedManufacture = await _manufactureService.AddManufactureAsync(manufacture);
+
+                if (addedManufacture != null)
+                {
+                    response.Status = true;
+                    response.Message = "Added Successfully";
+                    return new JsonResult(response);
+                }
+                else
+                {
+                    response.Status = false;
+                    response.Message = "Failed to add Manufacturer";
+                }
+            }
+            catch (Exception ex)
+            {
+                response.Status = false;
+                response.Message = $"An error occurred: {ex.Message}";
+            }
+
+            return new JsonResult(response);
         }
 
-        [HttpPut]
-        public async Task<IActionResult> Put(Manufacture ManufactureData)
+        [HttpPut("UpdateManufacture")]
+        public async Task<IActionResult> UpdateManufacture([FromBody] ManufactureDTO manufactureDto)
         {
-            if (ManufactureData == null || ManufactureData.ManufactureId == 0)
-                return BadRequest();
+            try
+            {
+                var existingManufacture = await _manufactureService.IsManufactureExist(manufactureDto.ManufactureId);
 
-            var Manufacture = await _context.Manufacture.FindAsync(ManufactureData.ManufactureId);
-            if (Manufacture == null)
-                return NotFound();
-            Manufacture.ManufactureId = ManufactureData.ManufactureId;
-            Manufacture.Manufacturer = ManufactureData.Manufacturer;
-            Manufacture.Status = ManufactureData.Status;
+                if (!existingManufacture)
+                {
+                    return NotFound("Manufacturer with Id not found");
+                }
 
-
-            await _context.SaveChangesAsync();
-            return Ok();
+                var manufacture = new Manufacture
+                {
+                    ManufactureId = manufactureDto.ManufactureId,
+                    Manufacturer = manufactureDto.Manufacturer,
+                    Status = manufactureDto.Status
+                };
+                var result = await _manufactureService.UpdateManufactureAsync(manufacture);
+                return new JsonResult(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An error occurred while updating the manufacturer: {ex.Message}");
+            }
         }
 
-        [HttpDelete("{vehicleid}")]
-        public async Task<IActionResult> Delete(int manufactureid)
-
+        [HttpPut("{id}/deactivate")]
+        public async Task<IActionResult> DeactivateManufacture(int id)
         {
-            if (manufactureid < 1)
-                return BadRequest();
-            var Manufacture = await _context.Manufacture.FindAsync(manufactureid);
-            if (Manufacture == null)
-                return NotFound();
-            _context.Manufacture.Remove(Manufacture);
-            await _context.SaveChangesAsync();
-            return Ok();
+            try
+            {
+                await _manufactureService.DeactivateManufactureAsync(id);
+                return Ok("Manufacturer deactivated successfully.");
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
 
+        [HttpPut("{id}/activate")]
+        public async Task<IActionResult> ActivateManufacture(int id)
+        {
+            try
+            {
+                await _manufactureService.ActivateManufactureAsync(id);
+                return NoContent();
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
         }
     }
 }

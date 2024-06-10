@@ -12,7 +12,6 @@ namespace FleetPulse_BackEndDevelopment.Data
         {
         }
 
-        public DbSet<VehicleModel> VehicleModel { get; set; }
         public DbSet<VehicleType> VehicleType { get; set; }
         public DbSet<Manufacture> Manufacture { get; set; }
         public DbSet<FuelRefill> FuelRefill { get; set; }
@@ -25,6 +24,7 @@ namespace FleetPulse_BackEndDevelopment.Data
         public DbSet<FuelRefillUser> FuelRefillUsers { get; set; }
         public DbSet<User> Users { get; set; }
         public DbSet<AccidentUser> AccidentUsers { get; internal set; }
+        public object VehicleTypes { get; internal set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -39,7 +39,6 @@ namespace FleetPulse_BackEndDevelopment.Data
 
             base.OnModelCreating(modelBuilder);
 
-            modelBuilder.ApplyConfiguration(new VehicleModelConfig());
             modelBuilder.ApplyConfiguration(new VehicleTypeConfig());
             modelBuilder.ApplyConfiguration(new ManufactureConfig());
             modelBuilder.ApplyConfiguration(new FuelRefillConfig());
@@ -54,15 +53,10 @@ namespace FleetPulse_BackEndDevelopment.Data
 
             // configures one-to-many relationship
 
-            //Vehicle_Model
-            modelBuilder.Entity<Vehicle>()
-                .HasOne<VehicleModel>(v => v.Model)
-                .WithMany(vm => vm.Vehicles)
-                .HasForeignKey(v => v.VehicleModelId);
             //Vehicle_Type
             modelBuilder.Entity<Vehicle>()
                 .HasOne<VehicleType>(v => v.Type)
-                .WithMany(vm => vm.Vehicles)
+                .WithMany(vt => vt.Vehicles)
                 .HasForeignKey(v => v.VehicleTypeId);
             //Vehicle_Manufacture
             modelBuilder.Entity<Vehicle>()

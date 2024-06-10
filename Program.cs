@@ -113,6 +113,9 @@ builder.Services.AddCors(options =>
 // Declared services
 builder.Services.AddScoped<DBSeeder>();
 builder.Services.AddTransient<AuthService>();
+builder.Services.AddScoped<IVehicleTypeService, VehicleTypeService>();
+builder.Services.AddScoped<IManufactureService, ManufactureService>();
+builder.Services.AddScoped<IVehicleService, VehicleService>();
 
 var app = builder.Build();
 
