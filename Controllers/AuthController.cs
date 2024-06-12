@@ -21,11 +21,12 @@ namespace FleetPulse_BackEndDevelopment.Controllers
         private readonly FleetPulseDbContext _context;
         private readonly IConfiguration _configuration;
 
-        public AuthController(IAuthService authService, IMailService mailService, 
-                              IVerificationCodeService verificationCodeService, 
-                              IPushNotificationService pushNotificationService, 
-                              FleetPulseDbContext context,
-                              IConfiguration configuration)
+        public AuthController(IAuthService authService,
+            IMailService mailService,
+            IVerificationCodeService verificationCodeService,
+            IPushNotificationService pushNotificationService,
+            FleetPulseDbContext context,
+            IConfiguration configuration)
         {
             _authService = authService;
             _mailService = mailService;
@@ -230,7 +231,7 @@ namespace FleetPulse_BackEndDevelopment.Controllers
                         response.Error = "Old password is incorrect";
                         return new JsonResult(response);
                     }
-                    
+
                     var passwordReset = _authService.ResetPassword(user.EmailAddress, model.NewPassword);
 
                     if (passwordReset)
@@ -238,10 +239,12 @@ namespace FleetPulse_BackEndDevelopment.Controllers
                         response.Message = "Password changed successfully";
                         return new JsonResult(response);
                     }
+
                     response.Status = false;
                     response.Error = "Failed to change password";
                     return new JsonResult(response);
                 }
+
                 response.Error = "Invalid model state";
                 return BadRequest(response);
             }
@@ -262,23 +265,23 @@ namespace FleetPulse_BackEndDevelopment.Controllers
                 {
                     return NotFound("User not found");
                 }
-                
+
                 oldUser.FirstName = staff.FirstName;
                 oldUser.LastName = staff.LastName;
                 oldUser.NIC = staff.NIC;
                 oldUser.DateOfBirth = staff.DateOfBirth;
                 oldUser.PhoneNo = staff.PhoneNo;
                 oldUser.EmailAddress = staff.EmailAddress;
-                
+
                 if (string.IsNullOrEmpty(staff.ProfilePicture))
-                { 
+                {
                     oldUser.ProfilePicture = null;
                 }
                 else
                 {
                     oldUser.ProfilePicture = Convert.FromBase64String(staff.ProfilePicture);
                 }
-        
+
                 var result = await _authService.UpdateUserAsync(oldUser);
 
                 if (result)
@@ -295,12 +298,12 @@ namespace FleetPulse_BackEndDevelopment.Controllers
                 return StatusCode(500, $"An error occurred while updating the user: {ex.Message}");
             }
         }
-       
+
         [HttpGet("userProfile")]
         public async Task<ActionResult<StaffDTO>> GetUserByUsernameAsync(string username)
         {
             var user = await _authService.GetUserByUsernameAsync(username);
-    
+
             if (user == null)
                 return NotFound();
 
@@ -320,7 +323,7 @@ namespace FleetPulse_BackEndDevelopment.Controllers
             return Ok(staffDTO);
         }
 
-        
+
         [HttpPost("logout")]
         public IActionResult Logout()
         {
@@ -331,7 +334,7 @@ namespace FleetPulse_BackEndDevelopment.Controllers
             return RedirectToAction("Login");
         }
 
-         [HttpPost("request-password-reset")]
+        [HttpPost("request-password-reset")]
         public async Task<IActionResult> RequestPasswordReset([FromBody] ForgotPasswordDTO model)
         {
             var response = new ApiResponse
@@ -348,7 +351,7 @@ namespace FleetPulse_BackEndDevelopment.Controllers
                     {
                         response.Status = false;
                         response.Message = "Email not found";
-                        return new JsonResult(response);
+                        return BadRequest(response);
                     }
 
                     var resetRequest = new PasswordResetRequest
@@ -366,19 +369,21 @@ namespace FleetPulse_BackEndDevelopment.Controllers
                     var notification = new FCMNotification
                     {
                         NotificationId = Guid.NewGuid().ToString(),
-                        UserId = "6",
+                        UserId = user.UserId.ToString(),
                         Title = "Password Reset Request",
                         Message = $"Password reset requested for {user.UserName}",
-                        Date = DateTime.UtcNow.Date,
+                        Date = DateTime.UtcNow,
                         Time = DateTime.UtcNow.TimeOfDay,
                         Status = false
                     };
 
                     await _pushNotificationService.SaveNotificationAsync(notification);
-                    await _pushNotificationService.SendNotificationAsync(userToken, notification.Title, notification.Message, user.UserName); 
+
+                    await _pushNotificationService.SendNotificationAsync(userToken, notification.Title,
+                        notification.Message, user.UserName);
 
                     response.Message = "Password reset request sent successfully.";
-                    return new JsonResult(response);
+                    return Ok(response);
                 }
                 else
                 {
@@ -386,69 +391,17 @@ namespace FleetPulse_BackEndDevelopment.Controllers
                     return BadRequest(response);
                 }
             }
-            catch (Exception error)
+            catch (Exception ex)
             {
-                return StatusCode(500);
+                response.Status = false;
+                response.Message = $"An error occurred: {ex.Message}";
+                return StatusCode(500, response);
             }
         }
 
         private string GetUserToken(string username)
         {
-            // Fetch the device token for the given username from configuration
             return _configuration["FCMDeviceTokens:" + username];
-        }
-    
-        [HttpGet("password-reset-requests")]
-        public async Task<IActionResult> GetPasswordResetRequests()
-        {
-            var requests = await _context.PasswordResetRequests.Where(r => !r.IsProcessed).ToListAsync();
-            return Ok(requests);
-        }
-
-        [HttpPost("reset-password-admin/{id}")]
-        public async Task<IActionResult> ResetPasswordByAdmin(int id)
-        {
-            var response = new ApiResponse
-            {
-                Status = true
-            };
-
-            try
-            {
-                var resetRequest = await _context.PasswordResetRequests.FindAsync(id);
-                if (resetRequest == null || resetRequest.IsProcessed)
-                {
-                    response.Status = false;
-                    response.Message = "Password reset request not found or already processed.";
-                    return new JsonResult(response);
-                }
-                var newPassword = GenerateNewPassword();
-                var result = await _authService.ResetPasswordAsync(resetRequest.Email, newPassword);
-
-                if (result)
-                {
-                    resetRequest.IsProcessed = true;
-                    await _context.SaveChangesAsync();
-                    response.Message = "Password reset successfully by admin.";
-                    return new JsonResult(response);
-                }
-                else
-                {
-                    response.Status = false;
-                    response.Message = "Failed to reset password.";
-                    return new JsonResult(response);
-                }
-            }
-            catch (Exception error)
-            {
-                return StatusCode(500);
-            }
-        }
-
-        private string GenerateNewPassword()
-        {
-            // Implement password generation logic here
-            return "NewSecurePassword123!";
         }
     }
 }

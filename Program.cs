@@ -10,6 +10,7 @@ using FleetPulse_BackEndDevelopment.Services.Interfaces;
 using FleetPulse_BackEndDevelopment.Configuration;
 using FleetPulse_BackEndDevelopment.Helpers;
 using AutoMapper;
+using FleetPulse_BackEndDevelopment.Utilities;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -98,6 +99,7 @@ void ConfigureServices(IServiceCollection services, IConfiguration configuration
     {
         cfg.AddProfile(new MappingProfiles());
     });
+    
     var mapper = mapperConfig.CreateMapper();
     services.AddSingleton(mapper);
 
@@ -114,6 +116,9 @@ void ConfigureServices(IServiceCollection services, IConfiguration configuration
 
     // Add logging
     services.AddLogging();
+
+    // Initialize Firebase
+    FirebaseInitializer.InitializeFirebase();
 }
 
 void Configure(WebApplication app, IWebHostEnvironment env)

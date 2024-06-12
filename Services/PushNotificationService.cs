@@ -5,7 +5,10 @@ using FleetPulse_BackEndDevelopment.Data;
 using FleetPulse_BackEndDevelopment.Models;
 using FleetPulse_BackEndDevelopment.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
-
+using Microsoft.Extensions.Logging;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace FleetPulse_BackEndDevelopment.Services
 {
@@ -18,9 +21,14 @@ namespace FleetPulse_BackEndDevelopment.Services
         {
             _context = context;
             _logger = logger;
+            InitializeFirebase();
+        }
+
+        private void InitializeFirebase()
+        {
             if (FirebaseApp.DefaultInstance == null)
             {
-                FirebaseApp.Create(new AppOptions()
+                FirebaseApp.Create(new AppOptions
                 {
                     Credential = GoogleCredential.FromFile("config/serviceAccountKey.json"),
                 });
