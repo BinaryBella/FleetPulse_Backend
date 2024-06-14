@@ -42,6 +42,8 @@ namespace FleetPulse_BackEndDevelopment.Services
             return vehicleType;
         }
 
+
+
         public async Task<bool> UpdateVehicleTypeAsync(VehicleType vehicleType)
         {
             try

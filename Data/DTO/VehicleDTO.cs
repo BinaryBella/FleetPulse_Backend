@@ -1,4 +1,7 @@
-﻿namespace FleetPulse_BackEndDevelopment.Data.DTO
+﻿using FleetPulse_BackEndDevelopment.Models;
+using System.ComponentModel.DataAnnotations;
+
+namespace FleetPulse_BackEndDevelopment.Data.DTO
 {
     public class VehicleDTO
     {
