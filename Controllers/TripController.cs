@@ -1,8 +1,10 @@
 ﻿using FleetPulse_BackEndDevelopment.Data.DTO;
 using FleetPulse_BackEndDevelopment.Models;
-using FleetPulse_BackEndDevelopment.Services;
 using FleetPulse_BackEndDevelopment.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace FleetPulse_BackEndDevelopment.Controllers
 {
@@ -18,15 +20,16 @@ namespace FleetPulse_BackEndDevelopment.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<VehicleMaintenanceType>>> GetAllTrips()
+        public async Task<ActionResult<IEnumerable<Trip>>> GetAllTrips()
         {
             var trips = await _tripService.GetAllTripsAsync();
             return Ok(trips);
         }
-        [HttpGet("{tripid}")]
-        public async Task<ActionResult<Trip>> GetTripById(int tripid)
+
+        [HttpGet("{tripId}")]
+        public async Task<ActionResult<Trip>> GetTripById(int tripId)
         {
-            var trip = await _tripService.GetTripByIdAsync(tripid);
+            var trip = await _tripService.GetTripByIdAsync(tripId);
             if (trip == null)
                 return NotFound();
 
@@ -34,7 +37,7 @@ namespace FleetPulse_BackEndDevelopment.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult> AddTripAsync([FromBody] TripDTO tripDTO)
+        public async Task<ActionResult<ApiResponse>> AddTripAsync([FromBody] TripDTO tripDTO)
         {
             var response = new ApiResponse();
             try
@@ -42,21 +45,21 @@ namespace FleetPulse_BackEndDevelopment.Controllers
                 var trip = new Trip
                 {
                     TripId = tripDTO.TripId,
-                Date = tripDTO.Date,
-                StartTime = tripDTO.StartTime,
-                EndTime = tripDTO.EndTime,
-                StartLocation = tripDTO.StartLocation,
-               EndLocation = tripDTO.EndLocation,
-               StartMeterValue = tripDTO.StartMeterValue,
-                EndMeterValue = tripDTO.EndMeterValue,
-                Status = tripDTO.Status
-            };
+                    Date = tripDTO.Date,
+                    StartTime = tripDTO.StartTime,
+                    EndTime = tripDTO.EndTime,
+                    StartLocation = tripDTO.StartLocation,
+                    EndLocation = tripDTO.EndLocation,
+                    StartMeterValue = tripDTO.StartMeterValue,
+                    EndMeterValue = tripDTO.EndMeterValue,
+                    Status = tripDTO.Status
+                };
 
                 var tripExists = _tripService.DoesTripExists(trip.TripId);
                 if (tripExists)
                 {
                     response.Message = "Trip already exists";
-                    return new JsonResult(response);
+                    return Conflict(response);
                 }
 
                 var addedTrip = await _tripService.AddTripAsync(trip);
@@ -65,30 +68,29 @@ namespace FleetPulse_BackEndDevelopment.Controllers
                 {
                     response.Status = true;
                     response.Message = "Added Successfully";
-                    return new JsonResult(response);
+                    return Ok(response);
                 }
                 else
                 {
                     response.Status = false;
                     response.Message = "Failed to add Trip";
+                    return BadRequest(response);
                 }
             }
             catch (Exception ex)
             {
                 response.Status = false;
                 response.Message = $"An error occurred: {ex.Message}";
+                return StatusCode(500, response);
             }
-
-            return new JsonResult(response);
         }
 
-
-        [HttpPut("UpdateTrip")]
-        public async Task<IActionResult> UpdateTrip([FromBody] TripDTO trip)
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateTrip(int id, [FromBody] TripDTO tripDTO)
         {
             try
             {
-                var existingTrip = await _tripService.IsTripExist(trip.Id);
+                var existingTrip = await _tripService.IsTripExist(id);
 
                 if (!existingTrip)
                 {
@@ -97,19 +99,19 @@ namespace FleetPulse_BackEndDevelopment.Controllers
 
                 var trip = new Trip
                 {
-                   
-                    TripId = trip.TripId,
-                    Date = trip.Date,
-                    StartTime = trip.StartTime,
-                    EndTime = trip.EndTime,
-                    StartLocation = trip.StartLocation,
-                    EndLocation = trip.EndLocation,
-                    StartMeterValue = trip.StartMeterValue,
-                    EndMeterValue = trip.EndMeterValue,
-                    Status = trip.Status
+                    TripId = tripDTO.TripId,
+                    Date = tripDTO.Date,
+                    StartTime = tripDTO.StartTime,
+                    EndTime = tripDTO.EndTime,
+                    StartLocation = tripDTO.StartLocation,
+                    EndLocation = tripDTO.EndLocation,
+                    StartMeterValue = tripDTO.StartMeterValue,
+                    EndMeterValue = tripDTO.EndMeterValue,
+                    Status = tripDTO.Status
                 };
+
                 var result = await _tripService.UpdateTripAsync(trip);
-                return new JsonResult(result);
+                return Ok(result);
             }
             catch (Exception ex)
             {
@@ -132,12 +134,12 @@ namespace FleetPulse_BackEndDevelopment.Controllers
         }
 
         [HttpPut("{id}/activate")]
-        public async Task<IActionResult> ActivateTripType(int id)
+        public async Task<IActionResult> ActivateTrip(int id)
         {
             try
             {
                 await _tripService.ActivateTripAsync(id);
-                return NoContent();
+                return Ok("Trip activated successfully.");
             }
             catch (KeyNotFoundException ex)
             {
@@ -145,4 +147,4 @@ namespace FleetPulse_BackEndDevelopment.Controllers
             }
         }
     }
-
+}

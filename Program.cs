@@ -116,6 +116,7 @@ builder.Services.AddTransient<AuthService>();
 builder.Services.AddScoped<IVehicleTypeService, VehicleTypeService>();
 builder.Services.AddScoped<IManufactureService, ManufactureService>();
 builder.Services.AddScoped<IVehicleService, VehicleService>();
+builder.Services.AddScoped<ITripService, TripService>();
 
 var app = builder.Build();
 

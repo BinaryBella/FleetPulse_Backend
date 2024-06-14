@@ -2,6 +2,10 @@
 using FleetPulse_BackEndDevelopment.Models;
 using FleetPulse_BackEndDevelopment.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace FleetPulse_BackEndDevelopment.Services
 {
@@ -14,42 +18,38 @@ namespace FleetPulse_BackEndDevelopment.Services
             _context = context;
         }
 
-        public async Task<IEnumerable<Trip?>> GetAllTripsAsync()
+        public async Task<IEnumerable<Trip>> GetAllTripsAsync()
         {
             return await _context.Trip.ToListAsync();
         }
 
-        public async Task<Trip?> GetTripByIdAsync(int id)
+        public async Task<Trip> GetTripByIdAsync(int id)
         {
             return await _context.Trip.FindAsync(id);
         }
 
-        public Task<bool> IsTripExist(int id)
+        public async Task<bool> IsTripExist(int id)
         {
-            return Task.FromResult(_context.Trip.Any(x => x.Trip == id));
+            return await _context.Trip.AnyAsync(x => x.TripId == id.ToString());
         }
 
-        public bool DoesTripExists(string trip)
+        public bool DoesTripExists(string tripId)
         {
-            var trip = _context.Trip.FirstOrDefault(x => x.Trip == trip);
-            return trip != null;
+            return _context.Trip.Any(x => x.TripId == tripId);
         }
 
-        public async Task<Trip?> AddTripAsync(Trip? trip)
+        public async Task<Trip> AddTripAsync(Trip trip)
         {
             _context.Trip.Add(trip);
             await _context.SaveChangesAsync();
             return trip;
         }
 
-
-
         public async Task<bool> UpdateTripAsync(Trip trip)
         {
             try
             {
-                var result = _context.Trip.Update(trip);
-                result.State = EntityState.Modified;
+                _context.Trip.Update(trip);
                 await _context.SaveChangesAsync();
                 return true;
             }
@@ -58,6 +58,7 @@ namespace FleetPulse_BackEndDevelopment.Services
                 return false;
             }
         }
+
         public async Task DeactivateTripAsync(int tripId)
         {
             var trip = await _context.Trip.FindAsync(tripId);
@@ -78,7 +79,7 @@ namespace FleetPulse_BackEndDevelopment.Services
 
         private bool TripIsActive(Trip trip)
         {
-            return _context.Trip.Any(vt => vt.TripId == trip.TripId);
+            return _context.Trip.Any(vt => vt.TripId == trip.TripId && vt.Status);
         }
 
         public async Task ActivateTripAsync(int id)
