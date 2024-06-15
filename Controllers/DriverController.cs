@@ -1,10 +1,11 @@
-﻿/*using System.Collections.Generic;
-using System.Threading.Tasks;
-using FleetPulse_BackEndDevelopment.Data;
-using FleetPulse_BackEndDevelopment.Data.DTO;
+﻿using FleetPulse_BackEndDevelopment.Data.DTO;
+using FleetPulse_BackEndDevelopment.DTOs;
 using FleetPulse_BackEndDevelopment.Models;
-using FleetPulse_BackEndDevelopment.Services;
+using FleetPulse_BackEndDevelopment.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace FleetPulse_BackEndDevelopment.Controllers
 {
@@ -12,73 +13,184 @@ namespace FleetPulse_BackEndDevelopment.Controllers
     [ApiController]
     public class DriverController : ControllerBase
     {
-        private readonly DriverService _driverService;
-        private readonly FleetPulseDbContext _context;
-        private object driver;
+        private readonly IDriverService _driverService;
 
-        public DriverController(DriverService DriverService, FleetPulseDbContext context)
+        public DriverController(IDriverService driverService)
         {
             _driverService = driverService;
-            _context = context;
-
         }
 
-        // POST: api/Driver
-        [HttpPost("for driver")]
-        public async Task<ActionResult<DriverDTO>> PostDriver(DriverDTO Driver)
-        {
-            Driver model = new()
-            {
-                DriverId = driver.DriverId,
-                DriverFirstName = driver.DriverFirstName,
-                DriverLastName = driver.DriverLastName,
-                DoB = driver.DoB,
-                DriverNIC = driver.DriverNIC,
-                EmialAddress = driver.EmailAddress,
-                PhoneNo = driver.PhoneNo,
-                EmergencyContact = driver.EmergencyContact,
-                BloodGroup = driver.BloodGroup,
-                Status = driver.Status,
-            };
-            _context.Drivers.Add(model);
-            _context.SaveChanges();
-            return Ok(model);
-        }
-
-        // GET: api/Driver
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<DriverDTO>>> GetDriver()
+        public async Task<ActionResult<IEnumerable<DriverDTO>>> GetAllDrivers()
         {
-            var drivers = await _driverService.GetAllDrivers();
-            return Ok(drivers);
-        }
-        // PUT: api/Vehicle/5
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutDriver(int id, DriverDTO driver)
-        {
-            var updatedDriver = await _driverService.UpdateDriver(id, driver);
-
-            if (updatedDriver == null)
+            try
             {
-                return NotFound();
+                var drivers = await _driverService.GetAllDriversAsync();
+                var driverDTOs = new List<DriverDTO>();
+                foreach (var driver in drivers)
+                {
+                    driverDTOs.Add(MapUserToDTO(driver)); // Assuming a mapping method exists
+                }
+                return Ok(driverDTOs);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An error occurred while retrieving drivers: {ex.Message}");
+            }
+        }
+
+        [HttpGet("{id}")]
+        public async Task<ActionResult<DriverDTO>> GetDriverById(int id)
+        {
+            try
+            {
+                var driver = await _driverService.GetDriverByIdAsync(id);
+                if (driver == null)
+                    return NotFound();
+
+                var driverDTO = MapUserToDTO(driver); // Assuming a mapping method exists
+                return Ok(driverDTO);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An error occurred while retrieving the driver: {ex.Message}");
+            }
+        }
+
+        [HttpPost]
+        public async Task<ActionResult<ApiResponse>> AddDriverAsync([FromBody] DriverDTO driverDto)
+        {
+            var response = new ApiResponse();
+            try
+            {
+                var user = new User // Use User entity instead of Driver if it represents your driver entity
+                {
+                    FirstName = driverDto.FirstName,
+                    LastName = driverDto.LastName,
+                    DateOfBirth = driverDto.DateOfBirth,
+                    NIC = driverDto.NIC,
+                    DriverLicenseNo = driverDto.DriverLicenseNo,
+                    LicenseExpiryDate = driverDto.LicenseExpiryDate,
+                    EmailAddress = driverDto.EmailAddress,
+                    PhoneNo = driverDto.PhoneNo,
+                    EmergencyContact = driverDto.EmergencyContact,
+                    BloodGroup = driverDto.BloodGroup,
+                    Status = driverDto.Status,
+                };
+
+                var driverExists = await _driverService.IsDriverExist(user.UserId); // Assuming UserId exists on User entity
+                if (driverExists)
+                {
+                    response.Message = "Driver already exists";
+                    return new JsonResult(response);
+                }
+
+                var addedDriver = await _driverService.AddDriverAsync(user); // Assuming AddDriverAsync method expects User entity
+
+                if (addedDriver != null)
+                {
+                    response.Status = true;
+                    response.Message = "Driver added successfully";
+                    return new JsonResult(response);
+                }
+                else
+                {
+                    response.Status = false;
+                    response.Message = "Failed to add Driver";
+                }
+            }
+            catch (Exception ex)
+            {
+                response.Status = false;
+                response.Message = $"An error occurred: {ex.Message}";
             }
 
-            return Ok();
+            return new JsonResult(response);
         }
 
-        // DELETE: api/Driver/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteDriver(int id)
+        [HttpPut("UpdateDriver")]
+        public async Task<IActionResult> UpdateDriver([FromBody] DriverDTO driverDto)
         {
-            var result = await _driverService.DeleteDriverAsync(id);
-
-            if (!result)
+            try
             {
-                return NotFound();
-            }
+                var existingDriver = await _driverService.IsDriverExist(driverDto.UserId); // Assuming UserId exists on DriverDTO
 
-            return NoContent();
+                if (!existingDriver)
+                {
+                    return NotFound("Driver with Id not found");
+                }
+
+                var user = new User
+                {
+                    UserId = driverDto.UserId, // Assuming UserId exists on User entity
+                    FirstName = driverDto.FirstName,
+                    LastName = driverDto.LastName,
+                    DateOfBirth = driverDto.DateOfBirth,
+                    NIC = driverDto.NIC,
+                    DriverLicenseNo = driverDto.DriverLicenseNo,
+                    LicenseExpiryDate = driverDto.LicenseExpiryDate,
+                    EmailAddress = driverDto.EmailAddress,
+                    PhoneNo = driverDto.PhoneNo,
+                    EmergencyContact = driverDto.EmergencyContact,
+                    BloodGroup = driverDto.BloodGroup,
+                    Status = driverDto.Status,
+                };
+
+                var result = await _driverService.UpdateDriverAsync(user); // Assuming UpdateDriverAsync method expects User entity
+                return new JsonResult(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An error occurred while updating the driver: {ex.Message}");
+            }
+        }
+
+        [HttpPut("{id}/deactivate")]
+        public async Task<IActionResult> DeactivateDriver(int id)
+        {
+            try
+            {
+                await _driverService.DeactivateDriverAsync(id);
+                return Ok("Driver deactivated successfully.");
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPut("{id}/activate")]
+        public async Task<IActionResult> ActivateDriver(int id)
+        {
+            try
+            {
+                await _driverService.ActivateDriverAsync(id);
+                return NoContent();
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
+
+   
+        private DriverDTO MapUserToDTO(User user)
+        {
+            return new DriverDTO
+            {
+                UserId = user.UserId,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                DateOfBirth = user.DateOfBirth,
+                NIC = user.NIC,
+                DriverLicenseNo = user.DriverLicenseNo,
+                LicenseExpiryDate = user.LicenseExpiryDate,
+                EmailAddress = user.EmailAddress,
+                PhoneNo = user.PhoneNo,
+                EmergencyContact = user.EmergencyContact,
+                BloodGroup = user.BloodGroup,
+                Status = user.Status,
+            };
         }
     }
 }
-*/

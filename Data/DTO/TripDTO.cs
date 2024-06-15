@@ -1,4 +1,5 @@
-﻿using System;
+﻿using FleetPulse_BackEndDevelopment.Models;
+using System.ComponentModel.DataAnnotations;
 
 namespace FleetPulse_BackEndDevelopment.Data.DTO
 {

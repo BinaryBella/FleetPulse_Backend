@@ -117,6 +117,9 @@ builder.Services.AddScoped<IVehicleTypeService, VehicleTypeService>();
 builder.Services.AddScoped<IManufactureService, ManufactureService>();
 builder.Services.AddScoped<IVehicleService, VehicleService>();
 builder.Services.AddScoped<ITripService, TripService>();
+builder.Services.AddScoped<IDriverService, DriverService>();
+builder.Services.AddScoped<IHelperService, HelperService>();
+builder.Services.AddScoped<IStaffService, StaffService>();
 
 var app = builder.Build();
 
