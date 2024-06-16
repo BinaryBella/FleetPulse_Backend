@@ -23,11 +23,8 @@ namespace FleetPulse_BackEndDevelopment.Data
         public DbSet<TripUser> TripUsers { get; set; }
         public DbSet<User> Users { get; set; }
         public DbSet<VerificationCode> VerificationCodes { get; set; }
-
         public DbSet<FCMNotification> FCMNotification { get; set; }
-
         public DbSet<PasswordResetRequest> PasswordResetRequests { get; set; }
-
         
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
