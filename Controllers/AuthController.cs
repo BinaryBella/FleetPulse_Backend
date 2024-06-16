@@ -1,14 +1,13 @@
+using FleetPulse_BackEndDevelopment.Configuration;
 using FleetPulse_BackEndDevelopment.Data;
 using FleetPulse_BackEndDevelopment.Data.DTO;
 using FleetPulse_BackEndDevelopment.Models;
-using FleetPulse_BackEndDevelopment.Services;
 using FleetPulse_BackEndDevelopment.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;  
+using Microsoft.Extensions.Options;
 
 namespace FleetPulse_BackEndDevelopment.Controllers
 {
@@ -18,26 +17,33 @@ namespace FleetPulse_BackEndDevelopment.Controllers
     {
         private readonly IAuthService _authService;
         private readonly IMailService _mailService;
+        private readonly IEmailService _emailService;
         private readonly IVerificationCodeService _verificationCodeService;
         private readonly IPushNotificationService _pushNotificationService;
         private readonly FleetPulseDbContext _context;
         private readonly IConfiguration _configuration;
         private readonly ILogger<AuthController> _logger;
+        private readonly MailSettings _mailSettings;
+
         public AuthController(IAuthService authService,
             IMailService mailService,
+            IEmailService emailService,
             IVerificationCodeService verificationCodeService,
             IPushNotificationService pushNotificationService,
             FleetPulseDbContext context,
             IConfiguration configuration,
-            ILogger<AuthController> logger)
+            ILogger<AuthController> logger,
+            IOptions<MailSettings> mailSettings)
         {
             _authService = authService;
             _mailService = mailService;
+            _emailService = emailService;
             _verificationCodeService = verificationCodeService;
             _pushNotificationService = pushNotificationService;
             _context = context;
             _logger = logger;
             _configuration = configuration;
+            _mailSettings = mailSettings.Value;
         }
 
         [HttpPost("login")]
@@ -80,92 +86,92 @@ namespace FleetPulse_BackEndDevelopment.Controllers
             }
             catch (Exception error)
             {
+                _logger.LogError(error, "An error occurred while processing the login request: {Message}", error.Message);
                 return StatusCode(500);
             }
         }
 
-       [AllowAnonymous]
-    [HttpPost("forgot-password")]
-    public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordDTO model)
-    {
-        var response = new ApiResponse
+        [AllowAnonymous]
+        [HttpPost("forgot-password")]
+        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordDTO model)
         {
-            Status = true
-        };
-
-        try
-        {
-            if (ModelState.IsValid)
+            var response = new ApiResponse
             {
-                var emailExists = _authService.DoesEmailExists(model.Email);
+                Status = true
+            };
 
-                if (!emailExists)
+            try
+            {
+                if (ModelState.IsValid)
                 {
-                    response.Status = false;
-                    response.Message = "Email not found";
+                    var emailExists = _authService.DoesEmailExists(model.Email);
+
+                    if (!emailExists)
+                    {
+                        response.Status = false;
+                        response.Message = "Email not found";
+                        return new JsonResult(response);
+                    }
+
+                    var verificationCode = await _verificationCodeService.GenerateVerificationCode(model.Email);
+                    var mailRequest = new MailRequest
+                    {
+                        Subject = "Password Reset Verification",
+                        Body = verificationCode.Code,
+                        ToEmail = model.Email
+                    };
+
+                    await _mailService.SendEmailAsync(mailRequest);
+
+                    response.Message = "Verification code sent successfully";
                     return new JsonResult(response);
                 }
-
-                var verificationCode = await _verificationCodeService.GenerateVerificationCode(model.Email);
-                var mailRequest = new MailRequest
+                else
                 {
-                    Subject = "Password Reset Verification",
-                    Body = verificationCode.Code,
-                    ToEmail = model.Email
-                };
+                    response.Message = "Invalid model state";
+                    return BadRequest(response);
+                }
+            }
+            catch (Exception error)
+            {
+                _logger.LogError(error, "An error occurred while processing the forgot password request: {Message}", error.Message);
 
-                await _mailService.SendEmailAsync(mailRequest);
+                response.Status = false;
+                response.Message = "An error occurred while processing your request";
+                return StatusCode(500, response);
+            }
+        }
 
-                response.Message = "Verification code sent successfully";
+        [AllowAnonymous]
+        [HttpPost("validate-verification-code")]
+        public async Task<IActionResult> ValidateVerificationCode([FromBody] ValidateVerificationCodeRequest request)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var response = new ApiResponse
+            {
+                Status = true
+            };
+
+            bool isValid = await _verificationCodeService.ValidateVerificationCode(request.Email, request.Code);
+
+            if (isValid)
+            {
                 return new JsonResult(response);
             }
             else
             {
-                response.Message = "Invalid model state";
+                response.Status = false;
+                response.Error = "Invalid Data";
                 return BadRequest(response);
             }
         }
-        catch (Exception error)
-        {
-            _logger.LogError(error, "An error occurred while processing the forgot password request: {Message}", error.Message); // Log error
-
-            response.Status = false;
-            response.Message = "An error occurred while processing your request";
-            return StatusCode(500, response);
-        }
-    }
-
-    [AllowAnonymous]
-    [HttpPost("validate-verification-code")]
-    public async Task<IActionResult> ValidateVerificationCode([FromBody] ValidateVerificationCodeRequest request)
-    {
-        if (!ModelState.IsValid)
-        {
-            return BadRequest(ModelState);
-        }
-
-        var response = new ApiResponse
-        {
-            Status = true
-        };
-
-        bool isValid = await _verificationCodeService.ValidateVerificationCode(request.Email, request.Code);
-
-        if (isValid)
-        {
-            return new JsonResult(response);
-        }
-        else
-        {
-            response.Status = false;
-            response.Error = "Invalid Data";
-            return BadRequest(response);
-        }
-    }
-
 
         [HttpPost("reset-password")]
-        public IActionResult ResetPassword([FromBody] ResetPasswordDTO model)
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDTO model)
         {
             var response = new ApiResponse
             {
@@ -190,6 +196,17 @@ namespace FleetPulse_BackEndDevelopment.Controllers
                     if (passwordReset)
                     {
                         response.Message = "Password reset successfully";
+
+                        // Send email notification
+                        var mailRequest = new MailRequest
+                        {
+                            ToEmail = model.Email,
+                            Subject = "Password Reset Notification",
+                            Body = model.NewPassword
+                        };
+
+                        await _emailService.SendEmailAsync(mailRequest);
+
                         return new JsonResult(response);
                     }
                     else
@@ -207,7 +224,8 @@ namespace FleetPulse_BackEndDevelopment.Controllers
             }
             catch (Exception error)
             {
-                return StatusCode(500);
+                _logger.LogError(error, "An error occurred while processing the reset password request: {Message}", error.Message);
+                return StatusCode(500, "An error occurred while processing your request");
             }
         }
 
@@ -259,7 +277,8 @@ namespace FleetPulse_BackEndDevelopment.Controllers
             }
             catch (Exception error)
             {
-                return StatusCode(500);
+                _logger.LogError(error, "An error occurred while processing the change password request: {Message}", error.Message);
+                return StatusCode(500, "An error occurred while processing your request");
             }
         }
 
@@ -304,10 +323,11 @@ namespace FleetPulse_BackEndDevelopment.Controllers
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "An error occurred while updating the user: {Message}", ex.Message);
                 return StatusCode(500, $"An error occurred while updating the user: {ex.Message}");
             }
         }
-        
+
         [HttpGet("userProfile")]
         public async Task<ActionResult<StaffDTO>> GetUserByUsernameAsync(string username)
         {
@@ -332,7 +352,6 @@ namespace FleetPulse_BackEndDevelopment.Controllers
             return Ok(staffDTO);
         }
 
-
         [HttpPost("logout")]
         public IActionResult Logout()
         {
@@ -341,77 +360,6 @@ namespace FleetPulse_BackEndDevelopment.Controllers
             Response.Cookies.Delete("localStorageKey");
 
             return RedirectToAction("Login");
-        }
-
-        [Authorize(Roles = "Admin")]
-        [HttpPost("request-password-reset")]
-        public async Task<IActionResult> RequestPasswordReset([FromBody] ForgotPasswordDTO model)
-        {
-            var response = new ApiResponse
-            {
-                Status = true
-            };
-
-            try
-            {
-                if (ModelState.IsValid)
-                {
-                    var user = _context.Users.FirstOrDefault(u => u.EmailAddress == model.Email);
-                    if (user == null)
-                    {
-                        response.Status = false;
-                        response.Message = "Email not found";
-                        return BadRequest(response);
-                    }
-
-                    var resetRequest = new PasswordResetRequest
-                    {
-                        Email = model.Email,
-                        RequestedAt = DateTime.UtcNow,
-                        IsProcessed = false
-                    };
-
-                    _context.PasswordResetRequests.Add(resetRequest);
-                    await _context.SaveChangesAsync();
-
-                    var userToken = GetUserToken(user.UserName);
-
-                    var notification = new FCMNotification
-                    {
-                        NotificationId = Guid.NewGuid().ToString(),
-                        UserId = user.UserId.ToString(),
-                        Title = "Password Reset Request",
-                        Message = $"Password reset requested for {user.UserName}",
-                        Date = DateTime.UtcNow,
-                        Time = DateTime.UtcNow.TimeOfDay,
-                        Status = false
-                    };
-
-                    await _pushNotificationService.SaveNotificationAsync(notification);
-
-                    await _pushNotificationService.SendNotificationAsync(userToken, notification.Title,
-                        notification.Message, user.UserName);
-
-                    response.Message = "Password reset request sent successfully.";
-                    return Ok(response);
-                }
-                else
-                {
-                    response.Message = "Invalid model state";
-                    return BadRequest(response);
-                }
-            }
-            catch (Exception ex)
-            {
-                response.Status = false;
-                response.Message = $"An error occurred: {ex.Message}";
-                return StatusCode(500, response);
-            }
-        }
-
-        private string GetUserToken(string username)
-        {
-            return _configuration["FCMDeviceTokens:" + username];
         }
     }
 }

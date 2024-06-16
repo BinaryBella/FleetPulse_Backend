@@ -113,6 +113,7 @@ void ConfigureServices(IServiceCollection services, IConfiguration configuration
     services.AddScoped<IVehicleMaintenanceTypeService, VehicleMaintenanceTypeService>();
     services.AddScoped<IFuelRefillService, FuelRefillService>();
     services.AddScoped<IPushNotificationService, PushNotificationService>();
+    services.AddScoped<IEmailService, EmailService>();
 
     // Add logging
     services.AddLogging();
