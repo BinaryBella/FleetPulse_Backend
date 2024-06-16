@@ -15,9 +15,6 @@
         public int ManufactureId { get; set; }
         public Manufacture Manufacturer { get; set; }
         public ICollection<VehicleMaintenance> VehicleMaintenance { get; set; }
-        public ICollection<FuelRefill> FuelRefills { get; set; } 
-        
-        public ICollection<Accident> Accident { get; set; } 
-        public ICollection<Trip> Trip { get; set; }
+        public ICollection<FuelRefill> FuelRefills { get; set; }
     }
 }

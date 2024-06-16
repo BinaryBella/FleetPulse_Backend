@@ -37,7 +37,6 @@ namespace FleetPulse_BackEndDevelopment.Controllers
             return Ok(maintenanceType);
         }
         
-        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<ActionResult> AddVehicleMaintenanceTypeAsync([FromBody] VehicleMaintenanceTypeDTO maintenanceType)
         {
