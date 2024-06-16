@@ -19,4 +19,6 @@ public interface IAuthService
     public Task<User?> GetUserByUsernameAsync(string username);
     Task<User?> AddUserAsync(User? User);
     Task<bool> UpdateUserAsync(User User);
+    Task<bool> ResetPasswordAsync(string email, string newPassword);
+
 }

@@ -73,32 +73,6 @@ public class AuthService : IAuthService
             return userEntity.Entity;
         }
 
-        // public string GenerateJwtToken(string username, string JobTitle)
-        // {
-        //     var issuer = this.configuration["Jwt:Issuer"];
-        //     var audience = this.configuration["Jwt:Audience"];
-        //     var key = Encoding.ASCII.GetBytes(this.configuration["Jwt:Key"]);
-        //     var tokenDescriptor = new SecurityTokenDescriptor
-        //     {
-        //         Subject = new ClaimsIdentity(new[]
-        //         {
-        //                     new Claim("Id", Guid.NewGuid().ToString()),
-        //                     new Claim(JwtRegisteredClaimNames.Sub, username),
-        //                     new Claim(JwtRegisteredClaimNames.Email, username),
-        //                     new Claim(ClaimTypes.Role, JobTitle),
-        //                     new Claim(JwtRegisteredClaimNames.Jti,
-        //                     Guid.NewGuid().ToString())
-        //                 }),
-        //         Expires = DateTime.UtcNow.AddMinutes(5),
-        //         Issuer = issuer,
-        //         Audience = audience,
-        //         SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha512Signature)
-        //     };
-        //     var tokenHandler = new JwtSecurityTokenHandler();
-        //     var token = tokenHandler.CreateToken(tokenDescriptor);
-        //     return tokenHandler.WriteToken(token);
-        // }
-
         public string GenerateJwtToken(string username, string jobTitle)
         {
             var issuer = this.configuration["Jwt:Issuer"];
@@ -204,4 +178,23 @@ public class AuthService : IAuthService
             }
             return false;       
         }
+        
+        public async Task<bool> ResetPasswordAsync(string email, string newPassword)
+        {
+            var user = await GetByEmailAsync(email);
+            if (user != null)
+            {
+                string hashedPassword = BCrypt.Net.BCrypt.HashPassword(newPassword);
+                user.HashedPassword = hashedPassword;
+                await dataContext.SaveChangesAsync();
+                return true;
+            }
+            return false;
+        }
+
+        private async Task<User> GetByEmailAsync(string email)
+        {
+            return await dataContext.Users.FirstOrDefaultAsync(c => c.EmailAddress == email);
+        }
+
 }

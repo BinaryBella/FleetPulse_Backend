@@ -1,19 +1,23 @@
 using FleetPulse_BackEndDevelopment.Configuration;
 using FleetPulse_BackEndDevelopment.Models;
 using FleetPulse_BackEndDevelopment.Services.Interfaces;
-using MailKit.Net.Smtp;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MimeKit;
 using MimeKit.Utils;
+using System;
+using System.IO;
+using System.Threading.Tasks;
+using MailKit.Net.Smtp;
 
 namespace FleetPulse_BackEndDevelopment.Services
 {
-    public class MailService : IMailService
+    public class EmailService : IEmailService
     {
         private readonly MailSettings _mailSettings;
-        private readonly ILogger<MailService> _logger;
+        private readonly ILogger<EmailService> _logger;
 
-        public MailService(IOptions<MailSettings> mailSettings, ILogger<MailService> logger)
+        public EmailService(IOptions<MailSettings> mailSettings, ILogger<EmailService> logger)
         {
             _mailSettings = mailSettings.Value;
             _logger = logger;
@@ -29,8 +33,8 @@ namespace FleetPulse_BackEndDevelopment.Services
             var builder = new BodyBuilder();
 
             // Load the HTML template
-            var templatePath = Path.Combine(Directory.GetCurrentDirectory(), "EmailTemplates", "VerificationEmailTemplate.html");
-            
+            var templatePath = Path.Combine(Directory.GetCurrentDirectory(), "EmailTemplates", "PasswordResetEmailTemplate.html");
+
             if (!File.Exists(templatePath))
             {
                 _logger.LogError("Email template not found: {TemplatePath}", templatePath);
@@ -38,13 +42,16 @@ namespace FleetPulse_BackEndDevelopment.Services
             }
 
             var templateContent = await File.ReadAllTextAsync(templatePath);
-            var emailBody = templateContent.Replace("{{VerificationCode}}", mailRequest.Body);
+            var emailBody = templateContent.Replace("{NewPassword}", mailRequest.Body); // Replace {NewPassword} with actual new password
             builder.HtmlBody = emailBody;
 
             // Attach the logo as a linked resource
             var logoPath = Path.Combine(Directory.GetCurrentDirectory(), "EmailTemplates", "logo.jpg");
-            var image = builder.LinkedResources.Add(logoPath);
-            image.ContentId = MimeUtils.GenerateMessageId();
+            if (File.Exists(logoPath))
+            {
+                var image = builder.LinkedResources.Add(logoPath);
+                image.ContentId = MimeUtils.GenerateMessageId();
+            }
 
             email.Body = builder.ToMessageBody();
 
