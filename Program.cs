@@ -1,21 +1,27 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;
+using Quartz;
 using System.Text;
+using FleetPulse_BackEndDevelopment.Configuration;
 using FleetPulse_BackEndDevelopment.Data;
 using FleetPulse_BackEndDevelopment.Filters;
+using FleetPulse_BackEndDevelopment.Helpers;
+using FleetPulse_BackEndDevelopment.Quartz.Jobs;
 using FleetPulse_BackEndDevelopment.Services;
 using FleetPulse_BackEndDevelopment.Services.Interfaces;
-using FleetPulse_BackEndDevelopment.Configuration;
-using FleetPulse_BackEndDevelopment.Helpers;
-using AutoMapper;
 using FleetPulse_BackEndDevelopment.Utilities;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Configure logging
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
+
 // Add services to the container.
 ConfigureServices(builder.Services, builder.Configuration);
+
+FirebaseInitializer.InitializeFirebase();
 
 var app = builder.Build();
 
@@ -26,32 +32,51 @@ app.Run();
 
 void ConfigureServices(IServiceCollection services, IConfiguration configuration)
 {
+    // Add Quartz.NET
+    services.AddQuartz(q =>
+    {
+        q.UseMicrosoftDependencyInjectionJobFactory();
+
+        var jobKey = new JobKey("SendMaintenanceNotificationJob");
+        q.AddJob<SendMaintenanceNotificationJob>(opts => opts.WithIdentity(jobKey));
+        q.AddTrigger(opts => opts
+            .ForJob(jobKey)
+            .WithIdentity("SendMaintenanceNotificationTrigger")
+            .WithSimpleSchedule(x => x
+                .WithIntervalInSeconds(10)
+                .RepeatForever()));
+    });
+
+    services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
+
     // Add controllers with options
     services.AddControllers(options =>
-        options.SuppressImplicitRequiredAttributeForNonNullableReferenceTypes = true)
-        .AddNewtonsoftJson(options =>
-            options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
+    {
+        options.SuppressImplicitRequiredAttributeForNonNullableReferenceTypes = true;
+    }).AddNewtonsoftJson(options =>
+    {
+        options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+    });
 
     // Add Swagger
-    services.AddEndpointsApiExplorer();
-    services.AddSwaggerGen(option =>
+    services.AddSwaggerGen(options =>
     {
-        option.SwaggerDoc("v1", new OpenApiInfo { Title = "User Authentication", Version = "v1" });
-        option.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+        options.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo { Title = "Your API", Version = "v1" });
+        options.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
         {
-            In = ParameterLocation.Header,
-            Description = "Please enter a valid token",
+            In = Microsoft.OpenApi.Models.ParameterLocation.Header,
+            Description = "Please enter a valid JWT token",
             Name = "Authorization",
-            Type = SecuritySchemeType.Http,
+            Type = Microsoft.OpenApi.Models.SecuritySchemeType.Http,
             BearerFormat = "JWT",
             Scheme = "bearer"
         });
 
-        option.OperationFilter<AuthResponsesOperationFilter>();
-        option.ResolveConflictingActions(apiDescriptions => apiDescriptions.First());
-        option.IgnoreObsoleteActions();
-        option.IgnoreObsoleteProperties();
-        option.CustomSchemaIds(type => type.FullName);
+        options.OperationFilter<AuthResponsesOperationFilter>();
+        options.ResolveConflictingActions(apiDescriptions => apiDescriptions.First());
+        options.IgnoreObsoleteActions();
+        options.IgnoreObsoleteProperties();
+        options.CustomSchemaIds(type => type.FullName);
     });
 
     // Add authentication
@@ -85,25 +110,17 @@ void ConfigureServices(IServiceCollection services, IConfiguration configuration
         });
     });
 
-    // Add Db context
+    // Add DbContext
     services.AddDbContext<FleetPulseDbContext>(options =>
     {
-        options.UseSqlServer(configuration.GetConnectionString("SqlServerConnectionString"), sqlOptions =>
-        {
-            sqlOptions.EnableRetryOnFailure(5, TimeSpan.FromSeconds(10), null);
-        });
+        options.UseSqlServer(configuration.GetConnectionString("SqlServerConnectionString"),
+            sqlOptions => sqlOptions.EnableRetryOnFailure(5, TimeSpan.FromSeconds(10), null));
     });
 
     // Add AutoMapper
-    var mapperConfig = new MapperConfiguration(cfg =>
-    {
-        cfg.AddProfile(new MappingProfiles());
-    });
-    
-    var mapper = mapperConfig.CreateMapper();
-    services.AddSingleton(mapper);
+    services.AddAutoMapper(typeof(MappingProfiles));
 
-    // Register your services
+    // Register services
     services.Configure<MailSettings>(configuration.GetSection("MailSettings"));
     services.AddTransient<IMailService, MailService>();
     services.AddTransient<IVerificationCodeService, VerificationCodeService>();
@@ -114,12 +131,11 @@ void ConfigureServices(IServiceCollection services, IConfiguration configuration
     services.AddScoped<IFuelRefillService, FuelRefillService>();
     services.AddScoped<IPushNotificationService, PushNotificationService>();
     services.AddScoped<IEmailService, EmailService>();
+    services.AddScoped<IVehicleMaintenanceConfigurationService, VehicleMaintenanceConfigurationService>();
+    services.AddScoped<SendMaintenanceNotificationJob>();
 
-    // Add logging
+    // Add logging (if needed)
     services.AddLogging();
-
-    // Initialize Firebase
-    FirebaseInitializer.InitializeFirebase();
 }
 
 void Configure(WebApplication app, IWebHostEnvironment env)

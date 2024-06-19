@@ -1,6 +1,6 @@
 ﻿using FleetPulse_BackEndDevelopment.Data.Config;
 using FleetPulse_BackEndDevelopment.Models;
-using FleetPulse_BackEndDevelopment.Models.Configurations;
+using FleetPulse_BackEndDevelopment.Models.FleetPulse_BackEndDevelopment.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace FleetPulse_BackEndDevelopment.Data
@@ -11,19 +11,14 @@ namespace FleetPulse_BackEndDevelopment.Data
         {
         }
         
-        public DbSet<VehicleModel> VehicleModels { get; set; }
-        public DbSet<VehicleType> VehicleType { get; set; }
-        public DbSet<Manufacture> Manufacture { get; set; }
         public DbSet<FuelRefill> FuelRefills { get; set; }
         public DbSet<Vehicle> Vehicles { get; set; }
-        public DbSet<Accident> Accident { get; set; }
-        public DbSet<Trip> Trip { get; set; }
         public DbSet<VehicleMaintenance> VehicleMaintenances { get; set; }
         public DbSet<VehicleMaintenanceType> VehicleMaintenanceType { get; set; }
-        public DbSet<TripUser> TripUsers { get; set; }
         public DbSet<User> Users { get; set; }
         public DbSet<VerificationCode> VerificationCodes { get; set; }
         public DbSet<FCMNotification> FCMNotification { get; set; }
+        public DbSet<VehicleMaintenanceConfiguration> VehicleMaintenanceConfigurations { get; set; }
         
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -34,11 +29,8 @@ namespace FleetPulse_BackEndDevelopment.Data
             modelBuilder.ApplyConfiguration(new ManufactureConfig());
             modelBuilder.ApplyConfiguration(new FuelRefillConfig());
             modelBuilder.ApplyConfiguration(new VehicleConfig());
-            modelBuilder.ApplyConfiguration(new AccidentConfig());
-            modelBuilder.ApplyConfiguration(new TripConfig());
             modelBuilder.ApplyConfiguration(new VehicleMaintenanceConfig());
             modelBuilder.ApplyConfiguration(new VehicleMaintenanceTypeConfig());
-            modelBuilder.ApplyConfiguration(new TripUserConfig());
             modelBuilder.ApplyConfiguration(new FuelRefillConfig());
             modelBuilder.ApplyConfiguration(new UserConfig());
             modelBuilder.ApplyConfiguration(new VerificationCodeConfig());
@@ -86,38 +78,10 @@ namespace FleetPulse_BackEndDevelopment.Data
             modelBuilder.Entity<User>()
                 .HasKey(u => new { u.UserId });
             
-            // Many-To-Many Relationship
-
-            // TripUser
-            modelBuilder.Entity<TripUser>().HasKey(tu => new { tu.TripId, tu.UserId });
-
-            modelBuilder.Entity<TripUser>()
-                .HasOne<Trip>(tu => tu.Trip)
-                .WithMany(v => v.TripUsers)
-                .HasForeignKey(tu => tu.TripId);
-            
-            modelBuilder.Entity<TripUser>()
-                .HasOne<User>(tu => tu.User)
-                .WithMany(v => v.TripUsers)
-                .HasForeignKey(tu => tu.UserId);
-            
             modelBuilder.Entity<FuelRefill>()
                 .HasOne(f => f.User)
                 .WithMany(u => u.FuelRefills)
                 .HasForeignKey(f => f.UserId);
-            
-            // AccidentUser
-            modelBuilder.Entity<AccidentUser>().HasKey(fru => new { fru.AccidentId, fru.UserId });
-
-            modelBuilder.Entity<AccidentUser>()
-                .HasOne<Accident>(fru => fru.Accident)
-                .WithMany(f => f.AccidentUsers)
-                .HasForeignKey(fru => fru.AccidentId);
-            
-            modelBuilder.Entity<AccidentUser>()
-                .HasOne<User>(fru => fru.User)
-                .WithMany(f => f.AccidentUsers)
-                .HasForeignKey(fru => fru.UserId);
         }
     }
 }

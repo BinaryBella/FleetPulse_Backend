@@ -4,6 +4,7 @@ using FleetPulse_BackEndDevelopment.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 
 namespace FleetPulse_BackEndDevelopment.Controllers
 {
@@ -62,7 +63,6 @@ namespace FleetPulse_BackEndDevelopment.Controllers
             }
             return NoContent();
         }
-
 
         [HttpPut("{id}/deactivate")]
         public async Task<IActionResult> DeactivateFuelRefill(int id)

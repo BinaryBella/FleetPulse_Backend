@@ -30,14 +30,8 @@ namespace FleetPulse_BackEndDevelopment.Data.Config
             builder.Property(u => u.ProfilePicture).HasColumnType("varbinary(max)"); // Adjust type as needed
             builder.Property(u => u.Status).IsRequired();
 
-            // Configure relationships
-            builder.HasMany(u => u.TripUsers)
-                   .WithOne(tu => tu.User)
-                   .HasForeignKey(tu => tu.UserId);
 
-            builder.HasMany(u => u.AccidentUsers)
-                   .WithOne(au => au.User)
-                   .HasForeignKey(au => au.UserId);
+            
         }
     }
 }

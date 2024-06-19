@@ -1,17 +1,16 @@
 using FleetPulse_BackEndDevelopment.Models;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+using FleetPulse_BackEndDevelopment.Models.FleetPulse_BackEndDevelopment.Models;
 
 namespace FleetPulse_BackEndDevelopment.Services.Interfaces
 {
     public interface IPushNotificationService
     {
-        Task SaveNotificationAsync(FCMNotification notification);
+        Task SendNotificationAsync(string fcmDeviceToken, string title, string message);
         Task<List<FCMNotification>> GetAllNotificationsAsync();
         Task MarkNotificationAsReadAsync(string notificationId);
         Task MarkAllAsReadAsync();
         Task DeleteNotificationAsync(string notificationId);
         Task DeleteAllNotificationsAsync();
-        Task SendNotificationAsync(string adminDeviceToken, string notificationTitle, string notificationMessage, string userUserName);
+        Task SendMaintenanceNotificationAsync();
     }
 }
