@@ -2,24 +2,25 @@
 
 namespace FleetPulse_BackEndDevelopment.Models
 {
-    public class FCMNotification
+    using System.ComponentModel.DataAnnotations;
+
+    namespace FleetPulse_BackEndDevelopment.Models
     {
-        [Key]
-        public string NotificationId { get; set; }
-        
-        [Required]
-        public string UserId { get; set; }
-        
-        [Required]
-        public string Title { get; set; }
-        
-        [Required]
-        public string Message { get; set; }
-        
-        public DateTime Date { get; set; }
-        
-        public TimeSpan Time { get; set; }
-        
-        public bool Status { get; set; }
+        public class FCMNotification
+        {
+            [Key] public string NotificationId { get; set; }
+
+            [Required] public string UserId { get; set; }
+
+            [Required] public string Title { get; set; }
+
+            [Required] public string Message { get; set; }
+
+            public DateTime Date { get; set; }
+
+            public TimeSpan Time { get; set; }
+
+            public bool Status { get; set; }
+        }
     }
 }

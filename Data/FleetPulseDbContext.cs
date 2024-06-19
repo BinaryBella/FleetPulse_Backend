@@ -1,5 +1,6 @@
 ﻿using FleetPulse_BackEndDevelopment.Data.Config;
 using FleetPulse_BackEndDevelopment.Models;
+using FleetPulse_BackEndDevelopment.Models.FleetPulse_BackEndDevelopment.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace FleetPulse_BackEndDevelopment.Data
@@ -10,9 +11,6 @@ namespace FleetPulse_BackEndDevelopment.Data
         {
         }
         
-        public DbSet<VehicleModel> VehicleModels { get; set; }
-        public DbSet<VehicleType> VehicleType { get; set; }
-        public DbSet<Manufacture> Manufacture { get; set; }
         public DbSet<FuelRefill> FuelRefills { get; set; }
         public DbSet<Vehicle> Vehicles { get; set; }
         public DbSet<VehicleMaintenance> VehicleMaintenances { get; set; }
@@ -21,7 +19,6 @@ namespace FleetPulse_BackEndDevelopment.Data
         public DbSet<VerificationCode> VerificationCodes { get; set; }
         public DbSet<FCMNotification> FCMNotification { get; set; }
         public DbSet<VehicleMaintenanceConfiguration> VehicleMaintenanceConfigurations { get; set; }
-
         
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

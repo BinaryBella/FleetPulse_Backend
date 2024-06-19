@@ -6,5 +6,5 @@ namespace FleetPulse_BackEndDevelopment.Services.Interfaces;
 public interface IVehicleMaintenanceConfigurationService
 {
     Task<VehicleMaintenanceConfiguration> AddVehicleMaintenanceConfigurationAsync(VehicleMaintenanceConfigurationDTO vehicleMaintenanceConfigurationDto);
-
+    Task<List<VehicleMaintenanceConfiguration>> GetDueMaintenanceTasksAsync();
 }

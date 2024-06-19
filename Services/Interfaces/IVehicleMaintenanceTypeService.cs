@@ -1,6 +1,4 @@
 using FleetPulse_BackEndDevelopment.Models;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace FleetPulse_BackEndDevelopment.Services.Interfaces
 {
@@ -8,11 +6,12 @@ namespace FleetPulse_BackEndDevelopment.Services.Interfaces
     {
         Task<IEnumerable<VehicleMaintenanceType?>> GetAllVehicleMaintenanceTypesAsync();
         Task<VehicleMaintenanceType?> GetVehicleMaintenanceTypeByIdAsync(int id);
-        Task<bool> IsVehicleTypeExist(int id);
+        Task<VehicleMaintenanceType?> AddVehicleMaintenanceTypeAsync(VehicleMaintenanceType? maintenanceType); 
         bool DoesVehicleMaintenanceTypeExists(string vehicleMaintenanceType);
-        Task<VehicleMaintenanceType?> AddVehicleMaintenanceTypeAsync(VehicleMaintenanceType? maintenanceType);
         Task<bool> UpdateVehicleMaintenanceTypeAsync(VehicleMaintenanceType maintenanceType);
         Task DeactivateMaintenanceTypeAsync(int maintenanceTypeId);
+        Task<bool> IsVehicleTypeExist(int id);
         Task ActivateVehicleMaintenanceTypeAsync(int id);
+
     }
 }

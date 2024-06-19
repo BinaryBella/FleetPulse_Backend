@@ -19,7 +19,6 @@ namespace FleetPulse_BackEndDevelopment.Controllers
         private readonly IMailService _mailService;
         private readonly IEmailService _emailService;
         private readonly IVerificationCodeService _verificationCodeService;
-        private readonly IPushNotificationService _pushNotificationService;
         private readonly FleetPulseDbContext _context;
         private readonly IConfiguration _configuration;
         private readonly ILogger<AuthController> _logger;
@@ -29,7 +28,6 @@ namespace FleetPulse_BackEndDevelopment.Controllers
             IMailService mailService,
             IEmailService emailService,
             IVerificationCodeService verificationCodeService,
-            IPushNotificationService pushNotificationService,
             FleetPulseDbContext context,
             IConfiguration configuration,
             ILogger<AuthController> logger,
@@ -39,57 +37,124 @@ namespace FleetPulse_BackEndDevelopment.Controllers
             _mailService = mailService;
             _emailService = emailService;
             _verificationCodeService = verificationCodeService;
-            _pushNotificationService = pushNotificationService;
             _context = context;
             _logger = logger;
             _configuration = configuration;
             _mailSettings = mailSettings.Value;
         }
 
+        // [HttpPost("login")]
+        // public ActionResult<ApiResponse> Login(LoginDTO userModel)
+        // {
+        //     var response = new ApiResponse
+        //     {
+        //         Status = true
+        //     };
+        //     try
+        //     {
+        //         if (ModelState.IsValid)
+        //         {
+        //             var user = _authService.IsAuthenticated(userModel.Username, userModel.Password);
+        //
+        //             if (user != null)
+        //             {
+        //                 if (user.JobTitle == "Admin" || user.JobTitle == "Staff")
+        //                 {
+        //                     var token = _authService.GenerateJwtToken(user.UserName, user.JobTitle);
+        //                     response.Data = new { token, user.JobTitle };
+        //                     return new JsonResult(response);
+        //                 }
+        //                 else
+        //                 {
+        //                     response.Status = false;
+        //                     response.Message = "Unauthorized: Only Admin or Staff can login";
+        //                     return new JsonResult(response);
+        //                 }
+        //             }
+        //
+        //             response.Status = false;
+        //             response.Message = "Invalid username or password";
+        //             return new JsonResult(response);
+        //         }
+        //
+        //         response.Status = false;
+        //         response.Error = "Invalid Data";
+        //         return BadRequest(response);
+        //     }
+        //     catch (Exception error)
+        //     {
+        //         _logger.LogError(error, "An error occurred while processing the login request: {Message}", error.Message);
+        //         return StatusCode(500);
+        //     }
+        // }
+        
         [HttpPost("login")]
-        public ActionResult<ApiResponse> Login(LoginDTO userModel)
+public ActionResult<ApiResponse> Login([FromBody] LoginDTO userModel)
+{
+    var response = new ApiResponse
+    {
+        Status = true
+    };
+
+    try
+    {
+        if (!ModelState.IsValid)
         {
-            var response = new ApiResponse
+            response.Status = false;
+            response.Error = "Invalid Data";
+            return BadRequest(response);
+        }
+
+        var user = _authService.IsAuthenticated(userModel.Username, userModel.Password);
+
+        if (user != null)
+        {
+            string[] validJobTitles;
+            string errorMessage;
+
+            if (user.JobTitle == "Admin" || user.JobTitle == "Staff")
             {
-                Status = true
-            };
-            try
-            {
-                if (ModelState.IsValid)
-                {
-                    var user = _authService.IsAuthenticated(userModel.Username, userModel.Password);
-
-                    if (user != null)
-                    {
-                        if (user.JobTitle == "Admin" || user.JobTitle == "Staff")
-                        {
-                            var token = _authService.GenerateJwtToken(user.UserName, user.JobTitle);
-                            response.Data = new { token, user.JobTitle };
-                            return new JsonResult(response);
-                        }
-                        else
-                        {
-                            response.Status = false;
-                            response.Message = "Unauthorized: Only Admin or Staff can login";
-                            return new JsonResult(response);
-                        }
-                    }
-
-                    response.Status = false;
-                    response.Message = "Invalid username or password";
-                    return new JsonResult(response);
-                }
-
-                response.Status = false;
-                response.Error = "Invalid Data";
-                return BadRequest(response);
+                validJobTitles = new[] { "Admin", "Staff" };
+                errorMessage = "Unauthorized: Only Admin or Staff can login";
             }
-            catch (Exception error)
+            else if (user.JobTitle == "Driver" || user.JobTitle == "Helper")
             {
-                _logger.LogError(error, "An error occurred while processing the login request: {Message}", error.Message);
-                return StatusCode(500);
+                validJobTitles = new[] { "Driver", "Helper" };
+                errorMessage = "Unauthorized: Only Driver or Helper can login";
+            }
+            else
+            {
+                response.Status = false;
+                response.Message = "Unauthorized: Your job title does not have access to this endpoint";
+                return new JsonResult(response);
+            }
+
+            if (validJobTitles.Contains(user.JobTitle))
+            {
+                var token = _authService.GenerateJwtToken(user.UserName, user.JobTitle);
+                response.Data = new { token, user.JobTitle };
+                return new JsonResult(response);
+            }
+            else
+            {
+                response.Status = false;
+                response.Message = errorMessage;
+                return new JsonResult(response);
             }
         }
+
+        response.Status = false;
+        response.Message = "Invalid username or password";
+        return new JsonResult(response);
+    }
+    catch (Exception error)
+    {
+        _logger.LogError(error, "An error occurred while processing the login request: {Message}", error.Message);
+        response.Status = false;
+        response.Error = "An internal error occurred";
+        return StatusCode(500, response);
+    }
+}
 
         [AllowAnonymous]
         [HttpPost("forgot-password")]
