@@ -43,7 +43,7 @@ void ConfigureServices(IServiceCollection services, IConfiguration configuration
             .ForJob(jobKey)
             .WithIdentity("SendMaintenanceNotificationTrigger")
             .WithSimpleSchedule(x => x
-                .WithIntervalInSeconds(10)
+                .WithIntervalInSeconds(10) // Runs every 10 seconds for testing purposes
                 .RepeatForever()));
     });
 

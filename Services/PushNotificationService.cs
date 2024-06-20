@@ -79,19 +79,19 @@ namespace FleetPulse_BackEndDevelopment.Services
         public async Task SendMaintenanceNotificationAsync()
         {
             var dueTasks = await _vehicleMaintenanceConfigurationService.GetDueMaintenanceTasksAsync();
-
+        
             if (dueTasks == null || dueTasks.Count == 0)
             {
                 _logger.LogInformation("No maintenance tasks are due.");
                 return;
             }
-
+        
             var deviceTokens = _configuration.GetSection("FCMDeviceTokens").Get<List<string>>();
-
+        
             foreach (var task in dueTasks)
             {
                 var message = $"Vehicle {task.VehicleId} requires maintenance for {task.VehicleMaintenanceType.TypeName}.";
-
+        
                 foreach (var token in deviceTokens)
                 {
                     await SendNotificationAsync(token, "Maintenance Due", message);
