@@ -11,7 +11,7 @@ namespace FleetPulse_BackEndDevelopment.Utilities
             {
                 FirebaseApp.Create(new AppOptions()
                 {
-                    Credential = GoogleCredential.FromFile("config/serviceAccountKey.json")
+                    Credential = GoogleCredential.FromFile("Configuration/serviceAccountKey.json")
                 });
 
                 Console.WriteLine("Firebase has been initialized.");
