@@ -15,7 +15,7 @@ namespace FleetPulse_BackEndDevelopment.Quartz
         public IJob NewJob(TriggerFiredBundle bundle, IScheduler scheduler)
         {
             var jobType = bundle.JobDetail.JobType;
-            return (IJob)_serviceProvider.GetService(jobType);
+            return (IJob)_serviceProvider.GetService(jobType)!;
         }
 
         public void ReturnJob(IJob job) { }

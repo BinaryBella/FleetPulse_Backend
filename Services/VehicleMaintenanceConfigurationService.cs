@@ -48,14 +48,14 @@ namespace FleetPulse_BackEndDevelopment.Services
         {
             try
             {
-                var allConfigurations = await _context.VehicleMaintenanceConfigurations.ToListAsync();
+                var allConfigurations = await _context.VehicleMaintenanceConfigurations.Include(vmc => vmc.VehicleMaintenanceType).ToListAsync();
 
                 var dueConfigurations = allConfigurations
                     .Where(config => CalculateNextMaintenanceDate(config.LastMaintenanceDate, config.Duration) <=
                                      DateTime.UtcNow)
                     .ToList();
 
-                return dueConfigurations ?? new List<VehicleMaintenanceConfiguration>();
+                return dueConfigurations;
             }
             catch (Exception ex)
             {

@@ -28,9 +28,9 @@ namespace FleetPulse_BackEndDevelopment.Quartz.Jobs
             {
                 var dueTasks = await _vehicleMaintenanceConfigurationService.GetDueMaintenanceTasksAsync();
 
-                if (dueTasks == null || dueTasks.Count == 0)
+                if (dueTasks.Count == 0)
                 {
-                    _logger.LogInformation("No maintenance tasks are due.");
+                    _logger.LogInformation("No maintenance tasks are due kk.");
                     return;
                 }
 
@@ -38,12 +38,6 @@ namespace FleetPulse_BackEndDevelopment.Quartz.Jobs
 
                 foreach (var task in dueTasks)
                 {
-                    if (task.VehicleMaintenanceType == null)
-                    {
-                        _logger.LogWarning($"Vehicle maintenance type is null for task {task.Id}. Skipping notification.");
-                        continue;
-                    }
-
                     var message = $"Vehicle {task.VehicleId} requires maintenance for {task.VehicleMaintenanceType.TypeName}.";
 
                     foreach (var token in deviceTokens)
