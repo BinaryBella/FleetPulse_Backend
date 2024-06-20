@@ -2,6 +2,7 @@
 using FleetPulse_BackEndDevelopment.Models;
 using FleetPulse_BackEndDevelopment.Models.Configurations;
 using Microsoft.EntityFrameworkCore;
+using UserConfig = FleetPulse_BackEndDevelopment.Data.Config.UserConfig;
 
 namespace FleetPulse_BackEndDevelopment.Data
 {

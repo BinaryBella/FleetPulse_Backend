@@ -18,6 +18,7 @@ namespace FleetPulse_BackEndDevelopment.Data.Config
             builder.Property(v => v.LicenseExpireDate).IsRequired();
             builder.Property(v => v.VehicleColor).HasMaxLength(50);
             builder.Property(v => v.Status).HasMaxLength(50);
+
         }
     }
 }

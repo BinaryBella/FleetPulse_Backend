@@ -2,6 +2,8 @@
 using FleetPulse_BackEndDevelopment.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace FleetPulse.Controllers
 {
@@ -15,60 +17,63 @@ namespace FleetPulse.Controllers
         {
             _context = context;
         }
+
         [HttpGet]
         public async Task<IEnumerable<TripUser>> Get()
         {
             return await _context.TripUsers.ToListAsync();
         }
+
         [HttpGet("{userid}")]
         public async Task<IActionResult> Get(int userid)
         {
             if (userid < 1)
                 return BadRequest();
 
-            var TripUser = await _context.TripUsers.FirstOrDefaultAsync(m => m.userid == userid);
-            if (TripUser == null)
+            var tripUser = await _context.TripUsers.FirstOrDefaultAsync(m => m.UserId == userid);
+            if (tripUser == null)
                 return NotFound();
-            return Ok(TripUser);
+            return Ok(tripUser);
         }
 
         [HttpPost]
-        public async Task<IActionResult> Post(TripUser TripUser)
+        public async Task<IActionResult> Post(TripUser tripUser)
         {
-            _context.Add(TripUser);
+            _context.TripUsers.Add(tripUser);
             await _context.SaveChangesAsync();
             return Ok();
         }
+
         [HttpPut]
-        public async Task<IActionResult> Put(TripUser TripUserData)
+        public async Task<IActionResult> Put(TripUser tripUserData)
         {
-            if (TripUserData == null || TripUserData.userid == 0)
+            if (tripUserData == null || tripUserData.UserId == 0)
                 return BadRequest();
 
-            var TripUser = await _context.TripUsers.FindAsync(TripUserData.userid);
-            if (TripUser == null)
+            var tripUser = await _context.TripUsers.FindAsync(tripUserData.UserId);
+            if (tripUser == null)
                 return NotFound();
-            TripUser.UserId = TripUserData.UserId;
-            TripUser.User = TripUserData.User;
-            TripUser.TripId = TripUserData.TripId;
-            TripUser.Trip = TripUserData.Trip;
+
+            tripUser.UserId = tripUserData.UserId;
+            tripUser.User = tripUserData.User;
+            tripUser.TripId = tripUserData.TripId;
+            tripUser.Trip = tripUserData.Trip;
 
             await _context.SaveChangesAsync();
             return Ok();
         }
 
-        [HttpDelete("{tripid}")]
+        [HttpDelete("{userid}")]
         public async Task<IActionResult> Delete(int userid)
         {
             if (userid < 1)
                 return BadRequest();
-            var TripUser = await _context.TripUsers.FindAsync(userid);
-            if (TripUser == null)
+            var tripUser = await _context.TripUsers.FindAsync(userid);
+            if (tripUser == null)
                 return NotFound();
-            _context.TripUsers.Remove(TripUser);
+            _context.TripUsers.Remove(tripUser);
             await _context.SaveChangesAsync();
             return Ok();
-
         }
     }
 }
