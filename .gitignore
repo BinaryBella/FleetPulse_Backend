@@ -364,4 +364,4 @@ FodyWeavers.xsd
 
 .idea/
 
-./Configuration/serviceAccountKey.json
+Configuration/serviceAccountKey.json
