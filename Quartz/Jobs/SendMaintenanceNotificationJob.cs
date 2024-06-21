@@ -1,3 +1,4 @@
+using FleetPulse_BackEndDevelopment.Services;
 using Quartz;
 using FleetPulse_BackEndDevelopment.Services.Interfaces;
 
@@ -38,7 +39,7 @@ namespace FleetPulse_BackEndDevelopment.Quartz.Jobs
 
                 foreach (var task in dueTasks)
                 {
-                    var message = $"Vehicle {task.VehicleId} requires maintenance for {task.VehicleMaintenanceType.TypeName}.";
+                    var message = $"Vehicle {task.VehicleId} requires maintenance for {task.TypeName}.";
 
                     foreach (var token in deviceTokens)
                     {

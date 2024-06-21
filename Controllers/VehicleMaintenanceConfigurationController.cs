@@ -1,5 +1,5 @@
 using FleetPulse_BackEndDevelopment.Data.DTO;
-using FleetPulse_BackEndDevelopment.Services.Interfaces;
+using FleetPulse_BackEndDevelopment.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FleetPulse_BackEndDevelopment.Controllers
@@ -8,30 +8,65 @@ namespace FleetPulse_BackEndDevelopment.Controllers
     [ApiController]
     public class VehicleMaintenanceConfigurationController : ControllerBase
     {
-        private readonly IVehicleMaintenanceConfigurationService _vehicleMaintenanceConfigurationService;
+        private readonly IVehicleMaintenanceConfigurationService _service;
 
-        public VehicleMaintenanceConfigurationController(IVehicleMaintenanceConfigurationService vehicleMaintenanceConfigurationService)
+        public VehicleMaintenanceConfigurationController(IVehicleMaintenanceConfigurationService service)
         {
-            _vehicleMaintenanceConfigurationService = vehicleMaintenanceConfigurationService;
+            _service = service;
         }
 
         [HttpPost]
-        public async Task<IActionResult> AddVehicleMaintenanceConfiguration([FromBody] VehicleMaintenanceConfigurationDTO vehicleMaintenanceConfigurationDto)
+        public async Task<ActionResult<VehicleMaintenanceConfigurationDTO>> Create(VehicleMaintenanceConfigurationDTO dto)
         {
-            if (!ModelState.IsValid)
+            var result = await _service.AddVehicleMaintenanceConfigurationAsync(dto);
+            return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
+        }
+
+        [HttpGet("{id}")]
+        public async Task<ActionResult<VehicleMaintenanceConfigurationDTO>> GetById(int id)
+        {
+            var result = await _service.GetVehicleMaintenanceConfigurationByIdAsync(id);
+            if (result == null)
             {
-                return BadRequest(ModelState);
+                return NotFound();
+            }
+            return Ok(result);
+        }
+
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<VehicleMaintenanceConfigurationDTO>>> GetAll()
+        {
+            var results = await _service.GetAllVehicleMaintenanceConfigurationsAsync();
+            return Ok(results);
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(int id, VehicleMaintenanceConfigurationDTO dto)
+        {
+            if (id != dto.Id)
+            {
+                return BadRequest();
             }
 
-            try
+            var result = await _service.UpdateVehicleMaintenanceConfigurationAsync(dto);
+            if (!result)
             {
-                var result = await _vehicleMaintenanceConfigurationService.AddVehicleMaintenanceConfigurationAsync(vehicleMaintenanceConfigurationDto);
-                return Ok(result);
+                return NotFound();
             }
-            catch (Exception ex)
+
+            return NoContent();
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var result = await _service.DeleteVehicleMaintenanceConfigurationAsync(id);
+            if (!result)
             {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
+                return NotFound();
             }
+
+            return NoContent();
         }
     }
 }

@@ -90,7 +90,7 @@ namespace FleetPulse_BackEndDevelopment.Services
         
             foreach (var task in dueTasks)
             {
-                var message = $"Vehicle {task.VehicleId} requires maintenance for {task.VehicleMaintenanceType.TypeName}.";
+                var message = $"Vehicle {task.VehicleId} requires maintenance for {task.TypeName}.";
         
                 foreach (var token in deviceTokens)
                 {

@@ -1,67 +1,125 @@
 using FleetPulse_BackEndDevelopment.Data;
 using FleetPulse_BackEndDevelopment.Data.DTO;
 using FleetPulse_BackEndDevelopment.Models;
-using FleetPulse_BackEndDevelopment.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace FleetPulse_BackEndDevelopment.Services
 {
     public class VehicleMaintenanceConfigurationService : IVehicleMaintenanceConfigurationService
     {
         private readonly FleetPulseDbContext _context;
-        private readonly ILogger<VehicleMaintenanceConfigurationService> _logger; // Define ILogger
+        private readonly ILogger<VehicleMaintenanceConfigurationService> _logger;
 
         public VehicleMaintenanceConfigurationService(FleetPulseDbContext context, ILogger<VehicleMaintenanceConfigurationService> logger)
         {
             _context = context;
-            _logger = logger; // Inject ILogger instance
+            _logger = logger;
         }
 
-        public async Task<VehicleMaintenanceConfiguration> AddVehicleMaintenanceConfigurationAsync(
-            VehicleMaintenanceConfigurationDTO vehicleMaintenanceConfigurationDto)
+        public async Task<VehicleMaintenanceConfigurationDTO> AddVehicleMaintenanceConfigurationAsync(VehicleMaintenanceConfigurationDTO dto)
         {
-            try
+            var entity = new VehicleMaintenanceConfiguration
             {
-                var vehicleMaintenanceConfiguration = new VehicleMaintenanceConfiguration
+                VehicleId = dto.VehicleId,
+                VehicleRegistrationNo = dto.VehicleRegistrationNo,
+                VehicleMaintenanceTypeId = dto.VehicleMaintenanceTypeId,
+                TypeName = dto.TypeName,
+                Duration = dto.Duration,
+                Status = dto.Status
+            };
+
+            _context.VehicleMaintenanceConfigurations.Add(entity);
+            await _context.SaveChangesAsync();
+            dto.Id = entity.Id;
+            return dto;
+        }
+
+        public async Task<VehicleMaintenanceConfigurationDTO> GetVehicleMaintenanceConfigurationByIdAsync(int id)
+        {
+            var entity = await _context.VehicleMaintenanceConfigurations.FindAsync(id);
+            if (entity == null)
+            {
+                return null;
+            }
+
+            return new VehicleMaintenanceConfigurationDTO
+            {
+                Id = entity.Id,
+                VehicleId = entity.VehicleId,
+                VehicleRegistrationNo = entity.VehicleRegistrationNo,
+                VehicleMaintenanceTypeId = entity.VehicleMaintenanceTypeId,
+                TypeName = entity.TypeName,
+                Duration = entity.Duration,
+                Status = entity.Status
+            };
+        }
+
+        public async Task<IEnumerable<VehicleMaintenanceConfigurationDTO>> GetAllVehicleMaintenanceConfigurationsAsync()
+        {
+            return await _context.VehicleMaintenanceConfigurations
+                .Select(entity => new VehicleMaintenanceConfigurationDTO
                 {
-                    VehicleId = vehicleMaintenanceConfigurationDto.VehicleId,
-                    VehicleRegistrationNo = vehicleMaintenanceConfigurationDto.VehicleRegistrationNo,
-                    VehicleMaintenanceTypeId = vehicleMaintenanceConfigurationDto.VehicleMaintenanceTypeId,
-                    Duration = vehicleMaintenanceConfigurationDto.Duration,
-                    Status = vehicleMaintenanceConfigurationDto.Status,
-                    LastMaintenanceDate = DateTime.UtcNow
-                };
-
-                _context.VehicleMaintenanceConfigurations.Add(vehicleMaintenanceConfiguration);
-                await _context.SaveChangesAsync();
-
-                return vehicleMaintenanceConfiguration;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error adding vehicle maintenance configuration.");
-                throw; // Rethrow the exception to propagate it up
-            }
+                    Id = entity.Id,
+                    VehicleId = entity.VehicleId,
+                    VehicleRegistrationNo = entity.VehicleRegistrationNo,
+                    VehicleMaintenanceTypeId = entity.VehicleMaintenanceTypeId,
+                    TypeName = entity.TypeName,
+                    Duration = entity.Duration,
+                    Status = entity.Status
+                }).ToListAsync();
         }
 
-        public async Task<List<VehicleMaintenanceConfiguration>> GetDueMaintenanceTasksAsync()
+        public async Task<bool> UpdateVehicleMaintenanceConfigurationAsync(VehicleMaintenanceConfigurationDTO dto)
         {
-            try
+            var entity = await _context.VehicleMaintenanceConfigurations.FindAsync(dto.Id);
+            if (entity == null)
             {
-                var allConfigurations = await _context.VehicleMaintenanceConfigurations.Include(vmc => vmc.VehicleMaintenanceType).ToListAsync();
-
-                var dueConfigurations = allConfigurations
-                    .Where(config => CalculateNextMaintenanceDate(config.LastMaintenanceDate, config.Duration) <=
-                                     DateTime.UtcNow)
-                    .ToList();
-
-                return dueConfigurations;
+                return false;
             }
-            catch (Exception ex)
+
+            entity.VehicleId = dto.VehicleId;
+            entity.VehicleRegistrationNo = dto.VehicleRegistrationNo;
+            entity.VehicleMaintenanceTypeId = dto.VehicleMaintenanceTypeId;
+            entity.TypeName = dto.TypeName;
+            entity.Duration = dto.Duration;
+            entity.Status = dto.Status;
+
+            _context.VehicleMaintenanceConfigurations.Update(entity);
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<bool> DeleteVehicleMaintenanceConfigurationAsync(int id)
+        {
+            var entity = await _context.VehicleMaintenanceConfigurations.FindAsync(id);
+            if (entity == null)
             {
-                _logger.LogError(ex, "Error retrieving due maintenance tasks.");
-                throw; // Rethrow the exception to propagate it up
+                return false;
             }
+
+            _context.VehicleMaintenanceConfigurations.Remove(entity);
+            await _context.SaveChangesAsync();
+            return true;
+        }
+    
+        public async Task<List<VehicleMaintenanceConfigurationDTO>> GetDueMaintenanceTasksAsync()
+        {
+            return await _context.VehicleMaintenanceConfigurations
+                .Select(entity => new VehicleMaintenanceConfigurationDTO
+                {
+                    Id = entity.Id,
+                    VehicleId = entity.VehicleId,
+                    VehicleRegistrationNo = entity.VehicleRegistrationNo,
+                    VehicleMaintenanceTypeId = entity.VehicleMaintenanceTypeId,
+                    TypeName = entity.TypeName,
+                    Duration = entity.Duration,
+                    Status = entity.Status
+                }).ToListAsync();
         }
 
         private DateTime CalculateNextMaintenanceDate(DateTime lastMaintenanceDate, string duration)
