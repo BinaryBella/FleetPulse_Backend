@@ -4,6 +4,7 @@ using FleetPulse_BackEndDevelopment.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FleetPulse_BackEndDevelopment.Migrations
 {
     [DbContext(typeof(FleetPulseDbContext))]
-    partial class FleetPulseDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240620133904_maintenanceConfigurationmodeladd")]
+    partial class maintenanceConfigurationmodeladd
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -283,6 +285,8 @@ namespace FleetPulse_BackEndDevelopment.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("VehicleMaintenanceTypeId");
+
                     b.ToTable("VehicleMaintenanceConfigurations");
                 });
 
@@ -464,6 +468,17 @@ namespace FleetPulse_BackEndDevelopment.Migrations
                         .IsRequired();
 
                     b.Navigation("Vehicle");
+
+                    b.Navigation("VehicleMaintenanceType");
+                });
+
+            modelBuilder.Entity("FleetPulse_BackEndDevelopment.Models.VehicleMaintenanceConfiguration", b =>
+                {
+                    b.HasOne("FleetPulse_BackEndDevelopment.Models.VehicleMaintenanceType", "VehicleMaintenanceType")
+                        .WithMany()
+                        .HasForeignKey("VehicleMaintenanceTypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("VehicleMaintenanceType");
                 });
