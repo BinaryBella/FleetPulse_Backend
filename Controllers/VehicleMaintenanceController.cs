@@ -65,40 +65,42 @@ namespace FleetPulse_BackEndDevelopment.Controllers
             }
         }
 
-        // [HttpPut("{id}")]
-        // public async Task<IActionResult> UpdateVehicleMaintenance(int id, [FromBody] VehicleMaintenanceDTO vehicleMaintenance)
-        // {
-        //     var response = new ApiResponse();
-        //     try
-        //     {
-        //         var existingMaintenance = await _maintenanceService.GetVehicleMaintenanceByIdAsync(id);
-        //
-        //         if (existingMaintenance == null)
-        //         {
-        //             return NotFound("Maintenance with Id not found.");
-        //         }
-        //
-        //         existingMaintenance.MaintenanceDate = vehicleMaintenance.MaintenanceDate;
-        //         existingMaintenance.PartsReplaced = vehicleMaintenance.PartsReplaced;
-        //         existingMaintenance.ServiceProvider = vehicleMaintenance.ServiceProvider;
-        //         existingMaintenance.Cost = vehicleMaintenance.Cost;
-        //         existingMaintenance.Status = vehicleMaintenance.Status;
-        //         existingMaintenance.SpecialNotes = vehicleMaintenance.SpecialNotes;
-        //         existingMaintenance.VehicleMaintenanceTypeId = vehicleMaintenance.Id; // Corrected property usage
-        //
-        //         var result = await _maintenanceService.UpdateVehicleMaintenanceAsync(existingMaintenance);
-        //         if (!result)
-        //             return NotFound();
-        //
-        //         return NoContent();
-        //     }
-        //     catch (Exception ex)
-        //     {
-        //         response.Status = false;
-        //         response.Message = $"An error occurred: {ex.Message}";
-        //         return new JsonResult(response);
-        //     }
-        // }
+        [HttpPut("{id}")] // Add this method
+        public async Task<IActionResult> UpdateVehicleMaintenanceAsync(int id,
+            [FromBody] VehicleMaintenanceDTO vehicleMaintenance)
+        {
+            try
+            {
+                var maintenance = new VehicleMaintenance
+                {
+                    MaintenanceDate = vehicleMaintenance.MaintenanceDate,
+                    PartsReplaced = vehicleMaintenance.PartsReplaced,
+                    ServiceProvider = vehicleMaintenance.ServiceProvider,
+                    Cost = vehicleMaintenance.Cost,
+                    Status = vehicleMaintenance.Status,
+                    SpecialNotes = vehicleMaintenance.SpecialNotes,
+                    VehicleId = vehicleMaintenance.VehicleId,
+                    VehicleMaintenanceTypeId = vehicleMaintenance.VehicleMaintenanceTypeId,
+                };
+
+                var updatedMaintenance = await _maintenanceService.UpdateVehicleMaintenanceAsync(id, maintenance);
+
+                if (updatedMaintenance == null)
+                {
+                    return NotFound();
+                }
+
+                return Ok(updatedMaintenance);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
 
         [HttpPut("{id}/deactivate")]
         public async Task<IActionResult> DeactivateMaintenance(int id)

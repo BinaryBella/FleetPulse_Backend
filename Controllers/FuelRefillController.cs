@@ -47,23 +47,18 @@ namespace FleetPulse_BackEndDevelopment.Controllers
             }
             return CreatedAtAction(nameof(GetFuelRefillById), new { id = addedFuelRefill.FuelRefillId }, addedFuelRefill);
         }
-
+        
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateFuelRefill(int id, FuelRefill fuelRefill)
+        public async Task<IActionResult> UpdateFuelRefill(int id, [FromBody] FuelRefillDTO fuelRefillDto)
         {
-            if (id != fuelRefill.FuelRefillId)
+            var updatedFuelRefill = await _fuelRefillService.UpdateFuelRefillAsync(id, fuelRefillDto);
+            if (updatedFuelRefill == null)
             {
-                return BadRequest();
+                return NotFound("Fuel refill not found.");
             }
-
-            var updated = await _fuelRefillService.UpdateFuelRefillAsync(id, fuelRefill);
-            if (!updated)
-            {
-                return NotFound();
-            }
-            return NoContent();
+            return Ok(updatedFuelRefill);
         }
-
+        
         [HttpPut("{id}/deactivate")]
         public async Task<IActionResult> DeactivateFuelRefill(int id)
         {

@@ -75,24 +75,27 @@ namespace FleetPulse_BackEndDevelopment.Services
             return fuelRefill;
         }
         
-        public async Task<bool> UpdateFuelRefillAsync(int fuelRefillId, FuelRefill fuelRefill)
+        public async Task<FuelRefill> UpdateFuelRefillAsync(int id, FuelRefillDTO fuelRefillDto)
         {
-            var existingFuelRefill = await _context.FuelRefills.FindAsync(fuelRefillId);
-            if (existingFuelRefill == null)
-                return false;
+            var fuelRefill = await _context.FuelRefills.FindAsync(id);
+            if (fuelRefill == null)
+            {
+                return null;
+            }
 
-            existingFuelRefill.Date = fuelRefill.Date;
-            existingFuelRefill.Time = fuelRefill.Time;
-            existingFuelRefill.LiterCount = fuelRefill.LiterCount;
-            existingFuelRefill.FType = fuelRefill.FType;
-            existingFuelRefill.Cost = fuelRefill.Cost;
-            existingFuelRefill.Status = fuelRefill.Status;
+            fuelRefill.Date = fuelRefillDto.Date;
+            fuelRefill.Time = fuelRefillDto.Time;
+            fuelRefill.LiterCount = fuelRefillDto.LiterCount;
+            fuelRefill.FType = fuelRefillDto.FType;
+            fuelRefill.Cost = fuelRefillDto.Cost;
+            fuelRefill.Status = fuelRefillDto.Status;
+            fuelRefill.UserId = fuelRefillDto.UserId;
+            fuelRefill.VehicleId = fuelRefillDto.VehicleId;
 
-            _context.FuelRefills.Update(existingFuelRefill);
             await _context.SaveChangesAsync();
-            return true;
+            return fuelRefill;
         }
-
+        
         public async Task DeactivateFuelRefillAsync(int fuelRefillId)
         {
             var fuelRefill = await _context.FuelRefills.FindAsync(fuelRefillId);

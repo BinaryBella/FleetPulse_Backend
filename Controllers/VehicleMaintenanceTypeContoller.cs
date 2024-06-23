@@ -1,8 +1,6 @@
 using FleetPulse_BackEndDevelopment.Data.DTO;
 using FleetPulse_BackEndDevelopment.Models;
-using FleetPulse_BackEndDevelopment.Services;
 using FleetPulse_BackEndDevelopment.Services.Interfaces;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FleetPulse_BackEndDevelopment.Controllers
@@ -15,7 +13,8 @@ namespace FleetPulse_BackEndDevelopment.Controllers
         private readonly IPushNotificationService _pushNotificationService;
         private readonly IConfiguration _configuration;
 
-        public VehicleMaintenanceTypeController(IVehicleMaintenanceTypeService maintenanceTypeService, IPushNotificationService pushNotificationService, IConfiguration configuration)
+        public VehicleMaintenanceTypeController(IVehicleMaintenanceTypeService maintenanceTypeService,
+            IPushNotificationService pushNotificationService, IConfiguration configuration)
         {
             _maintenanceTypeService = maintenanceTypeService;
             _pushNotificationService = pushNotificationService;
@@ -40,24 +39,32 @@ namespace FleetPulse_BackEndDevelopment.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult> AddVehicleMaintenanceTypeAsync([FromBody] VehicleMaintenanceTypeDTO maintenanceType)
+        public async Task<ActionResult> AddVehicleMaintenanceTypeAsync(
+            [FromBody] VehicleMaintenanceTypeDTO maintenanceTypeDto)
         {
             var response = new ApiResponse();
             try
             {
                 var vehicleMaintenanceType = new VehicleMaintenanceType
                 {
-                    TypeName = maintenanceType.TypeName
+                    TypeName = maintenanceTypeDto.TypeName,
+                    Status = maintenanceTypeDto.Status
                 };
 
-                var vehicleMaintenanceTypeExists = _maintenanceTypeService.DoesVehicleMaintenanceTypeExists(maintenanceType.TypeName);
+                // Log the values
+                Console.WriteLine(
+                    $"Received TypeName: {vehicleMaintenanceType.TypeName}, Status: {vehicleMaintenanceType.Status}");
+
+                var vehicleMaintenanceTypeExists =
+                    _maintenanceTypeService.DoesVehicleMaintenanceTypeExists(maintenanceTypeDto.TypeName);
                 if (vehicleMaintenanceTypeExists)
                 {
                     response.Message = "Vehicle Maintenance Type already exists";
                     return new JsonResult(response);
                 }
 
-                var addedMaintenanceType = await _maintenanceTypeService.AddVehicleMaintenanceTypeAsync(vehicleMaintenanceType);
+                var addedMaintenanceType =
+                    await _maintenanceTypeService.AddVehicleMaintenanceTypeAsync(vehicleMaintenanceType);
 
                 if (addedMaintenanceType != null)
                 {
@@ -65,7 +72,7 @@ namespace FleetPulse_BackEndDevelopment.Controllers
                     if (fcmDeviceTokens != null && fcmDeviceTokens.Length > 0)
                     {
                         var title = "New Vehicle Maintenance Type Added";
-                        var message = $"The maintenance type '{maintenanceType.TypeName}' has been added.";
+                        var message = $"The maintenance type '{maintenanceTypeDto.TypeName}' has been added.";
 
                         foreach (var fcmDeviceToken in fcmDeviceTokens)
                         {
@@ -92,9 +99,9 @@ namespace FleetPulse_BackEndDevelopment.Controllers
             return new JsonResult(response);
         }
 
-    
         [HttpPut("UpdateVehicleMaintenanceType")]
-        public async Task<IActionResult> UpdateVehicleMaintenanceType([FromBody] VehicleMaintenanceTypeDTO maintenanceType)
+        public async Task<IActionResult> UpdateVehicleMaintenanceType(
+            [FromBody] VehicleMaintenanceTypeDTO maintenanceType)
         {
             try
             {
@@ -119,7 +126,7 @@ namespace FleetPulse_BackEndDevelopment.Controllers
                 return StatusCode(500, $"An error occurred while updating the maintenance type: {ex.Message}");
             }
         }
-        
+
         [HttpPut("{id}/deactivate")]
         public async Task<IActionResult> DeactivateMaintenanceType(int id)
         {
@@ -133,7 +140,7 @@ namespace FleetPulse_BackEndDevelopment.Controllers
                 return BadRequest(ex.Message);
             }
         }
-        
+
         [HttpPut("{id}/activate")]
         public async Task<IActionResult> ActivateVehicleMaintenanceType(int id)
         {
