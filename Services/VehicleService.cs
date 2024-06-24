@@ -1,8 +1,10 @@
 ﻿using FleetPulse_BackEndDevelopment.Data;
+using FleetPulse_BackEndDevelopment.Data.DTO;
 using FleetPulse_BackEndDevelopment.Models;
 using FleetPulse_BackEndDevelopment.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -17,9 +19,29 @@ namespace FleetPulse_BackEndDevelopment.Services
             _context = context;
         }
 
-        public async Task<IEnumerable<Vehicle?>> GetAllVehiclesAsync()
+        public async Task<object> GetAllVehiclesAsyncDisplay()
         {
-            return await _context.Vehicles.ToListAsync();
+            var vehicleDetails = await _context.Vehicles
+                .Include(v => v.Manufacturer)
+                .Include(v => v.Type)
+                .Include(v => v.FType)
+                //.Include(v => v.FType)  // Make sure this is included if FType is a related entity
+                .Select(v => new
+                {
+                    id = v.VehicleId,
+                    VehicleRegistrationNo = v.VehicleRegistrationNo,
+                    LicenseNo = v.LicenseNo,
+                    LicenseExpireDate = v.LicenseExpireDate,
+                    ManufacturerName = v.Manufacturer.Manufacturer,
+                    typeOf = v.Type.Type,
+                    typeId = v.VehicleTypeId,
+                    fuelType = v.FType.FType,
+                    color = v.VehicleColor,
+                    status = v.Status,
+                })
+                .ToListAsync();
+
+            return vehicleDetails;
         }
 
         public async Task<Vehicle?> GetVehicleByIdAsync(int id)
@@ -66,20 +88,13 @@ namespace FleetPulse_BackEndDevelopment.Services
             {
                 throw new InvalidOperationException("Vehicle not found.");
             }
-
-            if (VehicleIsActive(vehicle))
+            else
             {
-                throw new InvalidOperationException("Vehicle is active and associated with vehicle records. Cannot deactivate.");
+                vehicle.Status = "Deactive";
+                await _context.SaveChangesAsync();
             }
-
-            vehicle.Status = "Inactive"; 
-            await _context.SaveChangesAsync();
         }
 
-        private bool VehicleIsActive(Vehicle vehicle)
-        {
-            return vehicle.Status == "Active"; 
-        }
 
         public async Task ActivateVehicleAsync(int id)
         {
@@ -88,9 +103,16 @@ namespace FleetPulse_BackEndDevelopment.Services
             {
                 throw new KeyNotFoundException("Vehicle not found.");
             }
+            else
+            {
+                vehicle.Status = "Active";
+                await _context.SaveChangesAsync();
+            }
+        }
 
-            vehicle.Status = "Active"; 
-            await _context.SaveChangesAsync();
+        Task<IEnumerable<Vehicle?>> IVehicleService.GetAllVehiclesAsync()
+        {
+            throw new NotImplementedException();
         }
     }
 }

@@ -10,7 +10,7 @@ namespace FleetPulse_BackEndDevelopment.Data.DTO
         public string LicenseNo { get; set; }
         public DateTime LicenseExpireDate { get; set; }
         public string VehicleColor { get; set; }
-        public string Status { get; set; }
+        public string? Status { get; set; }
         public int VehicleModelId { get; set; }
         public int VehicleTypeId { get; set; }
         public int ManufactureId { get; set; }

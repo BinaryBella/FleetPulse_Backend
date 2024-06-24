@@ -43,7 +43,8 @@ namespace FleetPulse_BackEndDevelopment.Controllers
             {
                 var vehicleType = new VehicleType
                 {
-                    Type = Type.Type
+                    Type = Type.Type,
+                    Status = Type.Status
                 };
 
                 var vehicleTypeExists = _vehicleTypeService.DoesVehicleTypeExists(vehicleType.Type);

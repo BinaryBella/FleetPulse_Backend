@@ -20,9 +20,9 @@ namespace FleetPulse_BackEndDevelopment.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Vehicle>>> GetAllVehicles()
+        public async Task<ActionResult> GetAllVehicles()
         {
-            var vehicles = await _vehicleService.GetAllVehiclesAsync();
+            var vehicles = await _vehicleService.GetAllVehiclesAsyncDisplay();
             return Ok(vehicles);
         }
 
@@ -151,7 +151,7 @@ namespace FleetPulse_BackEndDevelopment.Controllers
             try
             {
                 await _vehicleService.ActivateVehicleAsync(id);
-                return NoContent();
+                return Ok("Vehicle activated successfully.");
             }
             catch (KeyNotFoundException ex)
             {
