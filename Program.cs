@@ -121,6 +121,8 @@ builder.Services.AddScoped<IDriverService, DriverService>();
 builder.Services.AddScoped<IHelperService, HelperService>();
 builder.Services.AddScoped<IStaffService, StaffService>();
 builder.Services.AddScoped<ITripUserService, TripUserService>();
+builder.Services.AddScoped<IAccidentService, AccidentService>();
+builder.Services.AddScoped<IAccidentUserService, AccidentUserService>();
 
 var app = builder.Build();
 

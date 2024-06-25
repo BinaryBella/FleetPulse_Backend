@@ -1,8 +1,9 @@
+﻿using FleetPulse_BackEndDevelopment.Models;
 using System.ComponentModel.DataAnnotations;
 
-namespace FleetPulse_BackEndDevelopment.Models
+namespace FleetPulse_BackEndDevelopment.Data.DTO
 {
-    public class AccidentUser
+    public class AccidentUserDTO
     {
         [Key]
         public int UserId { get; set; }
@@ -11,6 +12,6 @@ namespace FleetPulse_BackEndDevelopment.Models
         public int AccidentId { get; set; }
         public Accident Accident { get; set; }
 
-        public bool Status { get; set; } // Added Status property
+       
     }
 }

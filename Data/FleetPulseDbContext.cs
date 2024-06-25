@@ -24,7 +24,7 @@ namespace FleetPulse_BackEndDevelopment.Data
         public DbSet<TripUser> TripUsers { get; set; }
         public DbSet<FuelRefillUser> FuelRefillUsers { get; set; }
         public DbSet<User> Users { get; set; }
-        public DbSet<AccidentUser> AccidentUsers { get; internal set; }
+        public DbSet<AccidentUser> AccidentUser { get; internal set; }
         public object VehicleTypes { get; internal set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -45,6 +45,7 @@ namespace FleetPulse_BackEndDevelopment.Data
             modelBuilder.ApplyConfiguration(new FuelRefillConfig());
             modelBuilder.ApplyConfiguration(new VehicleConfig());
             modelBuilder.ApplyConfiguration(new AccidentConfig());
+            modelBuilder.ApplyConfiguration(new AccidentUserConfig());
             modelBuilder.ApplyConfiguration(new TripConfig());
             modelBuilder.ApplyConfiguration(new VehicleMaintenanceConfig());
             modelBuilder.ApplyConfiguration(new VehicleMaintenanceTypeConfig());

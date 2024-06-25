@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Data\DTO\AccidentUser.cs" />
     <Compile Remove="Data\DTO\TripUserDTOcs.cs" />
   </ItemGroup>
 
