@@ -15,4 +15,7 @@ public class HelperDTO
     public string EmergencyContact { get; set; }
     public string? BloodGroup { get; set; }
     public bool Status { get; set; }
+
+    public string UserName { get; set; }
+    public string Password { get; set; }
 }

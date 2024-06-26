@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using BC = BCrypt.Net.BCrypt;
 
 namespace FleetPulse_BackEndDevelopment.Controllers
 {
@@ -76,6 +77,9 @@ namespace FleetPulse_BackEndDevelopment.Controllers
                     EmergencyContact = driverDto.EmergencyContact,
                     BloodGroup = driverDto.BloodGroup,
                     Status = driverDto.Status,
+                    JobTitle = "Driver",
+                    HashedPassword = BC.HashPassword(driverDto.Password),
+                    UserName = driverDto.UserName,
                 };
 
                 var driverExists = await _driverService.IsDriverExist(user.UserId); // Assuming UserId exists on User entity

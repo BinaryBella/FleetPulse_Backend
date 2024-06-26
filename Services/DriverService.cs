@@ -20,7 +20,7 @@ namespace FleetPulse_BackEndDevelopment.Services
 
         public async Task<IEnumerable<User>> GetAllDriversAsync()
         {
-            return await _context.Users.ToListAsync();
+            return await _context.Users.Where(x=> x.JobTitle != null && x.JobTitle.ToLower() == "driver").ToListAsync();
         }
 
         public async Task<User> GetDriverByIdAsync(int id)
@@ -40,8 +40,14 @@ namespace FleetPulse_BackEndDevelopment.Services
 
         public async Task<User> AddDriverAsync(User driver)
         {
-            _context.Users.Add(driver);
-            await _context.SaveChangesAsync();
+            try
+            {
+                _context.Users.Add(driver);
+                await _context.SaveChangesAsync();
+            }catch (Exception ex)
+            {
+                
+            }
             return driver;
         }
 

@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-
+using BC = BCrypt.Net.BCrypt;
 namespace FleetPulse_BackEndDevelopment.Controllers
 {
     [Route("api/[controller]")]
@@ -74,6 +74,9 @@ namespace FleetPulse_BackEndDevelopment.Controllers
                     EmergencyContact = helperDto.EmergencyContact,
                     BloodGroup = helperDto.BloodGroup,
                     Status = helperDto.Status,
+                    JobTitle = "Helper",
+                    HashedPassword = BC.HashPassword(helperDto.Password),
+                    UserName = helperDto.UserName,
                 };
 
                 var helperExists = await _helperService.IsHelperExist(user.UserId); 

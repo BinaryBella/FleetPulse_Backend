@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using BC = BCrypt.Net.BCrypt;
 
 namespace FleetPulse_BackEndDevelopment.Controllers
 {
@@ -74,6 +75,8 @@ namespace FleetPulse_BackEndDevelopment.Controllers
                     EmergencyContact = staffDto.EmergencyContact,
                     JobTitle = staffDto.JobTitle,
                     Status = staffDto.Status,
+                    HashedPassword = BC.HashPassword(staffDto.Password),
+                    UserName = staffDto.UserName,
                 };
 
                 var staffExists = await _staffService.IsStaffExist(user.UserId); // Assuming UserId exists on User entity
