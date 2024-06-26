@@ -30,7 +30,7 @@ namespace FleetPulse_BackEndDevelopment.Services
             {
                 FirebaseApp.Create(new AppOptions()
                 {
-                    Credential = GoogleCredential.FromFile("config/serviceAccountKey.json"),
+                    Credential = GoogleCredential.FromFile("Configuration/serviceAccountKey.json"),
                 });
             }
         }

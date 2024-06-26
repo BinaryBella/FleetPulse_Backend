@@ -20,5 +20,5 @@ public class User
     public bool Status { get; set; }
     public IList<FuelRefill> FuelRefills { get; set; } // One-to-many relationship with FuelRefill
 
-
+    public IList<RefreshToken> RefreshTokens { get; set; }
 }

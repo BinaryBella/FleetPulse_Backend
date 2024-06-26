@@ -19,7 +19,8 @@ namespace FleetPulse_BackEndDevelopment.Data
         public DbSet<VerificationCode> VerificationCodes { get; set; }
         public DbSet<FCMNotification> FCMNotification { get; set; }
         public DbSet<VehicleMaintenanceConfiguration> VehicleMaintenanceConfigurations { get; set; }
-        
+        public DbSet<RefreshToken> RefreshTokens { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -82,6 +83,12 @@ namespace FleetPulse_BackEndDevelopment.Data
                 .HasOne(f => f.User)
                 .WithMany(u => u.FuelRefills)
                 .HasForeignKey(f => f.UserId);
+            
+            modelBuilder.Entity<User>()
+                .HasMany(u => u.RefreshTokens)
+                .WithOne(rt => rt.User)
+                .HasForeignKey(rt => rt.UserId)
+                .OnDelete(DeleteBehavior.NoAction); 
         }
     }
 }
