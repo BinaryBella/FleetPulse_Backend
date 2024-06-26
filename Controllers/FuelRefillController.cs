@@ -1,10 +1,6 @@
 using FleetPulse_BackEndDevelopment.Data.DTO;
-using FleetPulse_BackEndDevelopment.Models;
 using FleetPulse_BackEndDevelopment.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
 
 namespace FleetPulse_BackEndDevelopment.Controllers
 {
@@ -12,10 +8,12 @@ namespace FleetPulse_BackEndDevelopment.Controllers
     [ApiController]
     public class FuelRefillController : ControllerBase
     {
+        private readonly IAuthService _authService;
         private readonly IFuelRefillService _fuelRefillService;
 
-        public FuelRefillController(IFuelRefillService fuelRefillService)
+        public FuelRefillController(IAuthService authService, IFuelRefillService fuelRefillService)
         {
+            _authService = authService;
             _fuelRefillService = fuelRefillService;
         }
 
@@ -36,15 +34,27 @@ namespace FleetPulse_BackEndDevelopment.Controllers
             }
             return Ok(fuelRefill);
         }
-
+        
         [HttpPost]
         public async Task<ActionResult<FuelRefill>> AddFuelRefill([FromBody] FuelRefillDTO fuelRefillDto)
         {
+            if (!fuelRefillDto.UserId.HasValue)
+            {
+                var userId = await _authService.GetUserIdByNICAsync(fuelRefillDto.NIC);
+                if (!userId.HasValue)
+                {
+                    return BadRequest("User not found");
+                }
+
+                fuelRefillDto.UserId = userId.Value;
+            }
+
             var addedFuelRefill = await _fuelRefillService.AddFuelRefillAsync(fuelRefillDto);
             if (addedFuelRefill == null)
             {
                 return BadRequest("User or Vehicle not found");
             }
+
             return CreatedAtAction(nameof(GetFuelRefillById), new { id = addedFuelRefill.FuelRefillId }, addedFuelRefill);
         }
         

@@ -2,7 +2,10 @@ using FleetPulse_BackEndDevelopment.Data;
 using FleetPulse_BackEndDevelopment.Data.DTO;
 using FleetPulse_BackEndDevelopment.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
-
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace FleetPulse_BackEndDevelopment.Services
 {
@@ -51,10 +54,18 @@ namespace FleetPulse_BackEndDevelopment.Services
         public async Task<FuelRefill?> AddFuelRefillAsync(FuelRefillDTO fuelRefillDto)
         {
             var user = await _context.Users.FindAsync(fuelRefillDto.UserId);
-            if (user == null) return null;
+            if (user == null)
+            {
+                Console.WriteLine($"User with ID {fuelRefillDto.UserId} not found.");
+                return null;
+            }
 
             var vehicle = await _context.Vehicles.FindAsync(fuelRefillDto.VehicleId);
-            if (vehicle == null) return null;
+            if (vehicle == null)
+            {
+                Console.WriteLine($"Vehicle with ID {fuelRefillDto.VehicleId} not found.");
+                return null;
+            }
 
             var fuelRefill = new FuelRefill
             {
@@ -64,8 +75,8 @@ namespace FleetPulse_BackEndDevelopment.Services
                 FType = fuelRefillDto.FType,
                 Cost = fuelRefillDto.Cost,
                 Status = fuelRefillDto.Status,
-                UserId = fuelRefillDto.UserId,
-                VehicleId = fuelRefillDto.VehicleId,
+                UserId = fuelRefillDto.UserId ?? 0,  // Use 0 or any other default int value if UserId is null
+                VehicleId = fuelRefillDto.VehicleId ?? 0,  // Use 0 or any other default int value if VehicleId is null
                 User = user,
                 Vehicle = vehicle
             };
@@ -89,8 +100,16 @@ namespace FleetPulse_BackEndDevelopment.Services
             fuelRefill.FType = fuelRefillDto.FType;
             fuelRefill.Cost = fuelRefillDto.Cost;
             fuelRefill.Status = fuelRefillDto.Status;
-            fuelRefill.UserId = fuelRefillDto.UserId;
-            fuelRefill.VehicleId = fuelRefillDto.VehicleId;
+
+            if (fuelRefillDto.UserId.HasValue)
+            {
+                fuelRefill.UserId = fuelRefillDto.UserId.Value;
+            }
+
+            if (fuelRefillDto.VehicleId.HasValue)
+            {
+                fuelRefill.VehicleId = fuelRefillDto.VehicleId.Value;
+            }
 
             await _context.SaveChangesAsync();
             return fuelRefill;
@@ -113,10 +132,12 @@ namespace FleetPulse_BackEndDevelopment.Services
             fuelRefill.Status = false;
             await _context.SaveChangesAsync();
         }
+        
         public async Task<bool> IsFuelRefillExist(int fuelRefillId)
         {
             return await _context.FuelRefills.AnyAsync(fr => fr.FuelRefillId == fuelRefillId);
         }
+
         private bool FuelRefillIsAssociatedWithUser(FuelRefill fuelRefill)
         {
             return _context.Users.Any(u => u.FuelRefills.Any(fr => fr.FuelRefillId == fuelRefill.FuelRefillId));
