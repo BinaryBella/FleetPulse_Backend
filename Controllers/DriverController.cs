@@ -124,23 +124,21 @@ namespace FleetPulse_BackEndDevelopment.Controllers
                     return NotFound("Driver with Id not found");
                 }
 
-                var user = new User
-                {
-                    UserId = driverDto.UserId, // Assuming UserId exists on User entity
-                    FirstName = driverDto.FirstName,
-                    LastName = driverDto.LastName,
-                    DateOfBirth = driverDto.DateOfBirth,
-                    NIC = driverDto.NIC,
-                    DriverLicenseNo = driverDto.DriverLicenseNo,
-                    LicenseExpiryDate = driverDto.LicenseExpiryDate,
-                    EmailAddress = driverDto.EmailAddress,
-                    PhoneNo = driverDto.PhoneNo,
-                    EmergencyContact = driverDto.EmergencyContact,
-                    BloodGroup = driverDto.BloodGroup,
-                    Status = driverDto.Status,
-                };
+                User driver = await _driverService.GetDriverByIdAsync(driverDto.UserId);
 
-                var result = await _driverService.UpdateDriverAsync(user); // Assuming UpdateDriverAsync method expects User entity
+                driver.UserId = driverDto.UserId; // Assuming UserId exists on User entity
+                driver.FirstName = driverDto.FirstName;
+                driver.LastName = driverDto.LastName;
+                driver.DateOfBirth = driverDto.DateOfBirth;
+                driver.DriverLicenseNo = driverDto.DriverLicenseNo;
+                driver.LicenseExpiryDate = driverDto.LicenseExpiryDate;
+                driver.EmailAddress = driverDto.EmailAddress;
+                driver.PhoneNo = driverDto.PhoneNo;
+                driver.EmergencyContact = driverDto.EmergencyContact;
+                driver.BloodGroup = driverDto.BloodGroup;
+                driver.Status = driverDto.Status;
+
+                var result = await _driverService.UpdateDriverAsync(driver); // Assuming UpdateDriverAsync method expects User entity
                 return new JsonResult(result);
             }
             catch (Exception ex)
@@ -194,6 +192,7 @@ namespace FleetPulse_BackEndDevelopment.Controllers
                 EmergencyContact = user.EmergencyContact,
                 BloodGroup = user.BloodGroup,
                 Status = user.Status,
+                UserName = user.UserName
             };
         }
     }

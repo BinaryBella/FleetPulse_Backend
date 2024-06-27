@@ -1,6 +1,7 @@
 ﻿using FleetPulse_BackEndDevelopment.Data.DTO;
 using FleetPulse_BackEndDevelopment.DTOs;
 using FleetPulse_BackEndDevelopment.Models;
+using FleetPulse_BackEndDevelopment.Services;
 using FleetPulse_BackEndDevelopment.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -121,21 +122,22 @@ namespace FleetPulse_BackEndDevelopment.Controllers
                     return NotFound("Staff with Id not found");
                 }
 
-                var user = new User
+                User helper = await _staffService.GetStaffByIdAsync(staffDto.UserId);
+
                 {
-                    UserId = staffDto.UserId, // Assuming UserId exists on User entity
-                    FirstName = staffDto.FirstName,
-                    LastName = staffDto.LastName,
-                    DateOfBirth = staffDto.DateOfBirth,
-                    NIC = staffDto.NIC, 
-                    EmailAddress = staffDto.EmailAddress,
-                    PhoneNo = staffDto.PhoneNo,
-                    EmergencyContact = staffDto.EmergencyContact,
-                    JobTitle= staffDto.JobTitle,
-                    Status = staffDto.Status,
+                  helper.UserId = staffDto.UserId; 
+                  helper.FirstName = staffDto.FirstName;
+                  helper.LastName = staffDto.LastName;
+                  helper.DateOfBirth = staffDto.DateOfBirth;
+                  helper.NIC = staffDto.NIC; 
+                  helper.EmailAddress = staffDto.EmailAddress;
+                  helper.PhoneNo = staffDto.PhoneNo;
+                  helper.EmergencyContact = staffDto.EmergencyContact;
+                  helper.JobTitle = staffDto.JobTitle;
+                  helper.Status = staffDto.Status;
                 };
 
-                var result = await _staffService.UpdateStaffAsync(user); // Assuming UpdateDriverAsync method expects User entity
+                var result = await _staffService.UpdateStaffAsync(helper); // Assuming UpdateDriverAsync method expects User entity
                 return new JsonResult(result);
             }
             catch (Exception ex)
@@ -187,6 +189,7 @@ namespace FleetPulse_BackEndDevelopment.Controllers
                 EmergencyContact = user.EmergencyContact,
                 JobTitle = user.JobTitle,
                 Status = user.Status,
+                UserName = user.UserName,
             };
         }
     }

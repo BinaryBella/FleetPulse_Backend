@@ -59,7 +59,7 @@ namespace FleetPulse_BackEndDevelopment.Services
                 await _context.SaveChangesAsync();
                 return true;
             }
-            catch
+            catch(Exception ex)
             {
                 return false;
             }

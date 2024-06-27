@@ -1,6 +1,7 @@
 ﻿using FleetPulse_BackEndDevelopment.Data.DTO;
 using FleetPulse_BackEndDevelopment.DTOs;
 using FleetPulse_BackEndDevelopment.Models;
+using FleetPulse_BackEndDevelopment.Services;
 using FleetPulse_BackEndDevelopment.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -121,22 +122,20 @@ namespace FleetPulse_BackEndDevelopment.Controllers
                     return NotFound("Helper with Id not found");
                 }
 
-                var user = new User
-                {
-                    UserId = helperDto.UserId, 
-                    FirstName = helperDto.FirstName,
-                    LastName = helperDto.LastName,
-                    DateOfBirth = helperDto.DateOfBirth,
-                    NIC = helperDto.NIC,
-                   
-                    EmailAddress = helperDto.EmailAddress,
-                    PhoneNo = helperDto.PhoneNo,
-                    EmergencyContact = helperDto.EmergencyContact,
-                    BloodGroup = helperDto.BloodGroup,
-                    Status = helperDto.Status,
-                };
+                User helper = await _helperService.GetHelperByIdAsync(helperDto.UserId);
 
-                var result = await _helperService.UpdateHelperAsync(user); // Assuming UpdateDriverAsync method expects User entity
+                helper.UserId = helperDto.UserId;
+                helper.FirstName = helperDto.FirstName;
+                helper.LastName = helperDto.LastName;
+                helper.DateOfBirth = helperDto.DateOfBirth;
+                helper.NIC = helperDto.NIC;
+                helper.EmailAddress = helperDto.EmailAddress;
+                helper.PhoneNo = helperDto.PhoneNo;
+                helper.EmergencyContact = helperDto.EmergencyContact;
+                helper.BloodGroup = helperDto.BloodGroup;
+                helper.Status = helperDto.Status;
+
+                var result = await _helperService.UpdateHelperAsync(helper); // Assuming UpdateDriverAsync method expects User entity
                 return new JsonResult(result);
             }
             catch (Exception ex)
@@ -188,6 +187,7 @@ namespace FleetPulse_BackEndDevelopment.Controllers
                 EmergencyContact = user.EmergencyContact,
                 BloodGroup = user.BloodGroup,
                 Status = user.Status,
+                UserName = user.UserName,
             };
         }
     }

@@ -20,7 +20,6 @@ namespace FleetPulse_BackEndDevelopment.Services
 
         public async Task<IEnumerable<User>> GetAllStaffsAsync()
         {
-            return await _context.Users.ToListAsync();
             return await _context.Users
                          .Where(x => x.JobTitle != null &&
                                      x.JobTitle.ToLower() != "driver" &&
