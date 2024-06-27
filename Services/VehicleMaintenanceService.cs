@@ -62,22 +62,25 @@ namespace FleetPulse_BackEndDevelopment.Services
             return await _context.VehicleMaintenances.AnyAsync(x => x.MaintenanceId == id);
         }
 
-        public async Task<bool> UpdateVehicleMaintenanceAsync(VehicleMaintenance maintenance)
+        public async Task<VehicleMaintenance> UpdateVehicleMaintenanceAsync(int id, VehicleMaintenance maintenance)
         {
-            var existingMaintenance = await _context.VehicleMaintenances.FindAsync(maintenance.MaintenanceId);
+            var existingMaintenance = await _context.VehicleMaintenances.FindAsync(id);
             if (existingMaintenance == null)
-                return false;
+                throw new KeyNotFoundException("Vehicle Maintenance not found");
 
             existingMaintenance.MaintenanceDate = maintenance.MaintenanceDate;
             existingMaintenance.Cost = maintenance.Cost;
             existingMaintenance.PartsReplaced = maintenance.PartsReplaced;
             existingMaintenance.ServiceProvider = maintenance.ServiceProvider;
             existingMaintenance.SpecialNotes = maintenance.SpecialNotes;
-            existingMaintenance.Status = maintenance.Status;
+            existingMaintenance.VehicleId = maintenance.VehicleId;
             existingMaintenance.VehicleMaintenanceTypeId = maintenance.VehicleMaintenanceTypeId;
+            existingMaintenance.Status = maintenance.Status;
 
+            _context.VehicleMaintenances.Update(existingMaintenance);
             await _context.SaveChangesAsync();
-            return true;
+
+            return existingMaintenance;
         }
 
         public async Task DeactivateMaintenanceAsync(int maintenanceId)

@@ -43,118 +43,77 @@ namespace FleetPulse_BackEndDevelopment.Controllers
             _mailSettings = mailSettings.Value;
         }
 
-        // [HttpPost("login")]
-        // public ActionResult<ApiResponse> Login(LoginDTO userModel)
-        // {
-        //     var response = new ApiResponse
-        //     {
-        //         Status = true
-        //     };
-        //     try
-        //     {
-        //         if (ModelState.IsValid)
-        //         {
-        //             var user = _authService.IsAuthenticated(userModel.Username, userModel.Password);
-        //
-        //             if (user != null)
-        //             {
-        //                 if (user.JobTitle == "Admin" || user.JobTitle == "Staff")
-        //                 {
-        //                     var token = _authService.GenerateJwtToken(user.UserName, user.JobTitle);
-        //                     response.Data = new { token, user.JobTitle };
-        //                     return new JsonResult(response);
-        //                 }
-        //                 else
-        //                 {
-        //                     response.Status = false;
-        //                     response.Message = "Unauthorized: Only Admin or Staff can login";
-        //                     return new JsonResult(response);
-        //                 }
-        //             }
-        //
-        //             response.Status = false;
-        //             response.Message = "Invalid username or password";
-        //             return new JsonResult(response);
-        //         }
-        //
-        //         response.Status = false;
-        //         response.Error = "Invalid Data";
-        //         return BadRequest(response);
-        //     }
-        //     catch (Exception error)
-        //     {
-        //         _logger.LogError(error, "An error occurred while processing the login request: {Message}", error.Message);
-        //         return StatusCode(500);
-        //     }
-        // }
-        
         [HttpPost("login")]
-public ActionResult<ApiResponse> Login([FromBody] LoginDTO userModel)
-{
-    var response = new ApiResponse
-    {
-        Status = true
-    };
-
-    try
-    {
-        if (!ModelState.IsValid)
+        public async Task<ActionResult<ApiResponse>> Login([FromBody] LoginDTO userModel)
         {
-            response.Status = false;
-            response.Error = "Invalid Data";
-            return BadRequest(response);
-        }
-
-        var user = _authService.IsAuthenticated(userModel.Username, userModel.Password);
-
-        if (user != null)
-        {
-            string[] validJobTitles;
-            string errorMessage;
-
-            if (user.JobTitle == "Admin" || user.JobTitle == "Staff")
+            var response = new ApiResponse
             {
-                validJobTitles = new[] { "Admin", "Staff" };
-                errorMessage = "Unauthorized: Only Admin or Staff can login";
-            }
-            else if (user.JobTitle == "Driver" || user.JobTitle == "Helper")
+                Status = true
+            };
+
+            try
             {
-                validJobTitles = new[] { "Driver", "Helper" };
-                errorMessage = "Unauthorized: Only Driver or Helper can login";
-            }
-            else
-            {
+                if (!ModelState.IsValid)
+                {
+                    response.Status = false;
+                    response.Error = "Invalid Data";
+                    return BadRequest(response);
+                }
+
+                var user = _authService.IsAuthenticated(userModel.Username, userModel.Password);
+
+                if (user != null)
+                {
+                    string[] validJobTitles;
+                    string errorMessage;
+
+                    if (user.JobTitle == "Admin" || user.JobTitle == "Staff")
+                    {
+                        validJobTitles = new[] { "Admin", "Staff" };
+                        errorMessage = "Unauthorized: Only Admin or Staff can login";
+                    }
+                    else if (user.JobTitle == "Driver" || user.JobTitle == "Helper")
+                    {
+                        validJobTitles = new[] { "Driver", "Helper" };
+                        errorMessage = "Unauthorized: Only Driver or Helper can login";
+                    }
+                    else
+                    {
+                        response.Status = false;
+                        response.Message = "Unauthorized: Your job title does not have access to this endpoint";
+                        return new JsonResult(response);
+                    }
+
+                    if (validJobTitles.Contains(user.JobTitle))
+                    {
+                        var accessToken = await _authService.GenerateJwtToken(user.UserName, user.JobTitle);
+                        var refreshToken = await _authService.GenerateRefreshToken(user.UserId);
+
+                        response.Data = new
+                            { AccessToken = accessToken, RefreshToken = refreshToken, JobTitle = user.JobTitle };
+                        return new JsonResult(response);
+                    }
+                    else
+                    {
+                        response.Status = false;
+                        response.Message = errorMessage;
+                        return new JsonResult(response);
+                    }
+                }
+
                 response.Status = false;
-                response.Message = "Unauthorized: Your job title does not have access to this endpoint";
+                response.Message = "Invalid username or password";
                 return new JsonResult(response);
             }
-
-            if (validJobTitles.Contains(user.JobTitle))
+            catch (Exception error)
             {
-                var token = _authService.GenerateJwtToken(user.UserName, user.JobTitle);
-                response.Data = new { token, user.JobTitle };
-                return new JsonResult(response);
-            }
-            else
-            {
+                _logger.LogError(error, "An error occurred while processing the login request: {Message}",
+                    error.Message);
                 response.Status = false;
-                response.Message = errorMessage;
-                return new JsonResult(response);
+                response.Error = "An internal error occurred";
+                return StatusCode(500, response);
             }
         }
-
-        response.Status = false;
-        response.Message = "Invalid username or password";
-        return new JsonResult(response);
-    }
-    catch (Exception error)
-    {
-        _logger.LogError(error, "An error occurred while processing the login request: {Message}", error.Message);
-        response.Status = false;
-        response.Error = "An internal error occurred";
-        return StatusCode(500, response);
-    }
-}
 
         [AllowAnonymous]
         [HttpPost("forgot-password")]
@@ -199,7 +158,8 @@ public ActionResult<ApiResponse> Login([FromBody] LoginDTO userModel)
             }
             catch (Exception error)
             {
-                _logger.LogError(error, "An error occurred while processing the forgot password request: {Message}", error.Message);
+                _logger.LogError(error, "An error occurred while processing the forgot password request: {Message}",
+                    error.Message);
 
                 response.Status = false;
                 response.Message = "An error occurred while processing your request";
@@ -235,7 +195,7 @@ public ActionResult<ApiResponse> Login([FromBody] LoginDTO userModel)
             }
         }
 
-        [HttpPost("reset-password")]
+        [HttpPost("reset-password-staff")]
         public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDTO model)
         {
             var response = new ApiResponse
@@ -261,17 +221,6 @@ public ActionResult<ApiResponse> Login([FromBody] LoginDTO userModel)
                     if (passwordReset)
                     {
                         response.Message = "Password reset successfully";
-
-                        // Send email notification
-                        var mailRequest = new MailRequest
-                        {
-                            ToEmail = model.Email,
-                            Subject = "Password Reset Notification",
-                            Body = model.NewPassword
-                        };
-
-                        await _emailService.SendEmailAsync(mailRequest);
-
                         return new JsonResult(response);
                     }
                     else
@@ -289,11 +238,50 @@ public ActionResult<ApiResponse> Login([FromBody] LoginDTO userModel)
             }
             catch (Exception error)
             {
-                _logger.LogError(error, "An error occurred while processing the reset password request: {Message}", error.Message);
+                _logger.LogError(error, "An error occurred while processing the reset password request: {Message}",
+                    error.Message);
                 return StatusCode(500, "An error occurred while processing your request");
             }
         }
 
+
+        [HttpPost("reset-password-driver")]
+        public async Task<IActionResult> ResetDriverPassword([FromBody] ResetDriverPasswordRequest request)
+        {
+            if (request == null || string.IsNullOrEmpty(request.EmailAddress) || string.IsNullOrEmpty(request.NewPassword))
+            {
+                return BadRequest("Invalid request.");
+            }
+
+            var result = await _authService.ResetDriverPasswordAsync(request.EmailAddress, request.NewPassword);
+
+            if (result)
+            {
+                var mailRequest = new MailRequest
+                {
+                    ToEmail = request.EmailAddress,
+                    Subject = "Password Reset Notification",
+                    Body = request.NewPassword
+                };
+
+                try
+                {
+                    await _emailService.SendEmailAsync(mailRequest);
+                }
+                catch (Exception ex)
+                {
+                    // Handle email sending error
+                    return StatusCode(500, "Password reset successful but failed to send email notification.");
+                }
+
+                return Ok(new { Status = true, Message = "Password reset successful." });
+            }
+            else
+            {
+                return BadRequest(new { Status = false, Error = "Failed to reset password." });
+            }
+        }
+        
         [HttpPost("change-password-staff")]
         public IActionResult ChangePassword([FromBody] ChangePasswordDTO model)
         {
@@ -342,7 +330,8 @@ public ActionResult<ApiResponse> Login([FromBody] LoginDTO userModel)
             }
             catch (Exception error)
             {
-                _logger.LogError(error, "An error occurred while processing the change password request: {Message}", error.Message);
+                _logger.LogError(error, "An error occurred while processing the change password request: {Message}",
+                    error.Message);
                 return StatusCode(500, "An error occurred while processing your request");
             }
         }

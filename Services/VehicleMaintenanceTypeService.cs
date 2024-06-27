@@ -35,8 +35,11 @@ namespace FleetPulse_BackEndDevelopment.Services
             return maintenanceType != null;
         }
 
-        public async Task<VehicleMaintenanceType?> AddVehicleMaintenanceTypeAsync(VehicleMaintenanceType? maintenanceType)
+        public async Task<VehicleMaintenanceType?> AddVehicleMaintenanceTypeAsync(VehicleMaintenanceType maintenanceType)
         {
+            // Log the values before saving
+            Console.WriteLine($"Saving TypeName: {maintenanceType.TypeName}, Status: {maintenanceType.Status}");
+
             _context.VehicleMaintenanceType.Add(maintenanceType);
             await _context.SaveChangesAsync();
             return maintenanceType;
