@@ -21,13 +21,15 @@ public interface IAuthService
 
     // User Registration and Management
     bool ResetPassword(string email, string newPassword);
+    
 
     // Miscellaneous User Operations
     string GetUsernameByEmail(string email);
     Task<User?> GetUserByUsernameAsync(string username);
     Task<User?> AddUserAsync(User? user);
     Task<bool> UpdateUserAsync(User user);
-    Task<bool> ResetPasswordAsync(string email, string newPassword);
+    Task<bool> ResetPasswordAsync(string emailAddress, string newPassword);
+    Task<bool> ResetDriverPasswordAsync(string emailAddress, string newPassword);
     Task<int?> GetUserIdByNICAsync(string nic);
 
     // Refresh Token Handling

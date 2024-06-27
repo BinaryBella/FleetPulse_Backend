@@ -195,7 +195,7 @@ namespace FleetPulse_BackEndDevelopment.Controllers
             }
         }
 
-        [HttpPost("reset-password")]
+        [HttpPost("reset-password-staff")]
         public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDTO model)
         {
             var response = new ApiResponse
@@ -221,17 +221,6 @@ namespace FleetPulse_BackEndDevelopment.Controllers
                     if (passwordReset)
                     {
                         response.Message = "Password reset successfully";
-
-                        // Send email notification
-                        var mailRequest = new MailRequest
-                        {
-                            ToEmail = model.Email,
-                            Subject = "Password Reset Notification",
-                            Body = model.NewPassword
-                        };
-
-                        await _emailService.SendEmailAsync(mailRequest);
-
                         return new JsonResult(response);
                     }
                     else
@@ -255,6 +244,44 @@ namespace FleetPulse_BackEndDevelopment.Controllers
             }
         }
 
+
+        [HttpPost("reset-password-driver")]
+        public async Task<IActionResult> ResetDriverPassword([FromBody] ResetDriverPasswordRequest request)
+        {
+            if (request == null || string.IsNullOrEmpty(request.EmailAddress) || string.IsNullOrEmpty(request.NewPassword))
+            {
+                return BadRequest("Invalid request.");
+            }
+
+            var result = await _authService.ResetDriverPasswordAsync(request.EmailAddress, request.NewPassword);
+
+            if (result)
+            {
+                var mailRequest = new MailRequest
+                {
+                    ToEmail = request.EmailAddress,
+                    Subject = "Password Reset Notification",
+                    Body = request.NewPassword
+                };
+
+                try
+                {
+                    await _emailService.SendEmailAsync(mailRequest);
+                }
+                catch (Exception ex)
+                {
+                    // Handle email sending error
+                    return StatusCode(500, "Password reset successful but failed to send email notification.");
+                }
+
+                return Ok(new { Status = true, Message = "Password reset successful." });
+            }
+            else
+            {
+                return BadRequest(new { Status = false, Error = "Failed to reset password." });
+            }
+        }
+        
         [HttpPost("change-password-staff")]
         public IActionResult ChangePassword([FromBody] ChangePasswordDTO model)
         {

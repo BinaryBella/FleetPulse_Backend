@@ -4,12 +4,9 @@ using System.Security.Cryptography;
 using System.Text;
 using FleetPulse_BackEndDevelopment.Data;
 using FleetPulse_BackEndDevelopment.Models;
-using FleetPulse_BackEndDevelopment.Services.Interfaces;
 using Google.Apis.Auth.OAuth2.Responses;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using System;
-using System.Threading.Tasks;
 
 namespace FleetPulse_BackEndDevelopment.Services
 {
@@ -160,6 +157,26 @@ namespace FleetPulse_BackEndDevelopment.Services
             return false;
         }
 
+        public async Task<bool> ResetDriverPasswordAsync(string emailAddress, string newPassword)
+        {
+            var user = await dataContext.Users.SingleOrDefaultAsync(u => u.EmailAddress == emailAddress);
+            if (user == null) return false;
+
+            user.HashedPassword = HashPassword(newPassword);
+            dataContext.Users.Update(user);
+            await dataContext.SaveChangesAsync();
+
+            return true;
+        }
+
+        private string HashPassword(string password)
+        {
+            using (var sha256 = SHA256.Create())
+            {
+                var hashedBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
+                return BitConverter.ToString(hashedBytes).Replace("-", "").ToLower();
+            }
+        }
         private async Task<User> GetByEmailAsync(string email)
         {
             return await dataContext.Users.FirstOrDefaultAsync(c => c.EmailAddress == email);
