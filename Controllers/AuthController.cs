@@ -394,6 +394,7 @@ namespace FleetPulse_BackEndDevelopment.Controllers
 
             var staffDTO = new StaffDTO
             {
+                UserId = user.UserId,
                 FirstName = user.FirstName,
                 LastName = user.LastName,
                 DateOfBirth = user.DateOfBirth,

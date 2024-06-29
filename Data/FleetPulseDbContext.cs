@@ -10,7 +10,7 @@ namespace FleetPulse_BackEndDevelopment.Data
         public FleetPulseDbContext(DbContextOptions<FleetPulseDbContext> options) : base(options)
         {
         }
-        
+
         public DbSet<FuelRefill> FuelRefills { get; set; }
         public DbSet<Vehicle> Vehicles { get; set; }
         public DbSet<VehicleMaintenance> VehicleMaintenances { get; set; }
@@ -20,11 +20,12 @@ namespace FleetPulse_BackEndDevelopment.Data
         public DbSet<FCMNotification> FCMNotification { get; set; }
         public DbSet<VehicleMaintenanceConfiguration> VehicleMaintenanceConfigurations { get; set; }
         public DbSet<RefreshToken> RefreshTokens { get; set; }
+        public DbSet<DeviceToken> DeviceTokens { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-            
+
             modelBuilder.ApplyConfiguration(new VehicleModelConfig());
             modelBuilder.ApplyConfiguration(new VehicleTypeConfig());
             modelBuilder.ApplyConfiguration(new ManufactureConfig());
@@ -37,58 +38,48 @@ namespace FleetPulse_BackEndDevelopment.Data
             modelBuilder.ApplyConfiguration(new VerificationCodeConfig());
             modelBuilder.ApplyConfiguration(new FCMNotificationConfig());
 
-            // Configures one-to-many relationship
-
-            // Vehicle_Model
             modelBuilder.Entity<Vehicle>()
-                .HasOne<VehicleModel>(v => v.Model)
+                .HasOne(v => v.Model)
                 .WithMany(vm => vm.Vehicles)
                 .HasForeignKey(v => v.VehicleModelId);
-            
-            // Vehicle_Type
+
             modelBuilder.Entity<Vehicle>()
-                .HasOne<VehicleType>(v => v.Type)
+                .HasOne(v => v.Type)
                 .WithMany(vm => vm.Vehicles)
                 .HasForeignKey(v => v.VehicleTypeId);
-            
-            // Vehicle_Manufacture
+
             modelBuilder.Entity<Vehicle>()
-                .HasOne<Manufacture>(v => v.Manufacturer)
+                .HasOne(v => v.Manufacturer)
                 .WithMany(vm => vm.Vehicles)
                 .HasForeignKey(v => v.ManufactureId);
-            
-            // Vehicle_Maintenance
+
             modelBuilder.Entity<VehicleMaintenance>()
                 .HasOne(v => v.Vehicle)
                 .WithMany(vm => vm.VehicleMaintenance)
                 .HasForeignKey(vm => vm.VehicleId);
-            
-            // Vehicle_Maintenance_Type
+
             modelBuilder.Entity<VehicleMaintenance>()
-                .HasOne<VehicleMaintenanceType>(v => v.VehicleMaintenanceType)
+                .HasOne(v => v.VehicleMaintenanceType)
                 .WithMany(vmt => vmt.VehicleMaintenances)
                 .HasForeignKey(v => v.VehicleMaintenanceTypeId);
-            
-            // Vehicle_FuelRefill
+
             modelBuilder.Entity<FuelRefill>()
                 .HasOne(v => v.Vehicle)
                 .WithMany(fr => fr.FuelRefills)
                 .HasForeignKey(v => v.VehicleId);
-            
-            // User
+
             modelBuilder.Entity<User>()
-                .HasKey(u => new { u.UserId });
-            
+                .HasKey(u => u.UserId);
+
             modelBuilder.Entity<FuelRefill>()
                 .HasOne(f => f.User)
                 .WithMany(u => u.FuelRefills)
                 .HasForeignKey(f => f.UserId);
-            
-            modelBuilder.Entity<User>()
-                .HasMany(u => u.RefreshTokens)
-                .WithOne(rt => rt.User)
-                .HasForeignKey(rt => rt.UserId)
-                .OnDelete(DeleteBehavior.NoAction); 
+
+            modelBuilder.Entity<RefreshToken>()
+                .HasOne(rt => rt.User)
+                .WithMany(u => u.RefreshTokens)
+                .HasForeignKey(rt => rt.UserId);
         }
     }
 }

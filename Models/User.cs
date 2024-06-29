@@ -18,7 +18,6 @@ public class User
     public string JobTitle { get; set; }
     public byte[]? ProfilePicture { get; set; }
     public bool Status { get; set; }
-    public IList<FuelRefill> FuelRefills { get; set; } // One-to-many relationship with FuelRefill
-
+    public IList<FuelRefill> FuelRefills { get; set; }
     public IList<RefreshToken> RefreshTokens { get; set; }
 }

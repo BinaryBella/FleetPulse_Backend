@@ -4,6 +4,7 @@ using FleetPulse_BackEndDevelopment.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FleetPulse_BackEndDevelopment.Migrations
 {
     [DbContext(typeof(FleetPulseDbContext))]
-    partial class FleetPulseDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240628065429_AddDeviceToken")]
+    partial class AddDeviceToken
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -475,7 +477,7 @@ namespace FleetPulse_BackEndDevelopment.Migrations
                     b.HasOne("FleetPulse_BackEndDevelopment.Models.User", "User")
                         .WithMany("RefreshTokens")
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("User");
