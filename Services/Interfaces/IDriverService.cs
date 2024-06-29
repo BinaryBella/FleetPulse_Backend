@@ -12,7 +12,8 @@ namespace FleetPulse_BackEndDevelopment.Services.Interfaces
         bool DoesDriverExist(string NIC);
         Task<User> AddDriverAsync(User driver);
         Task<bool> UpdateDriverAsync(User driver);
-        Task DeactivateDriverAsync(int driverId);
+        //Task DeactivateDriverAsync(int driverId);
         Task ActivateDriverAsync(int id);
+        Task DeactivateDriverAsync(int userId);
     }
 }

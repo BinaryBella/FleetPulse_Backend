@@ -59,39 +59,70 @@ namespace FleetPulse_BackEndDevelopment.Services
             return false;
         }
 
-        public async Task DeactivateManufactureAsync(int ManufactureId)
-        {
-            var manufacture = await _context.Manufacture.FindAsync(ManufactureId);
+        /* public async Task DeactivateManufactureAsync(int ManufactureId)
+         {
+             var manufacture = await _context.Manufacture.FindAsync(ManufactureId);
 
+             if (manufacture == null)
+             {
+                 throw new InvalidOperationException("Manufacturer not found.");
+             }
+
+             if (ManufactureIsActive(manufacture))
+             {
+                 throw new InvalidOperationException("Manufacturer is active and associated with manufacture records. Cannot deactivate.");
+             }
+
+             manufacture.Status = false;
+             await _context.SaveChangesAsync();
+         }
+
+         private bool ManufactureIsActive(Manufacture manufacture)
+         {
+             return _context.Manufacture.Any(vt => vt.ManufactureId == manufacture.ManufactureId);
+         }
+
+         public async Task ActivateManufactureAsync(int id)
+         {
+             var manufacture = await _context.Manufacture.FindAsync(id);
+             if (manufacture == null)
+             {
+                 throw new KeyNotFoundException("Manufacturer not found.");
+             }
+
+             manufacture.Status = true;
+             await _context.SaveChangesAsync();
+         }
+     }
+ } */
+
+        public async Task ActivateManufactureAsync(int ManufactureId)
+        {
+            var manufacture = await _context.Users.FindAsync(ManufactureId);
             if (manufacture == null)
             {
-                throw new InvalidOperationException("Manufacturer not found.");
-            }
-
-            if (ManufactureIsActive(manufacture))
-            {
-                throw new InvalidOperationException("Manufacturer is active and associated with manufacture records. Cannot deactivate.");
-            }
-
-            manufacture.Status = false;
-            await _context.SaveChangesAsync();
-        }
-
-        private bool ManufactureIsActive(Manufacture manufacture)
-        {
-            return _context.Manufacture.Any(vt => vt.ManufactureId == manufacture.ManufactureId);
-        }
-
-        public async Task ActivateManufactureAsync(int id)
-        {
-            var manufacture = await _context.Manufacture.FindAsync(id);
-            if (manufacture == null)
-            {
-                throw new KeyNotFoundException("Manufacturer not found.");
+                throw new KeyNotFoundException("Manufacture not found.");
             }
 
             manufacture.Status = true;
             await _context.SaveChangesAsync();
         }
+
+        public async Task DeactivateManufactureAsync(int ManufactureId)
+        {
+            var user = await _context.Users.FindAsync(ManufactureId);
+
+            if (user == null)
+            {
+                throw new InvalidOperationException("Manufacture not found.");
+            }
+            else
+            {
+                user.Status = false;
+                await _context.SaveChangesAsync();
+            }
+        }
     }
+
 }
+

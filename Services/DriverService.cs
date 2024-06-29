@@ -65,29 +65,6 @@ namespace FleetPulse_BackEndDevelopment.Services
             }
         }
 
-        public async Task DeactivateDriverAsync(int userId)
-        {
-            var driver = await _context.Users.FindAsync(userId);
-
-            if (driver == null)
-            {
-                throw new InvalidOperationException("Driver not found.");
-            }
-
-            if (DriverIsActive(driver))
-            {
-                throw new InvalidOperationException("Driver is active and associated with driver details records. Cannot deactivate.");
-            }
-
-            driver.Status = false;
-            await _context.SaveChangesAsync();
-        }
-
-        private bool DriverIsActive(User driver)
-        {
-            return _context.Users.Any(vt => vt.UserId == driver.UserId && vt.Status);
-        }
-
         public async Task ActivateDriverAsync(int id)
         {
             var driver = await _context.Users.FindAsync(id);
@@ -99,5 +76,21 @@ namespace FleetPulse_BackEndDevelopment.Services
             driver.Status = true;
             await _context.SaveChangesAsync();
         }
+
+        public async Task DeactivateDriverAsync(int userId)
+        {
+            var user = await _context.Users.FindAsync(userId);
+
+            if (user == null)
+            {
+                throw new InvalidOperationException("Driver not found.");
+            }
+            else
+            {
+                user.Status = false;
+                await _context.SaveChangesAsync();
+            }
+        }
     }
+
 }
