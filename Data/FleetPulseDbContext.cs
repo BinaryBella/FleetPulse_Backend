@@ -79,7 +79,8 @@ namespace FleetPulse_BackEndDevelopment.Data
             modelBuilder.Entity<RefreshToken>()
                 .HasOne(rt => rt.User)
                 .WithMany(u => u.RefreshTokens)
-                .HasForeignKey(rt => rt.UserId);
+                .HasForeignKey(rt => rt.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }
