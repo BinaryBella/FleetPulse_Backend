@@ -9,7 +9,8 @@ namespace FleetPulse_BackEndDevelopment.Services.Interfaces
         bool DoesFuelRefillExist(string fType);
         Task<FuelRefill?> AddFuelRefillAsync(FuelRefillDTO fuelRefillDto);
         Task<FuelRefill> UpdateFuelRefillAsync(int id, FuelRefillDTO fuelRefillDto);
-        Task DeactivateFuelRefillAsync(int fuelRefillId);
+        Task<bool> ActivateFuelRefillAsync(int fuelRefillId);
+        Task<bool> DeactivateFuelRefillAsync(int fuelRefillId);
         Task<bool> IsFuelRefillExist(int fuelRefillId);
     }
 }

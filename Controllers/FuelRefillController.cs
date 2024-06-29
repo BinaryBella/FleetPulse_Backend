@@ -69,18 +69,24 @@ namespace FleetPulse_BackEndDevelopment.Controllers
             return Ok(updatedFuelRefill);
         }
         
-        [HttpPut("{id}/deactivate")]
+        [HttpPost("activate/{id}")]
+        public async Task<IActionResult> ActivateFuelRefill(int id)
+        {
+            var result = await _fuelRefillService.ActivateFuelRefillAsync(id);
+            if (!result)
+                return NotFound();
+
+            return Ok();
+        }
+
+        [HttpPost("deactivate/{id}")]
         public async Task<IActionResult> DeactivateFuelRefill(int id)
         {
-            try
-            {
-                await _fuelRefillService.DeactivateFuelRefillAsync(id);
-                return Ok("Fuel refill deactivated successfully.");
-            }
-            catch (InvalidOperationException ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            var result = await _fuelRefillService.DeactivateFuelRefillAsync(id);
+            if (!result)
+                return NotFound();
+
+            return Ok();
         }
     }
 }

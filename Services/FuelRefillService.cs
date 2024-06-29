@@ -113,22 +113,26 @@ namespace FleetPulse_BackEndDevelopment.Services
             return fuelRefill;
         }
         
-        public async Task DeactivateFuelRefillAsync(int fuelRefillId)
+        public async Task<bool> ActivateFuelRefillAsync(int fuelRefillId)
         {
             var fuelRefill = await _context.FuelRefills.FindAsync(fuelRefillId);
+            if (fuelRefill == null) return false;
 
-            if (fuelRefill == null)
-            {
-                throw new InvalidOperationException("Fuel refill not found.");
-            }
+            fuelRefill.Status = true;
+            _context.FuelRefills.Update(fuelRefill);
+            await _context.SaveChangesAsync();
+            return true;
+        }
 
-            if (FuelRefillIsAssociatedWithUser(fuelRefill))
-            {
-                throw new InvalidOperationException("Fuel refill is associated with a user. Cannot deactivate.");
-            }
+        public async Task<bool> DeactivateFuelRefillAsync(int fuelRefillId)
+        {
+            var fuelRefill = await _context.FuelRefills.FindAsync(fuelRefillId);
+            if (fuelRefill == null) return false;
 
             fuelRefill.Status = false;
+            _context.FuelRefills.Update(fuelRefill);
             await _context.SaveChangesAsync();
+            return true;
         }
         
         public async Task<bool> IsFuelRefillExist(int fuelRefillId)
