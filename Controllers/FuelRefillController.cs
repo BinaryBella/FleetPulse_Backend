@@ -38,7 +38,7 @@ namespace FleetPulse_BackEndDevelopment.Controllers
         [HttpPost]
         public async Task<ActionResult<FuelRefill>> AddFuelRefill([FromBody] FuelRefillDTO fuelRefillDto)
         {
-            if (!fuelRefillDto.UserId.HasValue)
+            if (fuelRefillDto.UserId == 0)
             {
                 var userId = await _authService.GetUserIdByNICAsync(fuelRefillDto.NIC);
                 if (!userId.HasValue)

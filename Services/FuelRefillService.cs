@@ -75,10 +75,8 @@ namespace FleetPulse_BackEndDevelopment.Services
                 FType = fuelRefillDto.FType,
                 Cost = fuelRefillDto.Cost,
                 Status = fuelRefillDto.Status,
-                UserId = fuelRefillDto.UserId ?? 0,  // Use 0 or any other default int value if UserId is null
-                VehicleId = fuelRefillDto.VehicleId ?? 0,  // Use 0 or any other default int value if VehicleId is null
-                User = user,
-                Vehicle = vehicle
+                UserId = fuelRefillDto.UserId,
+                VehicleId = fuelRefillDto.VehicleId,
             };
 
             _context.FuelRefills.Add(fuelRefill);
@@ -101,14 +99,14 @@ namespace FleetPulse_BackEndDevelopment.Services
             fuelRefill.Cost = fuelRefillDto.Cost;
             fuelRefill.Status = fuelRefillDto.Status;
 
-            if (fuelRefillDto.UserId.HasValue)
+            if (fuelRefillDto.UserId != 0)
             {
-                fuelRefill.UserId = fuelRefillDto.UserId.Value;
+                fuelRefill.UserId = fuelRefillDto.UserId;
             }
 
-            if (fuelRefillDto.VehicleId.HasValue)
+            if (fuelRefillDto.VehicleId != 0)
             {
-                fuelRefill.VehicleId = fuelRefillDto.VehicleId.Value;
+                fuelRefill.VehicleId = fuelRefillDto.VehicleId;
             }
 
             await _context.SaveChangesAsync();

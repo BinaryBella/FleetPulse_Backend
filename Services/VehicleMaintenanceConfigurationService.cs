@@ -91,6 +91,7 @@ namespace FleetPulse_BackEndDevelopment.Services
 
             _context.VehicleMaintenanceConfigurations.Update(entity);
             await _context.SaveChangesAsync();
+
             return true;
         }
 
