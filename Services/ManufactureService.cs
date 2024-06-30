@@ -2,9 +2,6 @@
 using FleetPulse_BackEndDevelopment.Models;
 using FleetPulse_BackEndDevelopment.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace FleetPulse_BackEndDevelopment.Services
 {
@@ -19,29 +16,29 @@ namespace FleetPulse_BackEndDevelopment.Services
 
         public async Task<IEnumerable<Manufacture?>> GetAllManufacturesAsync() // Corrected name
         {
-            return await _context.Manufacture.ToListAsync();
+            return await _context.Manufactures.ToListAsync();
         }
 
         public async Task<Manufacture?> GetManufactureByIdAsync(int id)
         {
-            return await _context.Manufacture.FindAsync(id);
+            return await _context.Manufactures.FindAsync(id);
         }
 
         public Task<bool> IsManufactureExist(int id)
         {
-            return Task.FromResult(_context.Manufacture.Any(x => x.ManufactureId == id));
+            return Task.FromResult(_context.Manufactures.Any(x => x.ManufactureId == id));
         }
 
         public bool DoesManufactureExists(string manufacturer)
         {
-            return _context.Manufacture.Any(x => x.Manufacturer == manufacturer);
+            return _context.Manufactures.Any(x => x.Manufacturer == manufacturer);
         }
 
         public async Task<Manufacture?> AddManufactureAsync(Manufacture? manufacture)
         {
             if (manufacture != null)
             {
-                _context.Manufacture.Add(manufacture);
+                _context.Manufactures.Add(manufacture);
                 await _context.SaveChangesAsync();
             }
             return manufacture;
@@ -49,7 +46,7 @@ namespace FleetPulse_BackEndDevelopment.Services
 
         public async Task<bool> UpdateManufactureAsync(Manufacture manufacture)
         {
-            var existingManufacture = await _context.Manufacture.FindAsync(manufacture.ManufactureId);
+            var existingManufacture = await _context.Manufactures.FindAsync(manufacture.ManufactureId);
             if (existingManufacture != null)
             {
                 _context.Entry(existingManufacture).CurrentValues.SetValues(manufacture);
@@ -61,7 +58,7 @@ namespace FleetPulse_BackEndDevelopment.Services
 
         /* public async Task DeactivateManufactureAsync(int ManufactureId)
          {
-             var manufacture = await _context.Manufacture.FindAsync(ManufactureId);
+             var manufacture = await _context.Manufactures.FindAsync(ManufactureId);
 
              if (manufacture == null)
              {
@@ -79,12 +76,12 @@ namespace FleetPulse_BackEndDevelopment.Services
 
          private bool ManufactureIsActive(Manufacture manufacture)
          {
-             return _context.Manufacture.Any(vt => vt.ManufactureId == manufacture.ManufactureId);
+             return _context.Manufactures.Any(vt => vt.ManufactureId == manufacture.ManufactureId);
          }
 
          public async Task ActivateManufactureAsync(int id)
          {
-             var manufacture = await _context.Manufacture.FindAsync(id);
+             var manufacture = await _context.Manufactures.FindAsync(id);
              if (manufacture == null)
              {
                  throw new KeyNotFoundException("Manufacturer not found.");

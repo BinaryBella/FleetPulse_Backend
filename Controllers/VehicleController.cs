@@ -3,7 +3,9 @@ using FleetPulse_BackEndDevelopment.Models;
 using FleetPulse_BackEndDevelopment.Services;
 using FleetPulse_BackEndDevelopment.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace FleetPulse_BackEndDevelopment.Controllers
@@ -58,10 +60,10 @@ namespace FleetPulse_BackEndDevelopment.Controllers
                     Status = vehicleDto.Status,
                     VehicleTypeId = vehicleDto.VehicleTypeId,
                     ManufactureId = vehicleDto.ManufactureId,
-                    FuelRefillId = vehicleDto.FuelRefillId,
-                    VehicleMaintenanceId = vehicleDto.VehicleMaintenanceId,
                     AccidentId = vehicleDto.AccidentId,
-                    TripId = vehicleDto.TripId
+                    TripId = vehicleDto.TripId,
+                    VehicleMaintenances = vehicleDto.VehicleMaintenanceIds?.Select(id => new VehicleMaintenance {MaintenanceId = id }).ToList(),
+                    FuelRefills = vehicleDto.FuelRefillIds?.Select(id => new FuelRefill {FuelRefillId = id }).ToList()
                 };
 
                 var addedVehicle = await _vehicleService.AddVehicleAsync(vehicle);
@@ -109,10 +111,10 @@ namespace FleetPulse_BackEndDevelopment.Controllers
                     Status = vehicleDto.Status,
                     VehicleTypeId = vehicleDto.VehicleTypeId,
                     ManufactureId = vehicleDto.ManufactureId,
-                    FuelRefillId = vehicleDto.FuelRefillId,
-                    VehicleMaintenanceId = vehicleDto.VehicleMaintenanceId,
                     AccidentId = vehicleDto.AccidentId,
-                    TripId = vehicleDto.TripId
+                    TripId = vehicleDto.TripId,
+                    VehicleMaintenances = vehicleDto.VehicleMaintenanceIds?.Select(id => new VehicleMaintenance { MaintenanceId = id }).ToList(),
+                    FuelRefills = vehicleDto.FuelRefillIds?.Select(id => new FuelRefill { FuelRefillId = id }).ToList()
                 };
 
                 var result = await _vehicleService.UpdateVehicleAsync(vehicle);

@@ -20,27 +20,27 @@ namespace FleetPulse_BackEndDevelopment.Services
 
         public async Task<IEnumerable<Trip>> GetAllTripsAsync()
         {
-            return await _context.Trip.ToListAsync();
+            return await _context.Trips.ToListAsync();
         }
 
         public async Task<Trip> GetTripByIdAsync(int id)
         {
-            return await _context.Trip.FindAsync(id);
+            return await _context.Trips.FindAsync(id);
         }
 
         public async Task<bool> IsTripExist(int id)
         {
-            return await _context.Trip.AnyAsync(x => x.TripId == id.ToString());
+            return await _context.Trips.AnyAsync(x => x.TripId == id.ToString());
         }
 
         public bool DoesTripExists(string tripId)
         {
-            return _context.Trip.Any(x => x.TripId == tripId);
+            return _context.Trips.Any(x => x.TripId == tripId);
         }
 
         public async Task<Trip> AddTripAsync(Trip trip)
         {
-            _context.Trip.Add(trip);
+            _context.Trips.Add(trip);
             await _context.SaveChangesAsync();
             return trip;
         }
@@ -49,7 +49,7 @@ namespace FleetPulse_BackEndDevelopment.Services
         {
             try
             {
-                _context.Trip.Update(trip);
+                _context.Trips.Update(trip);
                 await _context.SaveChangesAsync();
                 return true;
             }
@@ -61,7 +61,7 @@ namespace FleetPulse_BackEndDevelopment.Services
 
         public async Task DeactivateTripAsync(int tripId)
         {
-            var trip = await _context.Trip.FindAsync(tripId);
+            var trip = await _context.Trips.FindAsync(tripId);
 
             if (trip == null)
             {
@@ -79,12 +79,12 @@ namespace FleetPulse_BackEndDevelopment.Services
 
         private bool TripIsActive(Trip trip)
         {
-            return _context.Trip.Any(vt => vt.TripId == trip.TripId && vt.Status);
+            return _context.Trips.Any(vt => vt.TripId == trip.TripId && vt.Status);
         }
 
         public async Task ActivateTripAsync(int id)
         {
-            var trip = await _context.Trip.FindAsync(id);
+            var trip = await _context.Trips.FindAsync(id);
             if (trip == null)
             {
                 throw new KeyNotFoundException("Trip not found.");

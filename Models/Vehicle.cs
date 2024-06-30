@@ -1,4 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace FleetPulse_BackEndDevelopment.Models
 {
@@ -12,28 +14,26 @@ namespace FleetPulse_BackEndDevelopment.Models
         public string? VehicleColor { get; set; }
         public string? Status { get; set; }
         
-        //Vehicle_Type
+        // Vehicle_Type
         public int VehicleTypeId { get; set; }
         public VehicleType? Type { get; set; }
-        //Vehicle_Manufacture
+        
+        // Vehicle_Manufacture
         public int ManufactureId { get; set; }
         public Manufacture? Manufacturer { get; set; }
-        //FuelRefill
-        public int FuelRefillId { get; set; }
-        public FuelRefill? FType { get; set; }
-        //Vehicle_Maintenance
-        public string? VehicleMaintenanceId { get; set; }
-        public VehicleMaintenance? VehicleMaintenance { get; set; }
-        //Accident
+        
+        // Accident
         public int? AccidentId { get; set; }
         public Accident? Accident { get; set; }
-        //Trip
+        
+        // Trip
         public string? TripId { get; set; }
         public Trip? Trip { get; set; }
         
-        //Vehicle_Maintenance
-        public ICollection<VehicleMaintenance> VehicleMaintenance { get; set; }
-        //fuelrefill
+        // Vehicle_Maintenance
+        public ICollection<VehicleMaintenance> VehicleMaintenances { get; set; } // Corrected to plural
+        
+        // FuelRefill
         public ICollection<FuelRefill> FuelRefills { get; set; }
     }
 }

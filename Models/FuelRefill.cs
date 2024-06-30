@@ -18,5 +18,5 @@ public class FuelRefill
     public ICollection<Vehicle> Vehicles { get; set; }
         
     //FuelRefillUser
-    public IList<FuelRefillUser> FuelRefillUsers { get; set; }
+    public ICollection<FuelRefillUser> FuelRefillUsers { get; set; }
 }

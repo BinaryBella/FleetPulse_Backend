@@ -20,29 +20,29 @@ namespace FleetPulse_BackEndDevelopment.Services
 
         public async Task<IEnumerable<AccidentUser?>> GetAllAccidentUsersAsync()
         {
-            return await _context.AccidentUser.ToListAsync();
+            return await _context.AccidentUsers.ToListAsync();
         }
 
         public async Task<AccidentUser?> GetAccidentUserByIdAsync(int id)
         {
-            return await _context.AccidentUser.FindAsync(id);
+            return await _context.AccidentUsers.FindAsync(id);
         }
 
         public Task<bool> IsAccidentUserExist(int id)
         {
-            return Task.FromResult(_context.AccidentUser.Any(x => x.UserId == id));
+            return Task.FromResult(_context.AccidentUsers.Any(x => x.UserId == id));
         }
 
         public bool DoesAccidentUserExist(string accidentUserName)
         {
-            return _context.AccidentUser.Any(x => x.User.UserName == accidentUserName); // Assuming 'UserName' is a property of User
+            return _context.AccidentUsers.Any(x => x.User.UserName == accidentUserName); // Assuming 'UserName' is a property of User
         }
 
         public async Task<AccidentUser?> AddAccidentUserAsync(AccidentUser? accidentUser)
         {
             if (accidentUser != null)
             {
-                _context.AccidentUser.Add(accidentUser);
+                _context.AccidentUsers.Add(accidentUser);
                 await _context.SaveChangesAsync();
             }
             return accidentUser;
@@ -50,7 +50,7 @@ namespace FleetPulse_BackEndDevelopment.Services
 
         public async Task<bool> UpdateAccidentUserAsync(AccidentUser accidentUser)
         {
-            var existingAccidentUser = await _context.AccidentUser.FindAsync(accidentUser.UserId);
+            var existingAccidentUser = await _context.AccidentUsers.FindAsync(accidentUser.UserId);
             if (existingAccidentUser != null)
             {
                 _context.Entry(existingAccidentUser).CurrentValues.SetValues(accidentUser);
@@ -62,7 +62,7 @@ namespace FleetPulse_BackEndDevelopment.Services
 
         public async Task DeactivateAccidentUserAsync(int accidentUserId)
         {
-            var accidentUser = await _context.AccidentUser.FindAsync(accidentUserId);
+            var accidentUser = await _context.AccidentUsers.FindAsync(accidentUserId);
 
             if (accidentUser == null)
             {
@@ -85,7 +85,7 @@ namespace FleetPulse_BackEndDevelopment.Services
 
         public async Task ActivateAccidentUserAsync(int id)
         {
-            var accidentUser = await _context.AccidentUser.FindAsync(id);
+            var accidentUser = await _context.AccidentUsers.FindAsync(id);
             if (accidentUser == null)
             {
                 throw new KeyNotFoundException("Accident user not found.");

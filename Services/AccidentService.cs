@@ -19,29 +19,29 @@ namespace FleetPulse_BackEndDevelopment.Services
 
         public async Task<IEnumerable<Accident?>> GetAllAccidentsAsync()
         {
-            return await _context.Accident.ToListAsync();
+            return await _context.Accidents.ToListAsync();
         }
 
         public async Task<Accident?> GetAccidentByIdAsync(int id)
         {
-            return await _context.Accident.FindAsync(id);
+            return await _context.Accidents.FindAsync(id);
         }
 
         public Task<bool> IsAccidentExist(int id)
         {
-            return Task.FromResult(_context.Accident.Any(x => x.AccidentId == id));
+            return Task.FromResult(_context.Accidents.Any(x => x.AccidentId == id));
         }
 
         public bool DoesAccidentExists(string venue)
         {
-            return _context.Accident.Any(x => x.Venue == venue);
+            return _context.Accidents.Any(x => x.Venue == venue);
         }
 
         public async Task<Accident?> AddAccidentAsync(Accident? accident)
         {
             if (accident != null)
             {
-                _context.Accident.Add(accident);
+                _context.Accidents.Add(accident);
                 await _context.SaveChangesAsync();
             }
             return accident;
@@ -49,7 +49,7 @@ namespace FleetPulse_BackEndDevelopment.Services
 
         public async Task<bool> UpdateAccidentAsync(Accident accident)
         {
-            var existingAccident = await _context.Accident.FindAsync(accident.AccidentId);
+            var existingAccident = await _context.Accidents.FindAsync(accident.AccidentId);
             if (existingAccident != null)
             {
                 _context.Entry(existingAccident).CurrentValues.SetValues(accident);
@@ -61,7 +61,7 @@ namespace FleetPulse_BackEndDevelopment.Services
 
         public async Task DeactivateAccidentAsync(int accidentId)
         {
-            var accident = await _context.Accident.FindAsync(accidentId);
+            var accident = await _context.Accidents.FindAsync(accidentId);
 
             if (accident == null)
             {
@@ -84,7 +84,7 @@ namespace FleetPulse_BackEndDevelopment.Services
 
         public async Task ActivateAccidentAsync(int id)
         {
-            var accident = await _context.Accident.FindAsync(id);
+            var accident = await _context.Accidents.FindAsync(id);
             if (accident == null)
             {
                 throw new KeyNotFoundException("Accident not found.");

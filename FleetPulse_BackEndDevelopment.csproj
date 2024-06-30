@@ -46,10 +46,4 @@
     <Folder Include="Migrations\" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Compile Update="Controllers\NotificationController.cs">
-      <DependentUpon>AuthController.cs</DependentUpon>
-    </Compile>
-  </ItemGroup>
-
 </Project>

@@ -16,28 +16,28 @@ namespace FleetPulse_BackEndDevelopment.Services
 
         public async Task<IEnumerable<VehicleType?>> GetAllVehicleTypesAsync()
         {
-            return await _context.VehicleType.ToListAsync();
+            return await _context.VehicleTypes.ToListAsync();
         }
 
         public async Task<VehicleType?> GetVehicleTypeByIdAsync(int id)
         {
-            return await _context.VehicleType.FindAsync(id);
+            return await _context.VehicleTypes.FindAsync(id);
         }
 
         public Task<bool> IsVehicleTypeExist(int id)
         {
-            return Task.FromResult(_context.VehicleType.Any(x => x.VehicleTypeId == id));
+            return Task.FromResult(_context.VehicleTypes.Any(x => x.VehicleTypeId == id));
         }
 
         public bool DoesVehicleTypeExists(string vehicleType)
         {
-            var vType = _context.VehicleType.FirstOrDefault(x => x.Type == vehicleType);
+            var vType = _context.VehicleTypes.FirstOrDefault(x => x.Type == vehicleType);
             return vType != null;
         }
 
         public async Task<VehicleType?> AddVehicleTypeAsync(VehicleType? vehicleType)
         {
-            _context.VehicleType.Add(vehicleType);
+            _context.VehicleTypes.Add(vehicleType);
             await _context.SaveChangesAsync();
             return vehicleType;
         }
@@ -48,7 +48,7 @@ namespace FleetPulse_BackEndDevelopment.Services
         {
             try
             {
-                var result = _context.VehicleType.Update(vehicleType);
+                var result = _context.VehicleTypes.Update(vehicleType);
                 result.State = EntityState.Modified;
                 await _context.SaveChangesAsync();
                 return true;
@@ -60,7 +60,7 @@ namespace FleetPulse_BackEndDevelopment.Services
         }
         public async Task DeactivateVehicleTypeAsync(int vehicleTypeId)
         {
-            var vehicleType = await _context.VehicleType.FindAsync(vehicleTypeId);
+            var vehicleType = await _context.VehicleTypes.FindAsync(vehicleTypeId);
 
             if (vehicleType == null)
             {
@@ -78,12 +78,12 @@ namespace FleetPulse_BackEndDevelopment.Services
 
         private bool VehicleTypeIsActive(VehicleType vehicleType)
         {
-            return _context.VehicleType.Any(vt => vt.VehicleTypeId == vehicleType.VehicleTypeId);
+            return _context.VehicleTypes.Any(vt => vt.VehicleTypeId == vehicleType.VehicleTypeId);
         }
 
         public async Task ActivateVehicleTypeAsync(int id)
         {
-            var vehicleType = await _context.VehicleType.FindAsync(id);
+            var vehicleType = await _context.VehicleTypes.FindAsync(id);
             if (vehicleType == null)
             {
                 throw new KeyNotFoundException("Vehicle  Type not found.");

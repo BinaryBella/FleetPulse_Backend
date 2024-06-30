@@ -18,7 +18,7 @@ namespace FleetPulse.Controllers
         [HttpGet]
         public async Task<IEnumerable<Accident>> Get()
         {
-            return await _context.Accident.AsQueryable().ToListAsync();
+            return await _context.Accidents.AsQueryable().ToListAsync();
         }
         [HttpGet("{accidentid}")]
         public async Task<IActionResult> Get(int accidentid)
@@ -27,7 +27,7 @@ namespace FleetPulse.Controllers
                 return BadRequest();
 
 
-            var Accident = await _context.Accident.FirstOrDefaultAsync(m => m.accidentid == accidentid);
+            var Accident = await _context.Accidents.FirstOrDefaultAsync(m => m.accidentid == accidentid);
             if (Accident == null)
                 return NotFound();
             return Ok(Accident);
@@ -48,7 +48,7 @@ namespace FleetPulse.Controllers
             if (AccidentData == null || AccidentData.accidentid == 0)
                 return BadRequest();
 
-            var Accident = await _context.Accident.FindAsync(AccidentData.accidentid);
+            var Accident = await _context.Accidents.FindAsync(AccidentData.accidentid);
             if (Accident == null)
                 return NotFound();
             Accident.Date = AccidentData.Date;
@@ -73,10 +73,10 @@ namespace FleetPulse.Controllers
         {
             if (accidentid < 1)
                 return BadRequest();
-            var Accident = await _context.Accident.FindAsync(accidentid);
+            var Accident = await _context.Accidents.FindAsync(accidentid);
             if (Accident == null)
                 return NotFound();
-            _context.Accident.Remove(Accident);
+            _context.Accidents.Remove(Accident);
             await _context.SaveChangesAsync();
             return Ok();
 

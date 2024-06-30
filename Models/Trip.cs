@@ -19,7 +19,7 @@ namespace FleetPulse_BackEndDevelopment.Models
         //Vehicle
         public ICollection<Vehicle> Vehicles { get; set; }
         //TripUser
-        public IList<TripUser> TripUsers { get; set; }
+        public ICollection<TripUser> TripUsers { get; set; }
 
     }
 }

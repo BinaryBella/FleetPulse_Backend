@@ -21,7 +21,7 @@ namespace FleetPulse_BackEndDevelopment.Models
         public ICollection<Vehicle> Vehicles { get; set; }
         
         //AccidentUser
-        public IList<AccidentUser> AccidentUsers { get; set; }
+        public ICollection<AccidentUser> AccidentUsers { get; set; }
         public int VehicleId { get; internal set; }
         public int HelperId { get; internal set; }
         public string LossStatement { get; internal set; }

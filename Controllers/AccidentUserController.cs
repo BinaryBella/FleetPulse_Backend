@@ -22,7 +22,7 @@ namespace FleetPulse.Controllers
         [HttpGet]
         public async Task<IEnumerable<AccidentUser>> Get()
         {
-            return await _context.AccidentUser.ToListAsync();
+            return await _context.AccidentUsers.ToListAsync();
         }
 
         [HttpGet("{userid}")]
@@ -31,7 +31,7 @@ namespace FleetPulse.Controllers
             if (userid < 1)
                 return BadRequest();
 
-            var accidentUser = await _context.AccidentUser.FirstOrDefaultAsync(m => m.UserId == userid);
+            var accidentUser = await _context.AccidentUsers.FirstOrDefaultAsync(m => m.UserId == userid);
             if (accidentUser == null)
                 return NotFound();
             return Ok(accidentUser);
@@ -54,7 +54,7 @@ namespace FleetPulse.Controllers
             if (accidentUserData == null || accidentUserData.UserId == 0)
                 return BadRequest();
 
-            var accidentUser = await _context.AccidentUser.FindAsync(accidentUserData.UserId);
+            var accidentUser = await _context.AccidentUsers.FindAsync(accidentUserData.UserId);
             if (accidentUser == null)
                 return NotFound();
 
@@ -73,11 +73,11 @@ namespace FleetPulse.Controllers
             if (userid < 1)
                 return BadRequest();
 
-            var accidentUser = await _context.AccidentUser.FindAsync(userid);
+            var accidentUser = await _context.AccidentUsers.FindAsync(userid);
             if (accidentUser == null)
                 return NotFound();
 
-            _context.AccidentUser.Remove(accidentUser);
+            _context.AccidentUsers.Remove(accidentUser);
             await _context.SaveChangesAsync();
             return Ok();
         }

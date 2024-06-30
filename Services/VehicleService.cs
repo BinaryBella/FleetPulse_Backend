@@ -1,12 +1,7 @@
 ﻿using FleetPulse_BackEndDevelopment.Data;
-using FleetPulse_BackEndDevelopment.Data.DTO;
 using FleetPulse_BackEndDevelopment.Models;
 using FleetPulse_BackEndDevelopment.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace FleetPulse_BackEndDevelopment.Services
 {
@@ -24,7 +19,6 @@ namespace FleetPulse_BackEndDevelopment.Services
             var vehicleDetails = await _context.Vehicles
                 .Include(v => v.Manufacturer)
                 .Include(v => v.Type)
-                .Include(v => v.FType)
                 //.Include(v => v.FType)  // Make sure this is included if FType is a related entity
                 .Select(v => new
                 {
@@ -35,7 +29,6 @@ namespace FleetPulse_BackEndDevelopment.Services
                     ManufacturerName = v.Manufacturer.Manufacturer,
                     typeOf = v.Type.Type,
                     typeId = v.VehicleTypeId,
-                    fuelType = v.FType.FType,
                     color = v.VehicleColor,
                     status = v.Status,
                 })

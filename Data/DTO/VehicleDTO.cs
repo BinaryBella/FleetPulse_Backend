@@ -14,9 +14,9 @@ namespace FleetPulse_BackEndDevelopment.Data.DTO
         public int VehicleModelId { get; set; }
         public int VehicleTypeId { get; set; }
         public int ManufactureId { get; set; }
-        public int FuelRefillId { get; set; }
-        public string VehicleMaintenanceId { get; set; }
         public int? AccidentId { get; set; }
         public string TripId { get; set; }
+        public ICollection<int>? FuelRefillIds { get; set; }
+        public ICollection<int>? VehicleMaintenanceIds { get; set; }
     }
 }

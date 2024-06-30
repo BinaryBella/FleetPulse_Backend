@@ -5,9 +5,6 @@ using FleetPulse_BackEndDevelopment.Data;
 using FleetPulse_BackEndDevelopment.Services.Interfaces;
 using FleetPulse_BackEndDevelopment.Models.FleetPulse_BackEndDevelopment.Models;
 using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace FleetPulse_BackEndDevelopment.Services
 {
@@ -109,7 +106,7 @@ namespace FleetPulse_BackEndDevelopment.Services
                 notification.NotificationId = Guid.NewGuid().ToString();
                 notification.Date = DateTime.UtcNow;
                 notification.Time = DateTime.UtcNow.TimeOfDay;
-                await _context.FCMNotification.AddAsync(notification);
+                await _context.FCMNotifications.AddAsync(notification);
                 await _context.SaveChangesAsync();
             }
             catch (Exception ex)
@@ -122,7 +119,7 @@ namespace FleetPulse_BackEndDevelopment.Services
         {
             try
             {
-                return await _context.FCMNotification.ToListAsync();
+                return await _context.FCMNotifications.ToListAsync();
             }
             catch (Exception ex)
             {
@@ -135,7 +132,7 @@ namespace FleetPulse_BackEndDevelopment.Services
         {
             try
             {
-                var notification = await _context.FCMNotification.FindAsync(notificationId);
+                var notification = await _context.FCMNotifications.FindAsync(notificationId);
                 if (notification != null)
                 {
                     notification.Status = true;
@@ -152,7 +149,7 @@ namespace FleetPulse_BackEndDevelopment.Services
         {
             try
             {
-                var notifications = await _context.FCMNotification.ToListAsync();
+                var notifications = await _context.FCMNotifications.ToListAsync();
                 notifications.ForEach(n => n.Status = true);
                 await _context.SaveChangesAsync();
             }
@@ -166,10 +163,10 @@ namespace FleetPulse_BackEndDevelopment.Services
         {
             try
             {
-                var notification = await _context.FCMNotification.FindAsync(notificationId);
+                var notification = await _context.FCMNotifications.FindAsync(notificationId);
                 if (notification != null)
                 {
-                    _context.FCMNotification.Remove(notification);
+                    _context.FCMNotifications.Remove(notification);
                     await _context.SaveChangesAsync();
                 }
             }
@@ -183,8 +180,8 @@ namespace FleetPulse_BackEndDevelopment.Services
         {
             try
             {
-                var notifications = await _context.FCMNotification.ToListAsync();
-                _context.FCMNotification.RemoveRange(notifications);
+                var notifications = await _context.FCMNotifications.ToListAsync();
+                _context.FCMNotifications.RemoveRange(notifications);
                 await _context.SaveChangesAsync();
             }
             catch (Exception ex)
