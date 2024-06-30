@@ -48,6 +48,8 @@ void ConfigureServices(IServiceCollection services, IConfiguration configuration
     });
 
     services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
+builder.Services.AddTransient<IMailService,FleetPulse_BackEndDevelopment.Services.MailService>();
+builder.Services.AddScoped<VehicleService>();
 
     // Add controllers with options
     services.AddControllers(options =>
@@ -116,6 +118,18 @@ void ConfigureServices(IServiceCollection services, IConfiguration configuration
         options.UseSqlServer(configuration.GetConnectionString("SqlServerConnectionString"),
             sqlOptions => sqlOptions.EnableRetryOnFailure(5, TimeSpan.FromSeconds(10), null));
     });
+// Declared services
+builder.Services.AddScoped<DBSeeder>();
+builder.Services.AddScoped<IVehicleTypeService, VehicleTypeService>();
+builder.Services.AddScoped<IManufactureService, ManufactureService>();
+builder.Services.AddScoped<IVehicleService, VehicleService>();
+builder.Services.AddScoped<ITripService, TripService>();
+builder.Services.AddScoped<IDriverService, DriverService>();
+builder.Services.AddScoped<IHelperService, HelperService>();
+builder.Services.AddScoped<IStaffService, StaffService>();
+builder.Services.AddScoped<ITripUserService, TripUserService>();
+builder.Services.AddScoped<IAccidentService, AccidentService>();
+builder.Services.AddScoped<IAccidentUserService, AccidentUserService>();
 
     // Add AutoMapper
     services.AddAutoMapper(typeof(MappingProfiles));

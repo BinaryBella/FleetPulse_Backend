@@ -7,6 +7,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Data\DTO\AccidentUser.cs" />
+    <Compile Remove="Data\DTO\TripUserDTOcs.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="AutoMapper" Version="12.0.1" />
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.1" />
     <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
@@ -39,12 +44,6 @@
 
   <ItemGroup>
     <Folder Include="Migrations\" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Update="Controllers\NotificationController.cs">
-      <DependentUpon>AuthController.cs</DependentUpon>
-    </Compile>
   </ItemGroup>
 
 </Project>

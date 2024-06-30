@@ -16,22 +16,22 @@ namespace FleetPulse_BackEndDevelopment.Services
 
         public async Task<IEnumerable<VehicleMaintenanceType?>> GetAllVehicleMaintenanceTypesAsync()
         {
-            return await _context.VehicleMaintenanceType.ToListAsync();
+            return await _context.VehicleMaintenanceTypes.ToListAsync();
         }
 
         public async Task<VehicleMaintenanceType?> GetVehicleMaintenanceTypeByIdAsync(int id)
         {
-            return await _context.VehicleMaintenanceType.FindAsync(id);
+            return await _context.VehicleMaintenanceTypes.FindAsync(id);
         }
 
         public Task<bool> IsVehicleTypeExist(int id)
         {
-            return Task.FromResult(_context.VehicleMaintenanceType.Any(x => x.Id == id));
+            return Task.FromResult(_context.VehicleMaintenanceTypes.Any(x => x.Id == id));
         }
         
         public bool DoesVehicleMaintenanceTypeExists(string vehicleMaintenanceType)
         {
-            var maintenanceType = _context.VehicleMaintenanceType.FirstOrDefault(x => x.TypeName == vehicleMaintenanceType);
+            var maintenanceType = _context.VehicleMaintenanceTypes.FirstOrDefault(x => x.TypeName == vehicleMaintenanceType);
             return maintenanceType != null;
         }
 
@@ -40,7 +40,7 @@ namespace FleetPulse_BackEndDevelopment.Services
             // Log the values before saving
             Console.WriteLine($"Saving TypeName: {maintenanceType.TypeName}, Status: {maintenanceType.Status}");
 
-            _context.VehicleMaintenanceType.Add(maintenanceType);
+            _context.VehicleMaintenanceTypes.Add(maintenanceType);
             await _context.SaveChangesAsync();
             return maintenanceType;
         }
@@ -49,7 +49,7 @@ namespace FleetPulse_BackEndDevelopment.Services
         {
             try
             {
-                var result = _context.VehicleMaintenanceType.Update(maintenanceType);
+                var result = _context.VehicleMaintenanceTypes.Update(maintenanceType);
                 result.State = EntityState.Modified;
                 await _context.SaveChangesAsync();
                 return true;
@@ -61,7 +61,7 @@ namespace FleetPulse_BackEndDevelopment.Services
         }
         public async Task DeactivateMaintenanceTypeAsync(int maintenanceTypeId)
         {
-            var maintenanceType = await _context.VehicleMaintenanceType.FindAsync(maintenanceTypeId);
+            var maintenanceType = await _context.VehicleMaintenanceTypes.FindAsync(maintenanceTypeId);
 
             if (maintenanceType == null)
             {
@@ -84,7 +84,7 @@ namespace FleetPulse_BackEndDevelopment.Services
         
         public async Task ActivateVehicleMaintenanceTypeAsync(int id)
         {
-            var vehicleMaintenanceType = await _context.VehicleMaintenanceType.FindAsync(id);
+            var vehicleMaintenanceType = await _context.VehicleMaintenanceTypes.FindAsync(id);
             if (vehicleMaintenanceType == null)
             {
                 throw new KeyNotFoundException("Vehicle Maintenance Type not found.");

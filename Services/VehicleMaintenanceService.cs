@@ -104,7 +104,7 @@ namespace FleetPulse_BackEndDevelopment.Services
         private bool MaintenanceIsAssociatedWithVehicle(VehicleMaintenance maintenance)
         {
             // Check if the maintenance is associated with any vehicle
-            return _context.Vehicles.Any(v => v.VehicleMaintenance.Any(vm => vm.MaintenanceId == maintenance.MaintenanceId));
+            return _context.Vehicles.Any(v => v.VehicleMaintenances.Any(vm => vm.MaintenanceId == maintenance.MaintenanceId));
         }
     }
 }

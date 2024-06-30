@@ -1,7 +1,10 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace FleetPulse_BackEndDevelopment.Models;
 
 public class User
 {
+    [Key]
     public int UserId { get; set; }
     public string FirstName { get; set; }
     public string LastName { get; set; }
@@ -20,5 +23,7 @@ public class User
     public bool Status { get; set; }
     public IList<FuelRefill> FuelRefills { get; set; }
     public ICollection<RefreshToken> RefreshTokens { get; set; }
-
+    public ICollection<AccidentUser> AccidentUsers { get; set; }
+    public ICollection<TripUser> TripUsers { get; set; }
+    public ICollection<FuelRefillUser> FuelRefillUsers { get; set; }
 }

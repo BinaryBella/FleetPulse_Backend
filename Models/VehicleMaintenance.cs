@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace FleetPulse_BackEndDevelopment.Models
@@ -15,13 +16,12 @@ namespace FleetPulse_BackEndDevelopment.Models
         public string SpecialNotes { get; set; }
         public bool Status { get; set; }
         
-        //Vehicle
+        // Vehicle
         public int VehicleId { get; set; }
         public Vehicle Vehicle { get; set; }
         
-        //Vehicle_Maintenance_Type
-         public int VehicleMaintenanceTypeId { get; set; }
-         public VehicleMaintenanceType VehicleMaintenanceType { get; set; }
-         
+        // Vehicle_Maintenance_Type
+        public int VehicleMaintenanceTypeId { get; set; }
+        public VehicleMaintenanceType VehicleMaintenanceType { get; set; }
     }
 }
