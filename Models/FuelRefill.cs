@@ -1,23 +1,22 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using FleetPulse_BackEndDevelopment.Models;
 
-namespace FleetPulse_BackEndDevelopment.Models
+public class FuelRefill
 {
-    public class FuelRefill
-    {
-        [Key]
-        public int FuelRefillId { get; set; }
-        public DateTime Date { get; set; }
-        public TimeSpan Time { get; set; }
-        public double LiterCount { get; set; }
-        public string FType { get; set; }
-        public decimal Cost { get; set; }
+    public int FuelRefillId { get; set; }
+    public DateTime Date { get; set; }
+    public TimeSpan Time { get; set; }
+    public double LiterCount { get; set; }
+    public string FType { get; set; }
+    public decimal Cost { get; set; }
+    public bool Status { get; set; }
+    public int VehicleId { get; set; }
+    public Vehicle Vehicle { get; set; }
+    public int UserId { get; set; }
+    public User User { get; set; }
+    
+    //Vehicle
+    public ICollection<Vehicle> Vehicles { get; set; }
         
-        public bool Status { get; set; }
-        
-        //Vehicle
-        public ICollection<Vehicle> Vehicles { get; set; }
-        
-        //FuelRefillUser
-        public IList<FuelRefillUser> FuelRefillUsers { get; set; }
-    }
+    //FuelRefillUser
+    public IList<FuelRefillUser> FuelRefillUsers { get; set; }
 }

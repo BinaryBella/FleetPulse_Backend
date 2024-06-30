@@ -9,7 +9,7 @@ namespace FleetPulse_BackEndDevelopment.Data.Config
         public void Configure(EntityTypeBuilder<User> builder)
         {
             builder.ToTable("Users"); // Set the table name
-
+            
             // Set primary key
             builder.HasKey(u => u.UserId);
 
@@ -31,7 +31,7 @@ namespace FleetPulse_BackEndDevelopment.Data.Config
             builder.Property(u => u.Status).IsRequired();
 
 
-
+            
         }
     }
 }

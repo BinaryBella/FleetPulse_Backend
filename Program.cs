@@ -1,118 +1,125 @@
-using System.Configuration;
-using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using Quartz;
 using System.Text;
-using Microsoft.OpenApi.Models;
+using FleetPulse_BackEndDevelopment.Configuration;
 using FleetPulse_BackEndDevelopment.Data;
 using FleetPulse_BackEndDevelopment.Filters;
-using Microsoft.EntityFrameworkCore;
-using AutoMapper;
-using FleetPulse_BackEndDevelopment.Configuration;
 using FleetPulse_BackEndDevelopment.Helpers;
-using Microsoft.IdentityModel.Tokens;
+using FleetPulse_BackEndDevelopment.Quartz.Jobs;
 using FleetPulse_BackEndDevelopment.Services;
 using FleetPulse_BackEndDevelopment.Services.Interfaces;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+using FleetPulse_BackEndDevelopment.Utilities;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Configure logging
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
+
 // Add services to the container.
-builder.Services.AddControllers(options =>
-                    options.SuppressImplicitRequiredAttributeForNonNullableReferenceTypes = true)
-                .AddNewtonsoftJson(options =>
-                    options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
-                );
+ConfigureServices(builder.Services, builder.Configuration);
 
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
+FirebaseInitializer.InitializeFirebase();
 
-//email configuration
-builder.Services.Configure<MailSettings>(builder.Configuration.GetSection("MailSettings"));
+var app = builder.Build();
 
+// Configure the HTTP request pipeline.
+Configure(app, app.Environment);
+
+app.Run();
+
+void ConfigureServices(IServiceCollection services, IConfiguration configuration)
+{
+    // Add Quartz.NET
+    services.AddQuartz(q =>
+    {
+        q.UseMicrosoftDependencyInjectionJobFactory();
+
+        var jobKey = new JobKey("SendMaintenanceNotificationJob");
+        q.AddJob<SendMaintenanceNotificationJob>(opts => opts.WithIdentity(jobKey));
+        q.AddTrigger(opts => opts
+            .ForJob(jobKey)
+            .WithIdentity("SendMaintenanceNotificationTrigger")
+            .WithSimpleSchedule(x => x
+                .WithIntervalInSeconds(15) // Runs every 10 seconds for testing purposes
+                .RepeatForever()));
+    });
+
+    services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
 builder.Services.AddTransient<IMailService,FleetPulse_BackEndDevelopment.Services.MailService>();
 builder.Services.AddScoped<VehicleService>();
 
-
-builder.Services.AddSwaggerGen(option =>
-{
-    option.SwaggerDoc("v1", new OpenApiInfo { Title = "User Authentication", Version = "v1" });
-    option.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    // Add controllers with options
+    services.AddControllers(options =>
     {
-        In = ParameterLocation.Header,
-        Description = "Please enter a valid token",
-        Name = "Authorization",
-        Type = SecuritySchemeType.Http,
-        BearerFormat = "JWT",
-        Scheme = "bearer"
+        options.SuppressImplicitRequiredAttributeForNonNullableReferenceTypes = true;
+    }).AddNewtonsoftJson(options =>
+    {
+        options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
     });
 
-    option.OperationFilter<AuthResponsesOperationFilter>();
-});
-
-// Add Db context
-var dbProvider = builder.Configuration.GetConnectionString("Provider");
-builder.Services.AddDbContext<FleetPulseDbContext>(options =>
-{
-    if (dbProvider == "SqlServer")
+    // Add Swagger
+    services.AddSwaggerGen(options =>
     {
-        object value = options.UseSqlServer(builder.Configuration.GetConnectionString("SqlServerConnectionString"), b =>
+        options.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo { Title = "Your API", Version = "v1" });
+        options.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
         {
-            b.EnableRetryOnFailure(5, TimeSpan.FromSeconds(10), null);
+            In = Microsoft.OpenApi.Models.ParameterLocation.Header,
+            Description = "Please enter a valid JWT token",
+            Name = "Authorization",
+            Type = Microsoft.OpenApi.Models.SecuritySchemeType.Http,
+            BearerFormat = "JWT",
+            Scheme = "bearer"
         });
-    }
-});
 
-var serviceProvider = builder.Services.BuildServiceProvider();
-var logger = serviceProvider.GetRequiredService<ILogger<ControllerBase>>();
-builder.Services.AddSingleton(typeof(ILogger), logger);
+        options.OperationFilter<AuthResponsesOperationFilter>();
+        options.ResolveConflictingActions(apiDescriptions => apiDescriptions.First());
+        options.IgnoreObsoleteActions();
+        options.IgnoreObsoleteProperties();
+        options.CustomSchemaIds(type => type.FullName);
+    });
 
-var config = new MapperConfiguration(cfg =>
-{
-    cfg.AddProfile(new MappingProfiles());
-});
-
-var mapper = config.CreateMapper();
-builder.Services.AddSingleton(mapper);
-
-builder.Services.AddAuthentication(options =>
-{
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-}).AddJwtBearer(o =>
-{
-    o.TokenValidationParameters = new TokenValidationParameters
+    // Add authentication
+    services.AddAuthentication(options =>
     {
-        ValidIssuer = builder.Configuration["Jwt:Issuer"],
-        ValidAudience = builder.Configuration["Jwt:Audience"],
-        IssuerSigningKey = new SymmetricSecurityKey
-        (Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"])),
-        ValidateIssuer = true,
-        ValidateAudience = true,
-        ValidateLifetime = false,
-        ValidateIssuerSigningKey = true
-    };
-});
-
-builder.Services.AddAuthorization();
-
-var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
-
-//Add CORS
-builder.Services.AddCors(options =>
-{
-    options.AddDefaultPolicy(
-        builder =>
+        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+    }).AddJwtBearer(o =>
+    {
+        o.TokenValidationParameters = new TokenValidationParameters
         {
-            //you can configure your custom policy
-            builder.AllowAnyOrigin()
-            .AllowAnyHeader()
-            .AllowAnyMethod();
-        });
-});
+            ValidIssuer = configuration["Jwt:Issuer"],
+            ValidAudience = configuration["Jwt:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Key"])),
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true
+        };
+    });
 
+    services.AddAuthorization();
+
+    // Add CORS
+    services.AddCors(options =>
+    {
+        options.AddDefaultPolicy(builder =>
+        {
+            builder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
+        });
+    });
+
+    // Add DbContext
+    services.AddDbContext<FleetPulseDbContext>(options =>
+    {
+        options.UseSqlServer(configuration.GetConnectionString("SqlServerConnectionString"),
+            sqlOptions => sqlOptions.EnableRetryOnFailure(5, TimeSpan.FromSeconds(10), null));
+    });
 // Declared services
 builder.Services.AddScoped<DBSeeder>();
-builder.Services.AddTransient<AuthService>();
 builder.Services.AddScoped<IVehicleTypeService, VehicleTypeService>();
 builder.Services.AddScoped<IManufactureService, ManufactureService>();
 builder.Services.AddScoped<IVehicleService, VehicleService>();
@@ -124,20 +131,41 @@ builder.Services.AddScoped<ITripUserService, TripUserService>();
 builder.Services.AddScoped<IAccidentService, AccidentService>();
 builder.Services.AddScoped<IAccidentUserService, AccidentUserService>();
 
-var app = builder.Build();
+    // Add AutoMapper
+    services.AddAutoMapper(typeof(MappingProfiles));
 
-app.UseHttpsRedirection();
-app.UseAuthentication();
-app.UseAuthorization();
-app.UseCors();
+    // Register services
+    services.Configure<MailSettings>(configuration.GetSection("MailSettings"));
+    services.AddTransient<IMailService, MailService>();
+    services.AddTransient<IVerificationCodeService, VerificationCodeService>();
+    services.AddTransient<IAuthService, AuthService>();
+    services.AddScoped<DBSeeder>();
+    services.AddScoped<IVehicleMaintenanceService, VehicleMaintenanceService>();
+    services.AddScoped<IVehicleMaintenanceTypeService, VehicleMaintenanceTypeService>();
+    services.AddScoped<IFuelRefillService, FuelRefillService>();
+    services.AddScoped<IPushNotificationService, PushNotificationService>();
+    services.AddScoped<IEmailService, EmailService>();
+    services.AddScoped<IVehicleMaintenanceConfigurationService, VehicleMaintenanceConfigurationService>();
+    services.AddScoped<SendMaintenanceNotificationJob>();
+    services.AddScoped<IDeviceTokenService, DeviceTokenService>();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-    app.UseSeedDB();
+    // Add logging (if needed)
+    services.AddLogging();
 }
 
-app.MapControllers();
-app.Run();
+void Configure(WebApplication app, IWebHostEnvironment env)
+{
+    app.UseHttpsRedirection();
+    app.UseAuthentication();
+    app.UseAuthorization();
+    app.UseCors();
+
+    if (env.IsDevelopment())
+    {
+        app.UseSwagger();
+        app.UseSwaggerUI();
+        app.UseSeedDB();
+    }
+
+    app.MapControllers();
+}

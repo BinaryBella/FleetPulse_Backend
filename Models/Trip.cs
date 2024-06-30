@@ -5,7 +5,6 @@ namespace FleetPulse_BackEndDevelopment.Models
     public class Trip
     {
         internal int tripid;
-
         [Key]
         public string TripId { get; set; }
         public DateTime Date { get; set; }

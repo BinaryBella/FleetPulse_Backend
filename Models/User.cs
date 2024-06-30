@@ -18,16 +18,10 @@ public class User
     public string HashedPassword { get; set; }
     public string EmailAddress { get; set; }
     public string EmergencyContact { get; set; }
-    public string? JobTitle { get; set; }
+    public string JobTitle { get; set; }
     public byte[]? ProfilePicture { get; set; }
     public bool Status { get; set; }
-    //TripUser
-    public IList<TripUser> TripUsers { get; set; }
-    
-    //FuelRefillUser
-    public IList<FuelRefillUser> FuelRefillUsers { get; set; }
-    
-    //AccidentUser
-    public IList<AccidentUser> AccidentUsers { get; set; }
+    public IList<FuelRefill> FuelRefills { get; set; }
+    public ICollection<RefreshToken> RefreshTokens { get; set; }
 
 }

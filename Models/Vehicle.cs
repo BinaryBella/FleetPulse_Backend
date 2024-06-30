@@ -30,5 +30,10 @@ namespace FleetPulse_BackEndDevelopment.Models
         //Trip
         public string? TripId { get; set; }
         public Trip? Trip { get; set; }
+        
+        //Vehicle_Maintenance
+        public ICollection<VehicleMaintenance> VehicleMaintenance { get; set; }
+        //fuelrefill
+        public ICollection<FuelRefill> FuelRefills { get; set; }
     }
 }
