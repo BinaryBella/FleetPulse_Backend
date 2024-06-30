@@ -10,14 +10,11 @@ namespace FleetPulse_BackEndDevelopment.Controllers
     public class VehicleMaintenanceTypeController : ControllerBase
     {
         private readonly IVehicleMaintenanceTypeService _maintenanceTypeService;
-        private readonly IPushNotificationService _pushNotificationService;
         private readonly IConfiguration _configuration;
 
-        public VehicleMaintenanceTypeController(IVehicleMaintenanceTypeService maintenanceTypeService,
-            IPushNotificationService pushNotificationService, IConfiguration configuration)
+        public VehicleMaintenanceTypeController(IVehicleMaintenanceTypeService maintenanceTypeService, IConfiguration configuration)
         {
             _maintenanceTypeService = maintenanceTypeService;
-            _pushNotificationService = pushNotificationService;
             _configuration = configuration;
         }
 
@@ -51,7 +48,6 @@ namespace FleetPulse_BackEndDevelopment.Controllers
                     Status = maintenanceTypeDto.Status
                 };
 
-                // Log the values
                 Console.WriteLine(
                     $"Received TypeName: {vehicleMaintenanceType.TypeName}, Status: {vehicleMaintenanceType.Status}");
 
@@ -68,18 +64,6 @@ namespace FleetPulse_BackEndDevelopment.Controllers
 
                 if (addedMaintenanceType != null)
                 {
-                    var fcmDeviceTokens = _configuration.GetSection("FCMDeviceTokens").Get<string[]>();
-                    if (fcmDeviceTokens != null && fcmDeviceTokens.Length > 0)
-                    {
-                        var title = "New Vehicle Maintenance Type Added";
-                        var message = $"The maintenance type '{maintenanceTypeDto.TypeName}' has been added.";
-
-                        foreach (var fcmDeviceToken in fcmDeviceTokens)
-                        {
-                            await _pushNotificationService.SendNotificationAsync(fcmDeviceToken, title, message);
-                        }
-                    }
-
                     response.Status = true;
                     response.Message = "Added Successfully";
                     return new JsonResult(response);

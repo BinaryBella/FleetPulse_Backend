@@ -22,6 +22,16 @@ namespace FleetPulse_BackEndDevelopment.Controllers
             return Ok(tokens);
         }
 
+        [HttpGet("{id}")]
+        public async Task<ActionResult<DeviceToken>> GetDeviceTokenById(int id)
+        {
+            var token = await _deviceTokenService.GetTokenByIdAsync(id);
+            if (token == null)
+                return NotFound();
+
+            return Ok(token);
+        }
+
         [HttpPost]
         public async Task<ActionResult> AddDeviceToken([FromBody] DeviceToken token)
         {
@@ -29,7 +39,7 @@ namespace FleetPulse_BackEndDevelopment.Controllers
                 return BadRequest(ModelState);
 
             await _deviceTokenService.AddTokenAsync(token);
-            return CreatedAtAction(nameof(GetDeviceTokens), new { id = token.Id }, token);
+            return CreatedAtAction(nameof(GetDeviceTokenById), new { id = token.Id }, token);
         }
     }
 }
