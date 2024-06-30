@@ -1,10 +1,11 @@
 using FleetPulse_BackEndDevelopment.Models;
 
-namespace FleetPulse_BackEndDevelopment.Services.Interfaces;
-
-public interface IDeviceTokenService
+namespace FleetPulse_BackEndDevelopment.Services.Interfaces
 {
-    Task<IEnumerable<DeviceToken>> GetAllTokensAsync();
-    Task AddTokenAsync(DeviceToken token);
-    Task<DeviceToken> GetTokenByIdAsync(int id);
+    public interface IDeviceTokenService
+    {
+        Task<IEnumerable<DeviceToken>> GetAllTokensAsync();
+        Task AddTokenAsync(DeviceToken token);
+        Task<DeviceToken> GetTokenByIdAsync(int id);
+    }
 }

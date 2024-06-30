@@ -19,5 +19,6 @@ public class User
     public byte[]? ProfilePicture { get; set; }
     public bool Status { get; set; }
     public IList<FuelRefill> FuelRefills { get; set; }
-    public IList<RefreshToken> RefreshTokens { get; set; }
+    public ICollection<RefreshToken> RefreshTokens { get; set; }
+
 }

@@ -8,18 +8,18 @@ namespace FleetPulse_BackEndDevelopment.Quartz.Jobs
     {
         private readonly IPushNotificationService _pushNotificationService;
         private readonly IVehicleMaintenanceConfigurationService _vehicleMaintenanceConfigurationService;
-        private readonly IConfiguration _configuration;
+        private readonly IDeviceTokenService _deviceTokenService;
         private readonly ILogger<SendMaintenanceNotificationJob> _logger;
 
         public SendMaintenanceNotificationJob(
             IPushNotificationService pushNotificationService,
             IVehicleMaintenanceConfigurationService vehicleMaintenanceConfigurationService,
-            IConfiguration configuration,
+            IDeviceTokenService deviceTokenService,
             ILogger<SendMaintenanceNotificationJob> logger)
         {
             _pushNotificationService = pushNotificationService ?? throw new ArgumentNullException(nameof(pushNotificationService));
             _vehicleMaintenanceConfigurationService = vehicleMaintenanceConfigurationService ?? throw new ArgumentNullException(nameof(vehicleMaintenanceConfigurationService));
-            _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
+            _deviceTokenService = deviceTokenService ?? throw new ArgumentNullException(nameof(deviceTokenService));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
@@ -31,11 +31,11 @@ namespace FleetPulse_BackEndDevelopment.Quartz.Jobs
 
                 if (dueTasks.Count == 0)
                 {
-                    _logger.LogInformation("No maintenance tasks are due kk.");
+                    _logger.LogInformation("No maintenance tasks are due.");
                     return;
                 }
 
-                var deviceTokens = _configuration.GetSection("FCMDeviceTokens").Get<List<string>>();
+                var deviceTokens = await _deviceTokenService.GetAllTokensAsync();
 
                 foreach (var task in dueTasks)
                 {
@@ -43,14 +43,14 @@ namespace FleetPulse_BackEndDevelopment.Quartz.Jobs
 
                     foreach (var token in deviceTokens)
                     {
-                        await _pushNotificationService.SendNotificationAsync(token, "Maintenance Due", message);
+                        await _pushNotificationService.SendNotificationAsync(token.Token, "Maintenance Due", message);
                     }
                 }
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error sending maintenance notifications.");
-                throw; // Rethrow the exception to propagate it up
+                throw;
             }
         }
     }

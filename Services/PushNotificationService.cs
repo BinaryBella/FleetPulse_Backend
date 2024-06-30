@@ -5,6 +5,9 @@ using FleetPulse_BackEndDevelopment.Data;
 using FleetPulse_BackEndDevelopment.Services.Interfaces;
 using FleetPulse_BackEndDevelopment.Models.FleetPulse_BackEndDevelopment.Models;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace FleetPulse_BackEndDevelopment.Services
 {
@@ -13,18 +16,18 @@ namespace FleetPulse_BackEndDevelopment.Services
         private readonly FleetPulseDbContext _context;
         private readonly ILogger<PushNotificationService> _logger;
         private readonly IVehicleMaintenanceConfigurationService _vehicleMaintenanceConfigurationService;
-        private readonly IConfiguration _configuration;
+        private readonly IDeviceTokenService _deviceTokenService;
 
         public PushNotificationService(
             FleetPulseDbContext context,
             ILogger<PushNotificationService> logger,
             IVehicleMaintenanceConfigurationService vehicleMaintenanceConfigurationService,
-            IConfiguration configuration)
+            IDeviceTokenService deviceTokenService)
         {
             _context = context;
             _logger = logger;
             _vehicleMaintenanceConfigurationService = vehicleMaintenanceConfigurationService;
-            _configuration = configuration;
+            _deviceTokenService = deviceTokenService;
 
             if (FirebaseApp.DefaultInstance == null)
             {
@@ -79,26 +82,26 @@ namespace FleetPulse_BackEndDevelopment.Services
         public async Task SendMaintenanceNotificationAsync()
         {
             var dueTasks = await _vehicleMaintenanceConfigurationService.GetDueMaintenanceTasksAsync();
-        
+
             if (dueTasks == null || dueTasks.Count == 0)
             {
                 _logger.LogInformation("No maintenance tasks are due.");
                 return;
             }
-        
-            var deviceTokens = _configuration.GetSection("FCMDeviceTokens").Get<List<string>>();
-        
+
+            var deviceTokens = await _deviceTokenService.GetAllTokensAsync();
+
             foreach (var task in dueTasks)
             {
                 var message = $"Vehicle {task.VehicleId} requires maintenance for {task.TypeName}.";
-        
+
                 foreach (var token in deviceTokens)
                 {
-                    await SendNotificationAsync(token, "Maintenance Due", message);
+                    await SendNotificationAsync(token.Token, "Maintenance Due", message);
                 }
             }
-        } 
-        
+        }
+
         public async Task SaveNotificationAsync(FCMNotification notification)
         {
             try
