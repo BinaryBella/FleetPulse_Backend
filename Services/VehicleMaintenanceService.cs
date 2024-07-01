@@ -17,11 +17,10 @@ namespace FleetPulse_BackEndDevelopment.Services
         {
             _context = context;
         }
+
         public async Task<List<VehicleMaintenanceDTO>> GetAllVehicleMaintenancesAsync()
         {
             return await _context.VehicleMaintenances
-                .Include(vm => vm.Vehicle)
-                .Include(vm => vm.VehicleMaintenanceType)
                 .Select(vm => new VehicleMaintenanceDTO
                 {
                     MaintenanceId = vm.MaintenanceId,
@@ -31,25 +30,55 @@ namespace FleetPulse_BackEndDevelopment.Services
                     ServiceProvider = vm.ServiceProvider,
                     SpecialNotes = vm.SpecialNotes,
                     VehicleId = vm.VehicleId,
-                    VehicleRegistrationNo = vm.Vehicle.VehicleRegistrationNo,
                     VehicleMaintenanceTypeId = vm.VehicleMaintenanceTypeId,
-                    TypeName = vm.VehicleMaintenanceType.TypeName,
                     Status = vm.Status,
+                    VehicleRegistrationNo = _context.Vehicles
+                        .Where(v => v.VehicleId == vm.VehicleId)
+                        .Select(v => v.VehicleRegistrationNo)
+                        .FirstOrDefault(),
+                    TypeName = _context.VehicleMaintenanceType
+                        .Where(mt => mt.Id == vm.VehicleMaintenanceTypeId)
+                        .Select(mt => mt.TypeName)
+                        .FirstOrDefault()
                 }).ToListAsync();
         }
 
-
-
-        public async Task<VehicleMaintenance> GetVehicleMaintenanceByIdAsync(int MaintenanceId)
+        public async Task<VehicleMaintenance> GetVehicleMaintenanceByIdAsync(int maintenanceId)
         {
-            return await _context.VehicleMaintenances.FindAsync(MaintenanceId);
+            return await _context.VehicleMaintenances.FindAsync(maintenanceId);
         }
 
         public async Task<VehicleMaintenance> AddVehicleMaintenanceAsync(VehicleMaintenance maintenance)
         {
-            _context.VehicleMaintenances.Add(maintenance);
-            await _context.SaveChangesAsync();
-            return maintenance;
+            try
+            {
+                var vehicleExists = await _context.Vehicles.AnyAsync(v => v.VehicleId == maintenance.VehicleId);
+                var maintenanceTypeExists = await _context.VehicleMaintenanceType.AnyAsync(mt => mt.Id == maintenance.VehicleMaintenanceTypeId);
+
+                if (!vehicleExists)
+                {
+                    throw new Exception("Invalid VehicleId.");
+                }
+
+                if (!maintenanceTypeExists)
+                {
+                    throw new Exception("Invalid VehicleMaintenanceTypeId.");
+                }
+
+                _context.VehicleMaintenances.Add(maintenance);
+                await _context.SaveChangesAsync();
+                return maintenance;
+            }
+            catch (DbUpdateException ex)
+            {
+                Console.WriteLine($"An error occurred while adding the vehicle maintenance: {ex.Message}");
+                throw new Exception("An error occurred while adding the vehicle maintenance.", ex);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An unexpected error occurred: {ex.Message}");
+                throw new Exception("An unexpected error occurred while adding the vehicle maintenance.", ex);
+            }
         }
 
         public async Task<Vehicle> GetByRegNoAsync(string regNo)
@@ -103,8 +132,23 @@ namespace FleetPulse_BackEndDevelopment.Services
 
         private bool MaintenanceIsAssociatedWithVehicle(VehicleMaintenance maintenance)
         {
-            // Check if the maintenance is associated with any vehicle
-            return _context.Vehicles.Any(v => v.VehicleMaintenance.Any(vm => vm.MaintenanceId == maintenance.MaintenanceId));
+            return _context.Vehicles.Any(v => v.VehicleMaintenances.Any(vm => vm.MaintenanceId == maintenance.MaintenanceId));
+        }
+
+        public async Task<string> GetRegNoByVehicleIdAsync(int vehicleId)
+        {
+            return await _context.Vehicles
+                .Where(v => v.VehicleId == vehicleId)
+                .Select(v => v.VehicleRegistrationNo)
+                .FirstOrDefaultAsync();
+        }
+
+        public async Task<string> GetTypeNameByMaintenanceTypeIdAsync(int maintenanceTypeId)
+        {
+            return await _context.VehicleMaintenanceType
+                .Where(mt => mt.Id == maintenanceTypeId)
+                .Select(mt => mt.TypeName)
+                .FirstOrDefaultAsync();
         }
     }
 }

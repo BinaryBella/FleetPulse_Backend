@@ -2,6 +2,7 @@ using FleetPulse_BackEndDevelopment.Data.DTO;
 using FleetPulse_BackEndDevelopment.Models;
 using FleetPulse_BackEndDevelopment.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using System.Threading.Tasks;
 
 namespace FleetPulse_BackEndDevelopment.Controllers
 {
@@ -65,7 +66,7 @@ namespace FleetPulse_BackEndDevelopment.Controllers
             }
         }
 
-        [HttpPut("{id}")] // Add this method
+        [HttpPut("{id}")]
         public async Task<IActionResult> UpdateVehicleMaintenanceAsync(int id,
             [FromBody] VehicleMaintenanceDTO vehicleMaintenance)
         {

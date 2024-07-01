@@ -9,11 +9,9 @@ namespace FleetPulse_BackEndDevelopment.Data.DTO
         public string ServiceProvider { get; set; }
         public string SpecialNotes { get; set; }
         public int VehicleId { get; set; }
-        public string? VehicleRegistrationNo { get; set; }
+        public string VehicleRegistrationNo { get; set; }
         public int VehicleMaintenanceTypeId { get; set; }
-        public string? TypeName { get; set; }
-
+        public string TypeName { get; set; }
         public bool Status { get; set; }
     }
 }
-

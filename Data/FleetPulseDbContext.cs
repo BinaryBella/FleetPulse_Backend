@@ -53,7 +53,7 @@ namespace FleetPulse_BackEndDevelopment.Data
 
             modelBuilder.Entity<VehicleMaintenance>()
                 .HasOne(v => v.Vehicle)
-                .WithMany(vm => vm.VehicleMaintenance)
+                .WithMany(vm => vm.VehicleMaintenances)
                 .HasForeignKey(vm => vm.VehicleId);
 
             modelBuilder.Entity<VehicleMaintenance>()
