@@ -24,7 +24,8 @@ namespace FleetPulse_BackEndDevelopment.Controllers
         private readonly ILogger<AuthController> _logger;
         private readonly MailSettings _mailSettings;
 
-        public AuthController(IAuthService authService,
+        public AuthController(
+            IAuthService authService,
             IMailService mailService,
             IEmailService emailService,
             IVerificationCodeService verificationCodeService,
@@ -38,8 +39,8 @@ namespace FleetPulse_BackEndDevelopment.Controllers
             _emailService = emailService;
             _verificationCodeService = verificationCodeService;
             _context = context;
-            _logger = logger;
             _configuration = configuration;
+            _logger = logger;
             _mailSettings = mailSettings.Value;
         }
 
@@ -90,7 +91,11 @@ namespace FleetPulse_BackEndDevelopment.Controllers
                         var refreshToken = await _authService.GenerateRefreshToken(user.UserId);
 
                         response.Data = new
-                            { AccessToken = accessToken, RefreshToken = refreshToken, JobTitle = user.JobTitle };
+                        {
+                            AccessToken = accessToken,
+                            RefreshToken = refreshToken,
+                            JobTitle = user.JobTitle
+                        };
                         return new JsonResult(response);
                     }
                     else
@@ -253,32 +258,40 @@ namespace FleetPulse_BackEndDevelopment.Controllers
                 return BadRequest("Invalid request.");
             }
 
-            var result = await _authService.ResetDriverPasswordAsync(request.EmailAddress, request.NewPassword);
-
-            if (result)
+            try
             {
-                var mailRequest = new MailRequest
+                // Check if the email address exists
+                var emailExists = _authService.DoesEmailExists(request.EmailAddress);
+                if (!emailExists)
                 {
-                    ToEmail = request.EmailAddress,
-                    Subject = "Password Reset Notification",
-                    Body = request.NewPassword
-                };
+                    return BadRequest(new ApiResponse { Status = false, Message = "Email not found" });
+                }
 
-                try
+                // Reset the password
+                var result = await _authService.ResetDriverPasswordAsync(request.EmailAddress, request.NewPassword);
+                if (result)
                 {
+                    // Send email notification
+                    var mailRequest = new MailRequest
+                    {
+                        ToEmail = request.EmailAddress,
+                        Subject = "Password Reset Notification",
+                        Body =  request.NewPassword
+                    };
+
                     await _emailService.SendEmailAsync(mailRequest);
-                }
-                catch (Exception ex)
-                {
-                    // Handle email sending error
-                    return StatusCode(500, "Password reset successful but failed to send email notification.");
-                }
 
-                return Ok(new { Status = true, Message = "Password reset successful." });
+                    return Ok(new ApiResponse { Status = true, Message = "Password reset successful." });
+                }
+                else
+                {
+                    return BadRequest(new ApiResponse { Status = false, Message = "Failed to reset password." });
+                }
             }
-            else
+            catch (Exception ex)
             {
-                return BadRequest(new { Status = false, Error = "Failed to reset password." });
+                _logger.LogError(ex, "An error occurred while resetting driver password: {Message}", ex.Message);
+                return StatusCode(500, new ApiResponse { Status = false, Error = "An error occurred while resetting password." });
             }
         }
         

@@ -2,12 +2,9 @@ using FirebaseAdmin;
 using FirebaseAdmin.Messaging;
 using Google.Apis.Auth.OAuth2;
 using FleetPulse_BackEndDevelopment.Data;
+using FleetPulse_BackEndDevelopment.Models;
 using FleetPulse_BackEndDevelopment.Services.Interfaces;
-using FleetPulse_BackEndDevelopment.Models.FleetPulse_BackEndDevelopment.Models;
 using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace FleetPulse_BackEndDevelopment.Services
 {
@@ -16,18 +13,18 @@ namespace FleetPulse_BackEndDevelopment.Services
         private readonly FleetPulseDbContext _context;
         private readonly ILogger<PushNotificationService> _logger;
         private readonly IVehicleMaintenanceConfigurationService _vehicleMaintenanceConfigurationService;
-        private readonly IDeviceTokenService _deviceTokenService;
+        private readonly IConfiguration _configuration;
 
         public PushNotificationService(
             FleetPulseDbContext context,
             ILogger<PushNotificationService> logger,
             IVehicleMaintenanceConfigurationService vehicleMaintenanceConfigurationService,
-            IDeviceTokenService deviceTokenService)
+            IConfiguration configuration)
         {
             _context = context;
             _logger = logger;
             _vehicleMaintenanceConfigurationService = vehicleMaintenanceConfigurationService;
-            _deviceTokenService = deviceTokenService;
+            _configuration = configuration;
 
             if (FirebaseApp.DefaultInstance == null)
             {
@@ -38,7 +35,7 @@ namespace FleetPulse_BackEndDevelopment.Services
             }
         }
 
-        public async Task SendNotificationAsync(string fcmDeviceToken, string title, string message)
+        public async Task SendNotificationAsync(string fcmDeviceToken, string title, string message, int userId)
         {
             if (string.IsNullOrEmpty(fcmDeviceToken))
             {
@@ -60,10 +57,20 @@ namespace FleetPulse_BackEndDevelopment.Services
             {
                 var response = await FirebaseMessaging.DefaultInstance.SendAsync(notification);
                 _logger.LogInformation("Successfully sent message: " + response);
+
+                // Save notification to the database
+                var dbNotification = new FCMNotification
+                {
+                    Title = title,
+                    Message = message,
+                    UserName = await GetUserNameByIdAsync(userId),
+                    Status = false
+                };
+                await SaveNotificationAsync(dbNotification);
             }
             catch (FirebaseMessagingException ex)
             {
-                if (ex.MessagingErrorCode == MessagingErrorCode.Unregistered || 
+                if (ex.MessagingErrorCode == MessagingErrorCode.Unregistered ||
                     ex.MessagingErrorCode == MessagingErrorCode.InvalidArgument)
                 {
                     _logger.LogError(ex, $"Invalid or unregistered FCM Device Token: {fcmDeviceToken}");
@@ -79,6 +86,12 @@ namespace FleetPulse_BackEndDevelopment.Services
             }
         }
 
+        private async Task<string> GetUserNameByIdAsync(int userId)
+        {
+            var user = await _context.Users.FindAsync(userId);
+            return user?.UserName ?? "Unknown";
+        }
+
         public async Task SendMaintenanceNotificationAsync()
         {
             var dueTasks = await _vehicleMaintenanceConfigurationService.GetDueMaintenanceTasksAsync();
@@ -89,7 +102,7 @@ namespace FleetPulse_BackEndDevelopment.Services
                 return;
             }
 
-            var deviceTokens = await _deviceTokenService.GetAllTokensAsync();
+            var deviceTokens = _configuration.GetSection("DeviceTokens").Get<List<string>>();
 
             foreach (var task in dueTasks)
             {
@@ -97,7 +110,7 @@ namespace FleetPulse_BackEndDevelopment.Services
 
                 foreach (var token in deviceTokens)
                 {
-                    await SendNotificationAsync(token.Token, "Maintenance Due", message);
+                    await SendNotificationAsync(token, "Maintenance Due", message, 0);
                 }
             }
         }
@@ -109,12 +122,16 @@ namespace FleetPulse_BackEndDevelopment.Services
                 notification.NotificationId = Guid.NewGuid().ToString();
                 notification.Date = DateTime.UtcNow;
                 notification.Time = DateTime.UtcNow.TimeOfDay;
-                await _context.FCMNotification.AddAsync(notification);
-                await _context.SaveChangesAsync();
+
+                _context.FCMNotifications.Add(notification); // Ensure you're adding the notification to the context
+                await _context.SaveChangesAsync(); // Save changes to persist the notification
+
+                _logger.LogInformation("Notification saved successfully.");
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error saving notification.");
+                throw; // Ensure any exceptions are properly handled or logged
             }
         }
 
@@ -122,7 +139,7 @@ namespace FleetPulse_BackEndDevelopment.Services
         {
             try
             {
-                return await _context.FCMNotification.ToListAsync();
+                return await _context.FCMNotifications.ToListAsync();
             }
             catch (Exception ex)
             {
@@ -135,7 +152,7 @@ namespace FleetPulse_BackEndDevelopment.Services
         {
             try
             {
-                var notification = await _context.FCMNotification.FindAsync(notificationId);
+                var notification = await _context.FCMNotifications.FindAsync(notificationId);
                 if (notification != null)
                 {
                     notification.Status = true;
@@ -152,7 +169,7 @@ namespace FleetPulse_BackEndDevelopment.Services
         {
             try
             {
-                var notifications = await _context.FCMNotification.ToListAsync();
+                var notifications = await _context.FCMNotifications.ToListAsync();
                 notifications.ForEach(n => n.Status = true);
                 await _context.SaveChangesAsync();
             }
@@ -166,10 +183,10 @@ namespace FleetPulse_BackEndDevelopment.Services
         {
             try
             {
-                var notification = await _context.FCMNotification.FindAsync(notificationId);
+                var notification = await _context.FCMNotifications.FindAsync(notificationId);
                 if (notification != null)
                 {
-                    _context.FCMNotification.Remove(notification);
+                    _context.FCMNotifications.Remove(notification);
                     await _context.SaveChangesAsync();
                 }
             }
@@ -183,8 +200,8 @@ namespace FleetPulse_BackEndDevelopment.Services
         {
             try
             {
-                var notifications = await _context.FCMNotification.ToListAsync();
-                _context.FCMNotification.RemoveRange(notifications);
+                var notifications = await _context.FCMNotifications.ToListAsync();
+                _context.FCMNotifications.RemoveRange(notifications);
                 await _context.SaveChangesAsync();
             }
             catch (Exception ex)

@@ -1,5 +1,6 @@
 using FleetPulse_BackEndDevelopment.Models;
 using Google.Apis.Auth.OAuth2.Responses;
+using System.Threading.Tasks;
 
 public interface IAuthService
 {
@@ -21,7 +22,6 @@ public interface IAuthService
 
     // User Registration and Management
     bool ResetPassword(string email, string newPassword);
-    
 
     // Miscellaneous User Operations
     string GetUsernameByEmail(string email);

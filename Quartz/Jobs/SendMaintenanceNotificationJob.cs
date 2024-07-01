@@ -8,18 +8,18 @@ namespace FleetPulse_BackEndDevelopment.Quartz.Jobs
     {
         private readonly IPushNotificationService _pushNotificationService;
         private readonly IVehicleMaintenanceConfigurationService _vehicleMaintenanceConfigurationService;
-        private readonly IDeviceTokenService _deviceTokenService;
+        private readonly IConfiguration _configuration;
         private readonly ILogger<SendMaintenanceNotificationJob> _logger;
 
         public SendMaintenanceNotificationJob(
             IPushNotificationService pushNotificationService,
             IVehicleMaintenanceConfigurationService vehicleMaintenanceConfigurationService,
-            IDeviceTokenService deviceTokenService,
+            IConfiguration configuration,
             ILogger<SendMaintenanceNotificationJob> logger)
         {
             _pushNotificationService = pushNotificationService ?? throw new ArgumentNullException(nameof(pushNotificationService));
             _vehicleMaintenanceConfigurationService = vehicleMaintenanceConfigurationService ?? throw new ArgumentNullException(nameof(vehicleMaintenanceConfigurationService));
-            _deviceTokenService = deviceTokenService ?? throw new ArgumentNullException(nameof(deviceTokenService));
+            _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
@@ -35,7 +35,7 @@ namespace FleetPulse_BackEndDevelopment.Quartz.Jobs
                     return;
                 }
 
-                var deviceTokens = await _deviceTokenService.GetAllTokensAsync();
+                var deviceTokens = _configuration.GetSection("DeviceTokens").Get<List<string>>();
 
                 foreach (var task in dueTasks)
                 {
@@ -43,7 +43,7 @@ namespace FleetPulse_BackEndDevelopment.Quartz.Jobs
 
                     foreach (var token in deviceTokens)
                     {
-                        await _pushNotificationService.SendNotificationAsync(token.Token, "Maintenance Due", message);
+                        await _pushNotificationService.SendNotificationAsync(token, "Maintenance Due", message, 0);
                     }
                 }
             }

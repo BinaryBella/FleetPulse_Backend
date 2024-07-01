@@ -1,6 +1,5 @@
 ﻿using FleetPulse_BackEndDevelopment.Data.Config;
 using FleetPulse_BackEndDevelopment.Models;
-using FleetPulse_BackEndDevelopment.Models.FleetPulse_BackEndDevelopment.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace FleetPulse_BackEndDevelopment.Data
@@ -17,10 +16,9 @@ namespace FleetPulse_BackEndDevelopment.Data
         public DbSet<VehicleMaintenanceType> VehicleMaintenanceType { get; set; }
         public DbSet<User> Users { get; set; }
         public DbSet<VerificationCode> VerificationCodes { get; set; }
-        public DbSet<FCMNotification> FCMNotification { get; set; }
+        public DbSet<FCMNotification> FCMNotifications { get; set; }
         public DbSet<VehicleMaintenanceConfiguration> VehicleMaintenanceConfigurations { get; set; }
         public DbSet<RefreshToken> RefreshTokens { get; set; }
-        public DbSet<DeviceToken> DeviceTokens { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -75,12 +73,6 @@ namespace FleetPulse_BackEndDevelopment.Data
                 .HasOne(f => f.User)
                 .WithMany(u => u.FuelRefills)
                 .HasForeignKey(f => f.UserId);
-
-            modelBuilder.Entity<RefreshToken>()
-                .HasOne(rt => rt.User)
-                .WithMany(u => u.RefreshTokens)
-                .HasForeignKey(rt => rt.UserId)
-                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

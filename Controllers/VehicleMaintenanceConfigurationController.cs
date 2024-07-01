@@ -45,8 +45,16 @@ namespace FleetPulse_BackEndDevelopment.Controllers
         {
             if (id != dto.Id)
             {
-                return BadRequest();
+                return BadRequest("ID mismatch.");
             }
+
+            Console.WriteLine($"ID: {dto.Id}");
+            Console.WriteLine($"VehicleId: {dto.VehicleId}");
+            Console.WriteLine($"VehicleRegistrationNo: {dto.VehicleRegistrationNo}");
+            Console.WriteLine($"VehicleMaintenanceTypeId: {dto.VehicleMaintenanceTypeId}");
+            Console.WriteLine($"TypeName: {dto.TypeName}");
+            Console.WriteLine($"Duration: {dto.Duration}");
+            Console.WriteLine($"Status: {dto.Status}");
 
             var result = await _service.UpdateVehicleMaintenanceConfigurationAsync(dto);
             if (!result)
@@ -56,7 +64,7 @@ namespace FleetPulse_BackEndDevelopment.Controllers
 
             return NoContent();
         }
-
+        
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
@@ -65,7 +73,6 @@ namespace FleetPulse_BackEndDevelopment.Controllers
             {
                 return NotFound();
             }
-
             return NoContent();
         }
     }

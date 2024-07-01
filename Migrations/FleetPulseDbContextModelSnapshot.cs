@@ -22,27 +22,7 @@ namespace FleetPulse_BackEndDevelopment.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
 
-            modelBuilder.Entity("FleetPulse_BackEndDevelopment.Models.DeviceToken", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Token")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("DeviceTokens");
-                });
-
-            modelBuilder.Entity("FleetPulse_BackEndDevelopment.Models.FleetPulse_BackEndDevelopment.Models.FCMNotification", b =>
+            modelBuilder.Entity("FleetPulse_BackEndDevelopment.Models.FCMNotification", b =>
                 {
                     b.Property<string>("NotificationId")
                         .HasColumnType("nvarchar(450)");
@@ -66,11 +46,16 @@ namespace FleetPulse_BackEndDevelopment.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
 
+                    b.Property<int?>("UserId")
+                        .HasColumnType("int");
+
                     b.Property<string>("UserName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("NotificationId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Notifications", (string)null);
                 });
@@ -470,12 +455,19 @@ namespace FleetPulse_BackEndDevelopment.Migrations
                     b.ToTable("FuelRefills", (string)null);
                 });
 
+            modelBuilder.Entity("FleetPulse_BackEndDevelopment.Models.FCMNotification", b =>
+                {
+                    b.HasOne("FleetPulse_BackEndDevelopment.Models.User", null)
+                        .WithMany("FCMNotifications")
+                        .HasForeignKey("UserId");
+                });
+
             modelBuilder.Entity("FleetPulse_BackEndDevelopment.Models.RefreshToken", b =>
                 {
                     b.HasOne("FleetPulse_BackEndDevelopment.Models.User", "User")
                         .WithMany("RefreshTokens")
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("User");
@@ -553,6 +545,8 @@ namespace FleetPulse_BackEndDevelopment.Migrations
 
             modelBuilder.Entity("FleetPulse_BackEndDevelopment.Models.User", b =>
                 {
+                    b.Navigation("FCMNotifications");
+
                     b.Navigation("FuelRefills");
 
                     b.Navigation("RefreshTokens");
