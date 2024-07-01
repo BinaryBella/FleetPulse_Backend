@@ -249,51 +249,72 @@ namespace FleetPulse_BackEndDevelopment.Controllers
             }
         }
 
-
         [HttpPost("reset-password-driver")]
-        public async Task<IActionResult> ResetDriverPassword([FromBody] ResetDriverPasswordRequest request)
+public async Task<IActionResult> ResetDriverPassword([FromBody] ResetDriverPasswordRequest request)
+{
+    if (request == null || string.IsNullOrEmpty(request.EmailAddress) || string.IsNullOrEmpty(request.NewPassword))
+    {
+        return BadRequest("Invalid request.");
+    }
+
+    try
+    {
+        // Check if the email address exists
+        var emailExists = _authService.DoesEmailExists(request.EmailAddress);
+        if (!emailExists)
         {
-            if (request == null || string.IsNullOrEmpty(request.EmailAddress) || string.IsNullOrEmpty(request.NewPassword))
-            {
-                return BadRequest("Invalid request.");
-            }
-
-            try
-            {
-                // Check if the email address exists
-                var emailExists = _authService.DoesEmailExists(request.EmailAddress);
-                if (!emailExists)
-                {
-                    return BadRequest(new ApiResponse { Status = false, Message = "Email not found" });
-                }
-
-                // Reset the password
-                var result = await _authService.ResetDriverPasswordAsync(request.EmailAddress, request.NewPassword);
-                if (result)
-                {
-                    // Send email notification
-                    var mailRequest = new MailRequest
-                    {
-                        ToEmail = request.EmailAddress,
-                        Subject = "Password Reset Notification",
-                        Body =  request.NewPassword
-                    };
-
-                    await _emailService.SendEmailAsync(mailRequest);
-
-                    return Ok(new ApiResponse { Status = true, Message = "Password reset successful." });
-                }
-                else
-                {
-                    return BadRequest(new ApiResponse { Status = false, Message = "Failed to reset password." });
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "An error occurred while resetting driver password: {Message}", ex.Message);
-                return StatusCode(500, new ApiResponse { Status = false, Error = "An error occurred while resetting password." });
-            }
+            return BadRequest(new ApiResponse { Status = false, Message = "Email not found" });
         }
+
+        // Reset the password
+        var result = await _authService.ResetDriverPasswordAsync(request.EmailAddress, request.NewPassword);
+        if (result)
+        {
+            // Retrieve user by email address
+            var user = await _authService.GetUserByEmailAsync(request.EmailAddress);
+            if (user == null)
+            {
+                return BadRequest(new ApiResponse { Status = false, Message = "User not found" });
+            }
+
+            // Send email notification
+            var mailRequest = new MailRequest
+            {
+                ToEmail = request.EmailAddress,
+                Subject = "Password Reset Notification",
+                Body = request.NewPassword
+            };
+
+            await _emailService.SendEmailAsync(mailRequest);
+
+            // Save notification to the database
+            var notification = new FCMNotification
+            {
+                NotificationId = Guid.NewGuid().ToString(),
+                UserName = user.UserName, // Save the username here
+                Title = "Password Reset Request",
+                Message = $"Your password has been reset successfully.",
+                Date = DateTime.Now,
+                Time = DateTime.Now.TimeOfDay,
+                Status = false
+            };
+
+            await _authService.AddNotificationAsync(notification);
+
+            return Ok(new ApiResponse { Status = true, Message = "Password reset successful." });
+        }
+        else
+        {
+            return BadRequest(new ApiResponse { Status = false, Message = "Failed to reset password." });
+        }
+    }
+    catch (Exception ex)
+    {
+        _logger.LogError(ex, "An error occurred while resetting driver password: {Message}", ex.Message);
+        return StatusCode(500, new ApiResponse { Status = false, Error = "An error occurred while resetting password." });
+    }
+}
+
         
         [HttpPost("change-password-staff")]
         public IActionResult ChangePassword([FromBody] ChangePasswordDTO model)

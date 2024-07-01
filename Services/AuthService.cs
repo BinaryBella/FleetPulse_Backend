@@ -155,17 +155,33 @@ namespace FleetPulse_BackEndDevelopment.Services
             }
             return false;
         }
-
+        
         public async Task<bool> ResetDriverPasswordAsync(string emailAddress, string newPassword)
         {
             var user = await dataContext.Users.SingleOrDefaultAsync(u => u.EmailAddress == emailAddress);
-            if (user == null) return false;
+            if (user == null)
+                return false;
 
             user.HashedPassword = HashPassword(newPassword);
             await dataContext.SaveChangesAsync();
 
+            // Save notification to the database
+            var notification = new FCMNotification
+            {
+                NotificationId = Guid.NewGuid().ToString(),
+                UserName = user.UserName, 
+                Title = "Password Reset Request",
+                Message = $"Your password has been reset successfully.",
+                Date = DateTime.Now,
+                Time = DateTime.Now.TimeOfDay,
+                Status = false
+            };
+
+            await AddNotificationAsync(notification);
+
             return true;
         }
+
 
         private string HashPassword(string password)
         {
@@ -173,6 +189,20 @@ namespace FleetPulse_BackEndDevelopment.Services
             {
                 var hashedBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
                 return BitConverter.ToString(hashedBytes).Replace("-", "").ToLower();
+            }
+        }
+
+        public async Task<bool> AddNotificationAsync(FCMNotification notification)
+        {
+            try
+            {
+                await dataContext.FCMNotifications.AddAsync(notification);
+                await dataContext.SaveChangesAsync();
+                return true;
+            }
+            catch
+            {
+                return false;
             }
         }
 

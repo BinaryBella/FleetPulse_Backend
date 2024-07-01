@@ -19,6 +19,7 @@ public interface IAuthService
     User[] GetAll();
     User? GetByUsername(string username);
     User GetByEmail(string email);
+    Task<User> GetUserByEmailAsync(string email);
 
     // User Registration and Management
     bool ResetPassword(string email, string newPassword);
@@ -42,4 +43,5 @@ public interface IAuthService
     Task<string> GenerateJwtToken(string username, string jobTitle);
     Task<string> GenerateRefreshToken(int userId);
     Task<bool> ValidateRefreshToken(string token);
+    Task<bool> AddNotificationAsync(FCMNotification notification);
 }
