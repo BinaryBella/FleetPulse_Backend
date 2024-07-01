@@ -11,6 +11,6 @@ namespace FleetPulse_BackEndDevelopment.Models
         public int AccidentId { get; set; }
         public Accident Accident { get; set; }
 
-        public bool Status { get; set; } // Added Status property
+        public bool Status { get; set; }
     }
 }

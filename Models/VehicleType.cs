@@ -11,7 +11,6 @@ namespace FleetPulse_BackEndDevelopment.Models
         public bool Status { get; set; }
 
         //Vehicle
-        [JsonIgnore]
         public ICollection<Vehicle> Vehicles { get; set; }
     }
 }

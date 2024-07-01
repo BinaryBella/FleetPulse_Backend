@@ -28,6 +28,7 @@ namespace FleetPulse_BackEndDevelopment.Data
         public DbSet<RefreshToken> RefreshTokens { get; set; }
         public DbSet<DeviceToken> DeviceTokens { get; set; }
         public DbSet<AccidentUser> AccidentUsers { get; set; }
+        public DbSet<FuelRefillUser> FuelRefillUsers { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -102,19 +103,22 @@ namespace FleetPulse_BackEndDevelopment.Data
                 .HasOne(au => au.User)
                 .WithMany(u => u.AccidentUsers)
                 .HasForeignKey(au => au.UserId);
-            
+      
             modelBuilder.Entity<FuelRefillUser>()
-                .HasOne(fru => fru.User)
-                .WithMany(u => u.FuelRefillUsers)
-                .HasForeignKey(fru => fru.UserId);
-            
-            modelBuilder.Entity<FuelRefillUser>().HasKey(fru => new { fru.FuelRefillId, fru.UserId });
+            .HasKey(fr => new { fr.UserId, fr.FuelRefillId });
 
             modelBuilder.Entity<FuelRefillUser>()
-                .HasOne(fru => fru.FuelRefill)
-                .WithMany(fr => fr.FuelRefillUsers)
-                .HasForeignKey(fru => fru.FuelRefillId);
-            
+                .HasOne(fr => fr.User)
+                .WithMany(u => u.FuelRefillUsers)
+                .HasForeignKey(fr => fr.UserId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<FuelRefillUser>()
+                .HasOne(fr => fr.FuelRefill)
+                .WithMany(f => f.FuelRefillUsers)
+                .HasForeignKey(fr => fr.FuelRefillId)
+                .OnDelete(DeleteBehavior.NoAction);
+
             modelBuilder.Entity<AccidentUser>().HasKey(au => new { au.AccidentId, au.UserId });
 
             modelBuilder.Entity<AccidentUser>()

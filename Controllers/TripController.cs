@@ -48,8 +48,6 @@ namespace FleetPulse_BackEndDevelopment.Controllers
                     Date = tripDTO.Date,
                     StartTime = tripDTO.StartTime,
                     EndTime = tripDTO.EndTime,
-                    StartLocation = tripDTO.StartLocation,
-                    EndLocation = tripDTO.EndLocation,
                     StartMeterValue = tripDTO.StartMeterValue,
                     EndMeterValue = tripDTO.EndMeterValue,
                     Status = tripDTO.Status
@@ -103,8 +101,7 @@ namespace FleetPulse_BackEndDevelopment.Controllers
                     Date = tripDTO.Date,
                     StartTime = tripDTO.StartTime,
                     EndTime = tripDTO.EndTime,
-                    StartLocation = tripDTO.StartLocation,
-                    EndLocation = tripDTO.EndLocation,
+                    
                     StartMeterValue = tripDTO.StartMeterValue,
                     EndMeterValue = tripDTO.EndMeterValue,
                     Status = tripDTO.Status

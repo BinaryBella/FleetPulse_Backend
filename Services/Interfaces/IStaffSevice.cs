@@ -10,9 +10,9 @@ namespace FleetPulse_BackEndDevelopment.Services.Interfaces
         Task<User> GetStaffByIdAsync(int id);
         Task<bool> IsStaffExist(int id);
         bool DoesStaffExist(string NIC);
-        Task<User> AddStaffAsync(User driver);
-        Task<bool> UpdateStaffAsync(User driver);
-        Task DeactivateStaffAsync(int driverId);
-        Task ActivateStaffAsync(int id);
+        Task<User> AddStaffAsync(User staff);
+        Task<bool> UpdateStaffAsync(User staff);
+        Task DeactivateStaffAsync(int Id);
+        Task ActivateStaffAsync(int userId);
     }
 }

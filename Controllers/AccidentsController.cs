@@ -27,7 +27,7 @@ namespace FleetPulse.Controllers
                 return BadRequest();
 
 
-            var Accident = await _context.Accidents.FirstOrDefaultAsync(m => m.accidentid == accidentid);
+            var Accident = await _context.Accidents.FirstOrDefaultAsync(m => m.AccidentId == accidentid);
             if (Accident == null)
                 return NotFound();
             return Ok(Accident);
@@ -45,24 +45,21 @@ namespace FleetPulse.Controllers
         [HttpPut]
         public async Task<IActionResult> Put(Accident AccidentData)
         {
-            if (AccidentData == null || AccidentData.accidentid == 0)
+            if (AccidentData == null || AccidentData.AccidentId == 0)
                 return BadRequest();
 
-            var Accident = await _context.Accidents.FindAsync(AccidentData.accidentid);
+            var Accident = await _context.Accidents.FindAsync(AccidentData.AccidentId);
             if (Accident == null)
                 return NotFound();
-            Accident.Date = AccidentData.Date;
-            Accident.Time = AccidentData.Time;
+            Accident.DateTime = AccidentData.DateTime;
             Accident.Venue = AccidentData.Venue;
             Accident.Status = AccidentData.Status;
             Accident.DriverInjuredStatus = AccidentData.DriverInjuredStatus;
             Accident.HelperInjuredStatus = AccidentData.HelperInjuredStatus;
             Accident.VehicleDamagedStatus = AccidentData.VehicleDamagedStatus;
-            Accident.LossStatement = AccidentData.LossStatement;
+            Accident.Loss = AccidentData.Loss;
             Accident.SpecialNotes = AccidentData.SpecialNotes;
             Accident.Photos = AccidentData.Photos;
-            Accident.DriverId = AccidentData.DriverId;
-            Accident.HelperId = AccidentData.HelperId;
             Accident.VehicleId = AccidentData.VehicleId;
             await _context.SaveChangesAsync();
             return Ok();
