@@ -46,6 +46,7 @@ namespace FleetPulse_BackEndDevelopment.Services
         {
             _context.Users.Add(staff);
             await _context.SaveChangesAsync();
+
             return staff;
         }
 
@@ -57,45 +58,38 @@ namespace FleetPulse_BackEndDevelopment.Services
                 await _context.SaveChangesAsync();
                 return true;
             }
-            catch
+            catch (Exception ex)
             {
                 return false;
             }
         }
 
-        public async Task DeactivateStaffAsync(int userId)
-        {
-            var staff = await _context.Users.FindAsync(userId);
-
-            if (staff == null)
-            {
-                throw new InvalidOperationException("Staff not found.");
-            }
-
-            if (StaffIsActive(staff))
-            {
-                throw new InvalidOperationException("Staff is active and associated with staff details records. Cannot deactivate.");
-            }
-
-            staff.Status = false;
-            await _context.SaveChangesAsync();
-        }
-
-        private bool StaffIsActive(User staff)
-        {
-            return _context.Users.Any(vt => vt.UserId == staff.UserId && vt.Status);
-        }
-
         public async Task ActivateStaffAsync(int id)
         {
-            var staff = await _context.Users.FindAsync(id);
-            if (staff == null)
+            var driver = await _context.Users.FindAsync(id);
+            if (driver == null)
             {
                 throw new KeyNotFoundException("Staff not found.");
             }
 
-            staff.Status = true;
+            driver.Status = true;
             await _context.SaveChangesAsync();
         }
+
+        public async Task DeactivateStaffAsync(int userId)
+        {
+            var user = await _context.Users.FindAsync(userId);
+
+            if (user == null)
+            {
+                throw new InvalidOperationException("Staff not found.");
+            }
+            else
+            {
+                user.Status = false;
+                await _context.SaveChangesAsync();
+            }
+        }
     }
+
 }
