@@ -86,7 +86,7 @@ namespace FleetPulse_BackEndDevelopment.Migrations
                     b.HasKey("AccidentId");
 
                     b.ToTable("Accidents", (string)null);
-                });
+                }));
 
             modelBuilder.Entity("FleetPulse_BackEndDevelopment.Models.AccidentUser", b =>
                 {
@@ -651,7 +651,7 @@ namespace FleetPulse_BackEndDevelopment.Migrations
                     b.HasOne("FleetPulse_BackEndDevelopment.Models.User", null)
                         .WithMany("FCMNotifications")
                         .HasForeignKey("UserId");
-                });
+                }));
 
             modelBuilder.Entity("FleetPulse_BackEndDevelopment.Models.Vehicle", b =>
                 {

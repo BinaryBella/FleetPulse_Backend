@@ -7,11 +7,6 @@ using System.Security.Cryptography;
 using System.Text;
 using Google.Apis.Auth.OAuth2.Responses;
 using Microsoft.IdentityModel.Tokens;
-using System;
-using System.Linq;
-using System.Threading.Tasks;
-using FleetPulse_BackEndDevelopment.Models.FleetPulse_BackEndDevelopment.Models;
-using Microsoft.Extensions.Configuration;
 
 namespace FleetPulse_BackEndDevelopment.Services
 {

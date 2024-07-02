@@ -1,4 +1,3 @@
-using FleetPulse_BackEndDevelopment.Models.FleetPulse_BackEndDevelopment.Models;
 
 namespace FleetPulse_BackEndDevelopment.Models
 {

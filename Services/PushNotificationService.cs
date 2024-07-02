@@ -3,7 +3,6 @@ using FirebaseAdmin.Messaging;
 using Google.Apis.Auth.OAuth2;
 using FleetPulse_BackEndDevelopment.Data;
 using FleetPulse_BackEndDevelopment.Models;
-using FleetPulse_BackEndDevelopment.Models.FleetPulse_BackEndDevelopment.Models;
 using FleetPulse_BackEndDevelopment.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 

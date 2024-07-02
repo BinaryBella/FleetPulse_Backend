@@ -1,7 +1,6 @@
 ﻿using FleetPulse_BackEndDevelopment.Data.Config;
 using FleetPulse_BackEndDevelopment.Models;
 using FleetPulse_BackEndDevelopment.Models.Configurations;
-using FleetPulse_BackEndDevelopment.Models.FleetPulse_BackEndDevelopment.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace FleetPulse_BackEndDevelopment.Data
@@ -79,12 +78,6 @@ namespace FleetPulse_BackEndDevelopment.Data
                 .WithMany(u => u.FuelRefills)
                 .HasForeignKey(fr => fr.UserId);
 
-            modelBuilder.Entity<RefreshToken>()
-                .HasOne(rt => rt.User)
-                .WithMany(u => u.RefreshTokens)
-                .HasForeignKey(rt => rt.UserId)
-                .OnDelete(DeleteBehavior.Restrict);
-
             // Many-to-many relationships
             modelBuilder.Entity<TripUser>().HasKey(tu => new { tu.TripId, tu.UserId });
 
@@ -102,14 +95,14 @@ namespace FleetPulse_BackEndDevelopment.Data
                 .HasOne(vm => vm.Vehicle)
                 .WithMany(v => v.VehicleMaintenances)
                 .HasForeignKey(vm => vm.VehicleId);
-            
+
             modelBuilder.Entity<AccidentUser>()
                 .HasOne(au => au.User)
                 .WithMany(u => u.AccidentUsers)
                 .HasForeignKey(au => au.UserId);
-      
+
             modelBuilder.Entity<FuelRefillUser>()
-            .HasKey(fr => new { fr.UserId, fr.FuelRefillId });
+                .HasKey(fr => new { fr.UserId, fr.FuelRefillId });
 
             modelBuilder.Entity<FuelRefillUser>()
                 .HasOne(fr => fr.User)
@@ -129,5 +122,6 @@ namespace FleetPulse_BackEndDevelopment.Data
                 .HasOne(au => au.Accident)
                 .WithMany(a => a.AccidentUsers)
                 .HasForeignKey(au => au.AccidentId);
+        }
     }
 }

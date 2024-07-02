@@ -36,7 +36,7 @@ namespace FleetPulse_BackEndDevelopment.Services
                         .Where(v => v.VehicleId == vm.VehicleId)
                         .Select(v => v.VehicleRegistrationNo)
                         .FirstOrDefault(),
-                    TypeName = _context.VehicleMaintenanceType
+                    TypeName = _context.VehicleMaintenanceTypes
                         .Where(mt => mt.Id == vm.VehicleMaintenanceTypeId)
                         .Select(mt => mt.TypeName)
                         .FirstOrDefault()
@@ -53,7 +53,7 @@ namespace FleetPulse_BackEndDevelopment.Services
             try
             {
                 var vehicleExists = await _context.Vehicles.AnyAsync(v => v.VehicleId == maintenance.VehicleId);
-                var maintenanceTypeExists = await _context.VehicleMaintenanceType.AnyAsync(mt => mt.Id == maintenance.VehicleMaintenanceTypeId);
+                var maintenanceTypeExists = await _context.VehicleMaintenanceTypes.AnyAsync(mt => mt.Id == maintenance.VehicleMaintenanceTypeId);
 
                 if (!vehicleExists)
                 {

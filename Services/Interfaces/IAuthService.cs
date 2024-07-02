@@ -1,7 +1,6 @@
 using FleetPulse_BackEndDevelopment.Models;
 using Google.Apis.Auth.OAuth2.Responses;
 using System.Threading.Tasks;
-using FleetPulse_BackEndDevelopment.Models.FleetPulse_BackEndDevelopment.Models;
 
 public interface IAuthService
 {
