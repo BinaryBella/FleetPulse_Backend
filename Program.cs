@@ -10,7 +10,7 @@ using FleetPulse_BackEndDevelopment.Helpers;
 using FleetPulse_BackEndDevelopment.Quartz.Jobs;
 using FleetPulse_BackEndDevelopment.Services;
 using FleetPulse_BackEndDevelopment.Services.Interfaces;
-using FleetPulse_BackEndDevelopment.Utilities;
+using FirebaseAdmin.Messaging;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,10 +18,14 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
 
+// Initialize Firebase
+FirebaseInitializer.InitializeFirebase();
+
+// Register FirebaseMessaging
+builder.Services.AddSingleton(provider => FirebaseMessaging.DefaultInstance);
+
 // Add services to the container.
 ConfigureServices(builder.Services, builder.Configuration);
-
-FirebaseInitializer.InitializeFirebase();
 
 var app = builder.Build();
 
@@ -48,8 +52,9 @@ void ConfigureServices(IServiceCollection services, IConfiguration configuration
     });
 
     services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
-builder.Services.AddTransient<IMailService,FleetPulse_BackEndDevelopment.Services.MailService>();
-builder.Services.AddScoped<VehicleService>();
+
+    services.AddTransient<IMailService, FleetPulse_BackEndDevelopment.Services.MailService>();
+    services.AddScoped<VehicleService>();
 
     // Add controllers with options
     services.AddControllers(options =>
@@ -118,18 +123,20 @@ builder.Services.AddScoped<VehicleService>();
         options.UseSqlServer(configuration.GetConnectionString("SqlServerConnectionString"),
             sqlOptions => sqlOptions.EnableRetryOnFailure(5, TimeSpan.FromSeconds(10), null));
     });
-// Declared services
-builder.Services.AddScoped<DBSeeder>();
-builder.Services.AddScoped<IVehicleTypeService, VehicleTypeService>();
-builder.Services.AddScoped<IManufactureService, ManufactureService>();
-builder.Services.AddScoped<IVehicleService, VehicleService>();
-builder.Services.AddScoped<ITripService, TripService>();
-builder.Services.AddScoped<IDriverService, DriverService>();
-builder.Services.AddScoped<IHelperService, HelperService>();
-builder.Services.AddScoped<IStaffService, StaffService>();
-builder.Services.AddScoped<ITripUserService, TripUserService>();
-builder.Services.AddScoped<IAccidentService, AccidentService>();
-builder.Services.AddScoped<IAccidentUserService, AccidentUserService>();
+
+    // Declared services
+    services.AddScoped<DBSeeder>();
+    services.AddScoped<IVehicleTypeService, VehicleTypeService>();
+    services.AddScoped<IManufactureService, ManufactureService>();
+    services.AddScoped<IVehicleService, VehicleService>();
+    services.AddScoped<ITripService, TripService>();
+    services.AddScoped<IDriverService, DriverService>();
+    services.AddScoped<IHelperService, HelperService>();
+    services.AddScoped<IStaffService, StaffService>();
+    services.AddScoped<ITripUserService, TripUserService>();
+    services.AddScoped<IAccidentService, AccidentService>();
+    services.AddScoped<IAccidentUserService, AccidentUserService>();
+    services.AddScoped<IPushNotificationService, PushNotificationService>();
 
     // Add AutoMapper
     services.AddAutoMapper(typeof(MappingProfiles));

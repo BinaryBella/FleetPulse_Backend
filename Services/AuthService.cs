@@ -151,7 +151,7 @@ namespace FleetPulse_BackEndDevelopment.Services
             }
             return false;
         }
-        
+
         public async Task<bool> ResetDriverPasswordAsync(string emailAddress, string newPassword)
         {
             var user = await dataContext.Users.SingleOrDefaultAsync(u => u.EmailAddress == emailAddress);
@@ -165,7 +165,7 @@ namespace FleetPulse_BackEndDevelopment.Services
             var notification = new FCMNotification
             {
                 NotificationId = Guid.NewGuid().ToString(),
-                UserName = user.UserName, 
+                UserName = user.UserName,
                 Title = "Password Reset Request",
                 Message = $"Your password has been reset successfully.",
                 Date = DateTime.Now,
@@ -220,7 +220,7 @@ namespace FleetPulse_BackEndDevelopment.Services
 
             var token = await GenerateJwtToken(existingUser.UserName, existingUser.JobTitle);
             var refreshToken = await GenerateRefreshToken(existingUser.UserId);
-            
+
             return new TokenResponse { AccessToken = token, RefreshToken = refreshToken };
         }
 
@@ -345,6 +345,37 @@ namespace FleetPulse_BackEndDevelopment.Services
                 .SingleOrDefaultAsync(rt => rt.Token == token && rt.Expires > DateTime.UtcNow && !rt.IsRevoked);
 
             return refreshToken != null;
+        }
+
+        public async Task<bool> UpdateUserProfilePictureAsync(string username, string profilePicture)
+        {
+            try
+            {
+                var user = await GetUserByUsernameAsync(username);
+
+                if (user == null)
+                {
+                    return false;
+                }
+
+                if (string.IsNullOrEmpty(profilePicture))
+                {
+                    user.ProfilePicture = null;
+                }
+                else
+                {
+                    user.ProfilePicture = Convert.FromBase64String(profilePicture);
+                }
+
+                var result = await UpdateUserAsync(user);
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                // Optionally handle or log the exception
+                throw; // Propagate the exception
+            }
         }
     }
 }
