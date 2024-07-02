@@ -133,6 +133,8 @@ void ConfigureServices(IServiceCollection services, IConfiguration configuration
     services.AddScoped<IEmailService, EmailService>();
     services.AddScoped<IVehicleMaintenanceConfigurationService, VehicleMaintenanceConfigurationService>();
     services.AddScoped<SendMaintenanceNotificationJob>();
+    services.AddScoped<IDriverService, DriverService>();
+    services.AddTransient<IEmailUserCredentialService, EmailUserCredentialService>();
 
     // Add logging (if needed)
     services.AddLogging();
