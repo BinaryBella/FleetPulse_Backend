@@ -12,4 +12,4 @@ namespace FleetPulse_BackEndDevelopment.Services.Interfaces
         Task SendMaintenanceNotificationAsync();
         Task SendNotificationAsync(string fcmDeviceToken, string title, string message, int userId);
     }
-}
+} 
