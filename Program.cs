@@ -43,7 +43,7 @@ void ConfigureServices(IServiceCollection services, IConfiguration configuration
             .ForJob(jobKey)
             .WithIdentity("SendMaintenanceNotificationTrigger")
             .WithSimpleSchedule(x => x
-                .WithIntervalInSeconds(15) // Runs every 10 seconds for testing purposes
+                .WithIntervalInSeconds(10) // Runs every 30 seconds for testing purposes
                 .RepeatForever()));
     });
 
@@ -147,7 +147,8 @@ builder.Services.AddScoped<IAccidentUserService, AccidentUserService>();
     services.AddScoped<IEmailService, EmailService>();
     services.AddScoped<IVehicleMaintenanceConfigurationService, VehicleMaintenanceConfigurationService>();
     services.AddScoped<SendMaintenanceNotificationJob>();
-    services.AddScoped<IDeviceTokenService, DeviceTokenService>();
+    services.AddScoped<IDriverService, DriverService>();
+    services.AddTransient<IEmailUserCredentialService, EmailUserCredentialService>();
 
     // Add logging (if needed)
     services.AddLogging();

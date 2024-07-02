@@ -26,7 +26,6 @@ namespace FleetPulse_BackEndDevelopment.Data
         public DbSet<FCMNotification> FCMNotifications { get; set; }
         public DbSet<VehicleMaintenanceConfiguration> VehicleMaintenanceConfigurations { get; set; }
         public DbSet<RefreshToken> RefreshTokens { get; set; }
-        public DbSet<DeviceToken> DeviceTokens { get; set; }
         public DbSet<AccidentUser> AccidentUsers { get; set; }
         public DbSet<FuelRefillUser> FuelRefillUsers { get; set; }
 
@@ -44,6 +43,7 @@ namespace FleetPulse_BackEndDevelopment.Data
             modelBuilder.ApplyConfiguration(new TripUserConfig());
             modelBuilder.ApplyConfiguration(new VehicleMaintenanceConfig());
             modelBuilder.ApplyConfiguration(new VehicleMaintenanceTypeConfig());
+            modelBuilder.ApplyConfiguration(new FuelRefillConfig());
             modelBuilder.ApplyConfiguration(new UserConfig());
             modelBuilder.ApplyConfiguration(new VerificationCodeConfig());
             modelBuilder.ApplyConfiguration(new FCMNotificationConfig());
@@ -59,6 +59,10 @@ namespace FleetPulse_BackEndDevelopment.Data
                 .WithMany(m => m.Vehicles)
                 .HasForeignKey(v => v.ManufactureId);
 
+            modelBuilder.Entity<VehicleMaintenance>()
+                .HasOne(v => v.Vehicle)
+                .WithMany(vm => vm.VehicleMaintenances)
+                .HasForeignKey(vm => vm.VehicleId);
 
             modelBuilder.Entity<VehicleMaintenance>()
                 .HasOne(vm => vm.VehicleMaintenanceType)
@@ -125,6 +129,5 @@ namespace FleetPulse_BackEndDevelopment.Data
                 .HasOne(au => au.Accident)
                 .WithMany(a => a.AccidentUsers)
                 .HasForeignKey(au => au.AccidentId);
-        }
     }
 }

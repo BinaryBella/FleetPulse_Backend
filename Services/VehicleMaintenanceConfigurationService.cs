@@ -2,11 +2,6 @@ using FleetPulse_BackEndDevelopment.Data;
 using FleetPulse_BackEndDevelopment.Data.DTO;
 using FleetPulse_BackEndDevelopment.Models;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace FleetPulse_BackEndDevelopment.Services
 {
@@ -107,7 +102,7 @@ namespace FleetPulse_BackEndDevelopment.Services
             await _context.SaveChangesAsync();
             return true;
         }
-    
+
         public async Task<List<VehicleMaintenanceConfigurationDTO>> GetDueMaintenanceTasksAsync()
         {
             return await _context.VehicleMaintenanceConfigurations
@@ -135,7 +130,7 @@ namespace FleetPulse_BackEndDevelopment.Services
                 }
 
                 var durationValue = int.Parse(durationParts[0]);
-                var durationType = durationParts[1].Trim().ToLower(); // Convert to lowercase for case insensitivity
+                var durationType = durationParts[1].Trim().ToLower();
 
                 switch (durationType)
                 {
@@ -154,15 +149,13 @@ namespace FleetPulse_BackEndDevelopment.Services
             }
             catch (FormatException ex)
             {
-                // Log the exception with detailed information
                 _logger.LogError(ex, $"Invalid duration format or type: {duration}");
-                throw; // Rethrow the exception to propagate it up
+                throw;
             }
             catch (Exception ex)
             {
-                // Log any unexpected exceptions
                 _logger.LogError(ex, $"Error processing duration: {duration}");
-                throw; // Rethrow the exception to propagate it up
+                throw;
             }
         }
     }

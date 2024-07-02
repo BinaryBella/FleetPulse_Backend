@@ -1,13 +1,17 @@
+using FleetPulse_BackEndDevelopment.Models;
+using FleetPulse_BackEndDevelopment.Data;
+using Microsoft.EntityFrameworkCore;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
-using FleetPulse_BackEndDevelopment.Data;
-using FleetPulse_BackEndDevelopment.Models;
-using FleetPulse_BackEndDevelopment.Services.Interfaces;
 using Google.Apis.Auth.OAuth2.Responses;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
+using FleetPulse_BackEndDevelopment.Models.FleetPulse_BackEndDevelopment.Models;
+using Microsoft.Extensions.Configuration;
 
 namespace FleetPulse_BackEndDevelopment.Services
 {
@@ -110,12 +114,12 @@ namespace FleetPulse_BackEndDevelopment.Services
             return false;
         }
 
-        public async Task<User?> GetUserByUsernameAsync(string username)
+        public async Task<User> GetUserByUsernameAsync(string username)
         {
             return await dataContext.Users.FirstOrDefaultAsync(u => u.UserName == username);
         }
 
-        public async Task<User?> AddUserAsync(User? user)
+        public async Task<User> AddUserAsync(User user)
         {
             dataContext.Users.Add(user);
             await dataContext.SaveChangesAsync();
@@ -124,30 +128,25 @@ namespace FleetPulse_BackEndDevelopment.Services
 
         public async Task<bool> UpdateUserAsync(User user)
         {
-            dataContext.Entry(user).State = EntityState.Detached;
-            var result = dataContext.Users.Update(user);
+            dataContext.Entry(user).State = EntityState.Modified;
             await dataContext.SaveChangesAsync();
-            result.State = EntityState.Modified;
-
-            return result.State == EntityState.Modified;
+            return true;
         }
 
         public async Task<bool> DeactivateUserAsync(User user)
         {
-            dataContext.Entry(user).State = EntityState.Detached;
-
             user.Status = false;
-
-            var result = dataContext.Users.Update(user);
-
             await dataContext.SaveChangesAsync();
-
-            return result.State == EntityState.Modified;
+            return true;
+        }
+        public async Task<User> GetUserByEmailAsync(string email)
+        {
+            return await dataContext.Users.FirstOrDefaultAsync(u => u.EmailAddress == email);
         }
 
         public async Task<bool> ResetPasswordAsync(string email, string newPassword)
         {
-            var user = await GetByEmailAsync(email);
+            var user = await GetUserByEmailAsync(email);
             if (user != null)
             {
                 string hashedPassword = BCrypt.Net.BCrypt.HashPassword(newPassword);
@@ -157,18 +156,33 @@ namespace FleetPulse_BackEndDevelopment.Services
             }
             return false;
         }
-
+        
         public async Task<bool> ResetDriverPasswordAsync(string emailAddress, string newPassword)
         {
             var user = await dataContext.Users.SingleOrDefaultAsync(u => u.EmailAddress == emailAddress);
-            if (user == null) return false;
+            if (user == null)
+                return false;
 
             user.HashedPassword = HashPassword(newPassword);
-            dataContext.Users.Update(user);
             await dataContext.SaveChangesAsync();
+
+            // Save notification to the database
+            var notification = new FCMNotification
+            {
+                NotificationId = Guid.NewGuid().ToString(),
+                UserName = user.UserName, 
+                Title = "Password Reset Request",
+                Message = $"Your password has been reset successfully.",
+                Date = DateTime.Now,
+                Time = DateTime.Now.TimeOfDay,
+                Status = false
+            };
+
+            await AddNotificationAsync(notification);
 
             return true;
         }
+
 
         private string HashPassword(string password)
         {
@@ -178,9 +192,19 @@ namespace FleetPulse_BackEndDevelopment.Services
                 return BitConverter.ToString(hashedBytes).Replace("-", "").ToLower();
             }
         }
-        private async Task<User> GetByEmailAsync(string email)
+
+        public async Task<bool> AddNotificationAsync(FCMNotification notification)
         {
-            return await dataContext.Users.FirstOrDefaultAsync(c => c.EmailAddress == email);
+            try
+            {
+                await dataContext.FCMNotifications.AddAsync(notification);
+                await dataContext.SaveChangesAsync();
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         public async Task<int?> GetUserIdByNICAsync(string nic)
@@ -200,72 +224,9 @@ namespace FleetPulse_BackEndDevelopment.Services
                 throw new UnauthorizedAccessException();
 
             var token = await GenerateJwtToken(existingUser.UserName, existingUser.JobTitle);
-            var refreshToken = GenerateRefreshToken(existingUser);
-            existingUser.RefreshTokens.Add(refreshToken);
-            await dataContext.SaveChangesAsync();
-
-            return new TokenResponse { AccessToken = token, RefreshToken = refreshToken.Token };
-        }
-
-        public async Task<TokenResponse> RefreshToken(string token)
-        {
-            var refreshToken = await dataContext.RefreshTokens
-                .Include(rt => rt.User)
-                .SingleOrDefaultAsync(rt => rt.Token == token && rt.Expires > DateTime.UtcNow && !rt.IsRevoked);
-
-            if (refreshToken == null)
-                throw new UnauthorizedAccessException();
-
-            var user = refreshToken.User;
-            var newJwtToken = GenerateJwtToken(user.UserName, user.JobTitle);
-            var newRefreshToken = GenerateRefreshToken(user);
-            refreshToken.IsRevoked = true;
-            user.RefreshTokens.Add(newRefreshToken);
-            await dataContext.SaveChangesAsync();
-
-            return new TokenResponse { AccessToken = token, RefreshToken = newRefreshToken.Token };
-        }
-
-        public async Task<bool> IsRefreshTokenValidAsync(string token)
-        {
-            var refreshToken = await dataContext.RefreshTokens.FirstOrDefaultAsync(rt => rt.Token == token);
-            return refreshToken != null && refreshToken.Expires > DateTime.UtcNow && !refreshToken.IsRevoked;
-        }
-
-        public async Task<bool> RevokeToken(string token)
-        {
-            var refreshToken = await dataContext.RefreshTokens
-                .SingleOrDefaultAsync(rt => rt.Token == token);
-
-            if (refreshToken == null) return false;
-
-            refreshToken.IsRevoked = true;
-            await dataContext.SaveChangesAsync();
-
-            return true;
-        }
-
-        public async Task<bool> AddRefreshTokenAsync(RefreshToken refreshToken)
-        {
-            await dataContext.RefreshTokens.AddAsync(refreshToken);
-            await dataContext.SaveChangesAsync();
-            return true;
-        }
-
-        public async Task<RefreshToken> GetRefreshTokenAsync(string token)
-        {
-            return await dataContext.RefreshTokens.FirstOrDefaultAsync(rt => rt.Token == token);
-        }
-
-        public async Task<bool> RevokeRefreshTokenAsync(string token)
-        {
-            var refreshToken = await dataContext.RefreshTokens.FirstOrDefaultAsync(rt => rt.Token == token);
-
-            if (refreshToken == null) return false;
-
-            refreshToken.IsRevoked = true;
-            await dataContext.SaveChangesAsync();
-            return true;
+            var refreshToken = await GenerateRefreshToken(existingUser.UserId);
+            
+            return new TokenResponse { AccessToken = token, RefreshToken = refreshToken };
         }
 
         public async Task<string> GenerateJwtToken(string username, string jobTitle)
@@ -292,33 +253,9 @@ namespace FleetPulse_BackEndDevelopment.Services
             var token = tokenHandler.CreateToken(tokenDescriptor);
             return await Task.FromResult(tokenHandler.WriteToken(token));
         }
-        private RefreshToken GenerateRefreshToken(User user)
-        {
-            var randomBytes = new byte[32];
-            using (var rng = RandomNumberGenerator.Create())
-            {
-                rng.GetBytes(randomBytes);
-            }
 
-            var refreshToken = new RefreshToken
-            {
-                Token = Convert.ToBase64String(randomBytes),
-                Expires = DateTime.UtcNow.AddDays(7),
-                IsRevoked = false,
-                UserId = user.UserId
-            };
-
-            return refreshToken;
-        }
-        
         public async Task<string> GenerateRefreshToken(int userId)
         {
-            var user = await dataContext.Users.FindAsync(userId);
-            if (user == null)
-            {
-                throw new Exception("User not found.");
-            }
-
             var randomBytes = new byte[32];
             using (var rng = RandomNumberGenerator.Create())
             {
@@ -337,6 +274,74 @@ namespace FleetPulse_BackEndDevelopment.Services
             await dataContext.SaveChangesAsync();
 
             return refreshToken.Token;
+        }
+
+        public async Task<TokenResponse> RefreshToken(string token)
+        {
+            var refreshTokenEntity = await dataContext.RefreshTokens
+                .SingleOrDefaultAsync(rt => rt.Token == token && rt.Expires > DateTime.UtcNow && !rt.IsRevoked);
+
+            if (refreshTokenEntity == null)
+                throw new UnauthorizedAccessException();
+
+            var userId = refreshTokenEntity.UserId;
+            var user = await dataContext.Users.FindAsync(userId);
+            if (user == null)
+                throw new UnauthorizedAccessException();
+
+            var newJwtToken = await GenerateJwtToken(user.UserName, user.JobTitle);
+            var newRefreshToken = await GenerateRefreshToken(userId);
+
+            refreshTokenEntity.IsRevoked = true;
+
+            await dataContext.SaveChangesAsync();
+
+            return new TokenResponse { AccessToken = newJwtToken, RefreshToken = newRefreshToken };
+        }
+
+        public async Task<bool> IsRefreshTokenValidAsync(string token)
+        {
+            var refreshToken = await dataContext.RefreshTokens.FirstOrDefaultAsync(rt => rt.Token == token);
+            return refreshToken != null && refreshToken.Expires > DateTime.UtcNow && !refreshToken.IsRevoked;
+        }
+
+        public async Task<bool> RevokeToken(string token)
+        {
+            var refreshTokenEntity = await dataContext.RefreshTokens
+                .SingleOrDefaultAsync(rt => rt.Token == token);
+
+            if (refreshTokenEntity == null)
+                return false;
+
+            refreshTokenEntity.IsRevoked = true;
+            await dataContext.SaveChangesAsync();
+
+            return true;
+        }
+
+        public async Task<RefreshToken> GetRefreshTokenAsync(string token)
+        {
+            return await dataContext.RefreshTokens.FirstOrDefaultAsync(rt => rt.Token == token);
+        }
+
+        public async Task<bool> RevokeRefreshTokenAsync(string token)
+        {
+            var refreshTokenEntity = await dataContext.RefreshTokens.FirstOrDefaultAsync(rt => rt.Token == token);
+
+            if (refreshTokenEntity == null)
+                return false;
+
+            refreshTokenEntity.IsRevoked = true;
+            await dataContext.SaveChangesAsync();
+
+            return true;
+        }
+
+        public async Task<bool> AddRefreshTokenAsync(RefreshToken refreshToken)
+        {
+            await dataContext.RefreshTokens.AddAsync(refreshToken);
+            await dataContext.SaveChangesAsync();
+            return true;
         }
 
         public async Task<bool> ValidateRefreshToken(string token)
