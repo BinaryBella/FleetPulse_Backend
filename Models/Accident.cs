@@ -4,7 +4,6 @@ namespace FleetPulse_BackEndDevelopment.Models
 {
     public class Accident
     {
-        internal int accidentid;
         [Key]
         public int AccidentId { get; set; }
         public string Venue { get; set; }
@@ -15,6 +14,7 @@ namespace FleetPulse_BackEndDevelopment.Models
         public bool DriverInjuredStatus { get; set; }
         public bool HelperInjuredStatus { get; set; }
         public bool VehicleDamagedStatus { get; set; }
+        public int VehicleId { get; set; }
         public bool Status { get; set; }
         
         //Vehicle
@@ -22,12 +22,6 @@ namespace FleetPulse_BackEndDevelopment.Models
         
         //AccidentUser
         public ICollection<AccidentUser> AccidentUsers { get; set; }
-        public int VehicleId { get; internal set; }
-        public int HelperId { get; internal set; }
-        public string LossStatement { get; internal set; }
-        public DateTime Time { get; internal set; }
-        public int DriverId { get; internal set; }
-        public DateTime Date { get; internal set; }
     }
 }
 

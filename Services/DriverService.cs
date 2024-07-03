@@ -20,7 +20,8 @@ namespace FleetPulse_BackEndDevelopment.Services
 
         public async Task<IEnumerable<User>> GetAllDriversAsync()
         {
-            return await _context.Users.Where(x=> x.JobTitle != null && x.JobTitle.ToLower() == "driver").ToListAsync();
+            return await _context.Users.Where(x => x.JobTitle != null && x.JobTitle.ToLower() == "driver")
+                .ToListAsync();
         }
 
         public async Task<User> GetDriverByIdAsync(int id)
@@ -42,12 +43,21 @@ namespace FleetPulse_BackEndDevelopment.Services
         {
             try
             {
+                // Ensure password is provided and hash it
+                if (!string.IsNullOrEmpty(driver.HashedPassword))
+                {
+                    driver.HashedPassword = BCrypt.Net.BCrypt.HashPassword(driver.HashedPassword);
+                }
+
                 _context.Users.Add(driver);
                 await _context.SaveChangesAsync();
-            }catch (Exception ex)
-            {
-                
             }
+            catch (Exception ex)
+            {
+                // Handle exception appropriately
+                throw new Exception("Failed to add driver.", ex);
+            }
+
             return driver;
         }
 
@@ -59,7 +69,7 @@ namespace FleetPulse_BackEndDevelopment.Services
                 await _context.SaveChangesAsync();
                 return true;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return false;
             }
@@ -92,5 +102,4 @@ namespace FleetPulse_BackEndDevelopment.Services
             }
         }
     }
-
 }

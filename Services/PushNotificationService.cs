@@ -1,10 +1,16 @@
+using FleetPulse_BackEndDevelopment.DTOs;
+using FleetPulse_BackEndDevelopment.Models;
+using FleetPulse_BackEndDevelopment.Services.Interfaces;
 using FirebaseAdmin;
 using FirebaseAdmin.Messaging;
 using Google.Apis.Auth.OAuth2;
-using FleetPulse_BackEndDevelopment.Data;
-using FleetPulse_BackEndDevelopment.Services.Interfaces;
-using FleetPulse_BackEndDevelopment.Models.FleetPulse_BackEndDevelopment.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using FleetPulse_BackEndDevelopment.Data;
 
 namespace FleetPulse_BackEndDevelopment.Services
 {
@@ -12,30 +18,28 @@ namespace FleetPulse_BackEndDevelopment.Services
     {
         private readonly FleetPulseDbContext _context;
         private readonly ILogger<PushNotificationService> _logger;
-        private readonly IVehicleMaintenanceConfigurationService _vehicleMaintenanceConfigurationService;
-        private readonly IDeviceTokenService _deviceTokenService;
+        private readonly FirebaseMessaging _messaging;
 
-        public PushNotificationService(
-            FleetPulseDbContext context,
-            ILogger<PushNotificationService> logger,
-            IVehicleMaintenanceConfigurationService vehicleMaintenanceConfigurationService,
-            IDeviceTokenService deviceTokenService)
+        public PushNotificationService(FleetPulseDbContext context, ILogger<PushNotificationService> logger, FirebaseMessaging messaging)
         {
             _context = context;
             _logger = logger;
-            _vehicleMaintenanceConfigurationService = vehicleMaintenanceConfigurationService;
-            _deviceTokenService = deviceTokenService;
+            InitializeFirebase();
+            _messaging = messaging;
+        }
 
+        private void InitializeFirebase()
+        {
             if (FirebaseApp.DefaultInstance == null)
             {
-                FirebaseApp.Create(new AppOptions()
+                FirebaseApp.Create(new AppOptions
                 {
                     Credential = GoogleCredential.FromFile("Configuration/serviceAccountKey.json"),
                 });
             }
         }
 
-        public async Task SendNotificationAsync(string fcmDeviceToken, string title, string message)
+        public async Task SendNotificationAsync(string fcmDeviceToken, string title, string message, string username)
         {
             if (string.IsNullOrEmpty(fcmDeviceToken))
             {
@@ -50,6 +54,10 @@ namespace FleetPulse_BackEndDevelopment.Services
                 {
                     Title = title,
                     Body = message
+                },
+                Data = new Dictionary<string, string>
+                {
+                    { "username", username }
                 }
             };
 
@@ -58,44 +66,42 @@ namespace FleetPulse_BackEndDevelopment.Services
                 var response = await FirebaseMessaging.DefaultInstance.SendAsync(notification);
                 _logger.LogInformation("Successfully sent message: " + response);
             }
-            catch (FirebaseMessagingException ex)
-            {
-                if (ex.MessagingErrorCode == MessagingErrorCode.Unregistered || 
-                    ex.MessagingErrorCode == MessagingErrorCode.InvalidArgument)
-                {
-                    _logger.LogError(ex, $"Invalid or unregistered FCM Device Token: {fcmDeviceToken}");
-                }
-                else
-                {
-                    _logger.LogError(ex, "Error sending notification.");
-                }
-            }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error sending notification.");
             }
         }
 
-        public async Task SendMaintenanceNotificationAsync()
+        public async Task SendNotificationAsync(string fcmDeviceToken, string title, string message, int userId)
         {
-            var dueTasks = await _vehicleMaintenanceConfigurationService.GetDueMaintenanceTasksAsync();
-
-            if (dueTasks == null || dueTasks.Count == 0)
+            if (string.IsNullOrEmpty(fcmDeviceToken))
             {
-                _logger.LogInformation("No maintenance tasks are due.");
+                _logger.LogWarning("FCM Device Token not found.");
                 return;
             }
 
-            var deviceTokens = await _deviceTokenService.GetAllTokensAsync();
-
-            foreach (var task in dueTasks)
+            var notification = new Message()
             {
-                var message = $"Vehicle {task.VehicleId} requires maintenance for {task.TypeName}.";
-
-                foreach (var token in deviceTokens)
+                Token = fcmDeviceToken,
+                Notification = new Notification
                 {
-                    await SendNotificationAsync(token.Token, "Maintenance Due", message);
+                    Title = title,
+                    Body = message
+                },
+                Data = new Dictionary<string, string>
+                {
+                    { "userId", userId.ToString() }
                 }
+            };
+
+            try
+            {
+                var response = await FirebaseMessaging.DefaultInstance.SendAsync(notification);
+                _logger.LogInformation("Successfully sent message: " + response);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error sending notification.");
             }
         }
 
@@ -188,6 +194,66 @@ namespace FleetPulse_BackEndDevelopment.Services
             {
                 _logger.LogError(ex, "Error deleting all notifications.");
             }
+        }
+
+        public async Task<bool> SendNotificationAsynctoAdmin(FCMNotificationDTO notification)
+        {
+            var emailExists = DoesEmailExist(notification.EmailAddress);
+            if (!emailExists)
+            {
+                _logger.LogWarning("Email address not found: " + notification.EmailAddress);
+                return false;
+            }
+
+            var username = GetUsernameByEmail(notification.EmailAddress);
+            if (username == null)
+            {
+                _logger.LogWarning("Username not found for email address: " + notification.EmailAddress);
+                return false;
+            }
+
+            var message = new Message()
+            {
+                Data = new Dictionary<string, string>()
+                {
+                    { "username", username },
+                    { "jobTitle", notification.JobTitle },
+                    { "title", notification.Title },
+                    { "message", notification.Message },
+                    { "emailAddress", notification.EmailAddress }
+                },
+                Notification = new Notification
+                {
+                    Title = notification.Title,
+                    Body = notification.Message
+                },
+                Token = "foAwll9oGeXgr1eS7d0h-w:APA91bFORCNY1m8DQjVql0g14z64BEvuncpVuh5JKqkPxILLqwJBqg_B-4MZqpVI-gPISSy6c-py-ioprh45M4MezQQwYDN5EkejBTH7SdiRLUbU6VUoaJQrbgL1cJDK8jI-0PlS3tot" // replace with the actual admin device token
+            };
+
+            _logger.LogInformation($"Sending notification with data: {{Username: {notification.Username}, JobTitle: {notification.JobTitle}, Title: {notification.Title}, Message: {notification.Message}, EmailAddress: {notification.EmailAddress}}}");
+
+            try
+            {
+                var response = await FirebaseMessaging.DefaultInstance.SendAsync(message);
+                _logger.LogInformation("Successfully sent message: " + response);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error sending message.");
+                return false;
+            }
+        }
+
+        public bool DoesEmailExist(string email)
+        {
+            return _context.Users.Any(u => u.EmailAddress == email);
+        }
+
+        public string GetUsernameByEmail(string email)
+        {
+            var user = _context.Users.FirstOrDefault(u => u.EmailAddress == email);
+            return user?.UserName;
         }
     }
 }

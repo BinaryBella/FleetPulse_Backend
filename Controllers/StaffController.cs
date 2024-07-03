@@ -115,29 +115,29 @@ namespace FleetPulse_BackEndDevelopment.Controllers
         {
             try
             {
-                var existingStaff = await _staffService.IsStaffExist(staffDto.UserId); // Assuming UserId exists on DriverDTO
+                var existingStaff = await _staffService.IsStaffExist(staffDto.UserId); 
 
                 if (!existingStaff)
                 {
                     return NotFound("Staff with Id not found");
                 }
 
-                User helper = await _staffService.GetStaffByIdAsync(staffDto.UserId);
+                User staff = await _staffService.GetStaffByIdAsync(staffDto.UserId);
 
                 {
-                  helper.UserId = staffDto.UserId; 
-                  helper.FirstName = staffDto.FirstName;
-                  helper.LastName = staffDto.LastName;
-                  helper.DateOfBirth = staffDto.DateOfBirth;
-                  helper.NIC = staffDto.NIC; 
-                  helper.EmailAddress = staffDto.EmailAddress;
-                  helper.PhoneNo = staffDto.PhoneNo;
-                  helper.EmergencyContact = staffDto.EmergencyContact;
-                  helper.JobTitle = staffDto.JobTitle;
-                  helper.Status = staffDto.Status;
+                  staff.UserId = staffDto.UserId; 
+                  staff.FirstName = staffDto.FirstName;
+                  staff.LastName = staffDto.LastName;
+                  staff.DateOfBirth = staffDto.DateOfBirth;
+                  staff.NIC = staffDto.NIC; 
+                  staff.EmailAddress = staffDto.EmailAddress;
+                  staff.PhoneNo = staffDto.PhoneNo;
+                  staff.EmergencyContact = staffDto.EmergencyContact;
+                  staff.JobTitle = staffDto.JobTitle;
+                  staff.Status = staffDto.Status;
                 };
 
-                var result = await _staffService.UpdateStaffAsync(helper); // Assuming UpdateDriverAsync method expects User entity
+                var result = await _staffService.UpdateStaffAsync(staff); // Assuming UpdateDriverAsync method expects User entity
                 return new JsonResult(result);
             }
             catch (Exception ex)

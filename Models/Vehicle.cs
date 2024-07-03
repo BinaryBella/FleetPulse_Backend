@@ -31,7 +31,7 @@ namespace FleetPulse_BackEndDevelopment.Models
         public Trip? Trip { get; set; }
         
         // Vehicle_Maintenance
-        public ICollection<VehicleMaintenance> VehicleMaintenances { get; set; } // Corrected to plural
+        public ICollection<VehicleMaintenance> VehicleMaintenances { get; set; }
         
         // FuelRefill
         public ICollection<FuelRefill> FuelRefills { get; set; }

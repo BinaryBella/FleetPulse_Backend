@@ -3,9 +3,6 @@ using FleetPulse_BackEndDevelopment.DTOs;
 using FleetPulse_BackEndDevelopment.Models;
 using FleetPulse_BackEndDevelopment.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using BC = BCrypt.Net.BCrypt;
 
 namespace FleetPulse_BackEndDevelopment.Controllers
@@ -15,10 +12,12 @@ namespace FleetPulse_BackEndDevelopment.Controllers
     public class DriverController : ControllerBase
     {
         private readonly IDriverService _driverService;
+        private readonly IEmailUserCredentialService _emailService;
 
-        public DriverController(IDriverService driverService)
+        public DriverController(IDriverService driverService, IEmailUserCredentialService emailService)
         {
             _driverService = driverService;
+            _emailService = emailService;
         }
 
         [HttpGet]
@@ -64,7 +63,7 @@ namespace FleetPulse_BackEndDevelopment.Controllers
             var response = new ApiResponse();
             try
             {
-                var user = new User // Use User entity instead of Driver if it represents your driver entity
+                var user = new User
                 {
                     FirstName = driverDto.FirstName,
                     LastName = driverDto.LastName,
@@ -78,23 +77,27 @@ namespace FleetPulse_BackEndDevelopment.Controllers
                     BloodGroup = driverDto.BloodGroup,
                     Status = driverDto.Status,
                     JobTitle = "Driver",
-                    HashedPassword = BC.HashPassword(driverDto.Password),
                     UserName = driverDto.UserName,
+                    HashedPassword = BCrypt.Net.BCrypt.HashPassword(driverDto.Password) // Hash the password
                 };
 
-                var driverExists = await _driverService.IsDriverExist(user.UserId); // Assuming UserId exists on User entity
+                var driverExists = await _driverService.IsDriverExist(user.UserId);
                 if (driverExists)
                 {
                     response.Message = "Driver already exists";
                     return new JsonResult(response);
                 }
 
-                var addedDriver = await _driverService.AddDriverAsync(user); // Assuming AddDriverAsync method expects User entity
+                var addedDriver = await _driverService.AddDriverAsync(user);
 
                 if (addedDriver != null)
                 {
                     response.Status = true;
                     response.Message = "Driver added successfully";
+
+                    // Send email with username and password
+                    await _emailService.SendUsernameAndPassword(user.EmailAddress, user.UserName, driverDto.Password);
+
                     return new JsonResult(response);
                 }
                 else
@@ -111,14 +114,13 @@ namespace FleetPulse_BackEndDevelopment.Controllers
 
             return new JsonResult(response);
         }
-
+       
         [HttpPut("UpdateDriver")]
         public async Task<IActionResult> UpdateDriver([FromBody] DriverDTO driverDto)
         {
             try
             {
                 var existingDriver = await _driverService.IsDriverExist(driverDto.UserId); // Assuming UserId exists on DriverDTO
-
                 if (!existingDriver)
                 {
                     return NotFound("Driver with Id not found");
@@ -146,7 +148,6 @@ namespace FleetPulse_BackEndDevelopment.Controllers
                 return StatusCode(500, $"An error occurred while updating the driver: {ex.Message}");
             }
         }
-
         [HttpPut("{id}/deactivate")]
         public async Task<IActionResult> DeactivateDriver(int id)
         {

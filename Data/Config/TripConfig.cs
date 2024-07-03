@@ -15,8 +15,6 @@ namespace FleetPulse_BackEndDevelopment.Data.Config
             builder.Property(t => t.Date).IsRequired();
             builder.Property(t => t.StartTime).IsRequired();
             builder.Property(t => t.EndTime);
-            builder.Property(t => t.StartLocation).IsRequired().HasMaxLength(100);
-            builder.Property(t => t.EndLocation).HasMaxLength(100);
             builder.Property(t => t.StartMeterValue).IsRequired();
             builder.Property(t => t.EndMeterValue);
             builder.Property(t => t.Status).IsRequired();
