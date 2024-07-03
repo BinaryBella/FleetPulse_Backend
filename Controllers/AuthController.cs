@@ -1,16 +1,15 @@
-using FirebaseAdmin.Messaging;
+//auth controller
+
 using FleetPulse_BackEndDevelopment.Configuration;
 using FleetPulse_BackEndDevelopment.Data;
 using FleetPulse_BackEndDevelopment.Data.DTO;
 using FleetPulse_BackEndDevelopment.Models;
-using FleetPulse_BackEndDevelopment.Services;
 using FleetPulse_BackEndDevelopment.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using System.Threading.Tasks;
 
 namespace FleetPulse_BackEndDevelopment.Controllers
 {
@@ -22,17 +21,16 @@ namespace FleetPulse_BackEndDevelopment.Controllers
         private readonly IMailService _mailService;
         private readonly IEmailService _emailService;
         private readonly IVerificationCodeService _verificationCodeService;
-        private readonly IPushNotificationService _pushNotificationService;
         private readonly FleetPulseDbContext _context;
         private readonly IConfiguration _configuration;
         private readonly ILogger<AuthController> _logger;
         private readonly MailSettings _mailSettings;
 
-        public AuthController(IAuthService authService,
+        public AuthController(
+            IAuthService authService,
             IMailService mailService,
             IEmailService emailService,
             IVerificationCodeService verificationCodeService,
-            IPushNotificationService pushNotificationService,
             FleetPulseDbContext context,
             IConfiguration configuration,
             ILogger<AuthController> logger,
@@ -42,15 +40,14 @@ namespace FleetPulse_BackEndDevelopment.Controllers
             _mailService = mailService;
             _emailService = emailService;
             _verificationCodeService = verificationCodeService;
-            _pushNotificationService = pushNotificationService;
             _context = context;
-            _logger = logger;
             _configuration = configuration;
+            _logger = logger;
             _mailSettings = mailSettings.Value;
         }
 
         [HttpPost("login")]
-        public ActionResult<ApiResponse> Login([FromBody] LoginDTO userModel)
+        public async Task<ActionResult<ApiResponse>> Login([FromBody] LoginDTO userModel)
         {
             var response = new ApiResponse
             {
@@ -92,8 +89,15 @@ namespace FleetPulse_BackEndDevelopment.Controllers
 
                     if (validJobTitles.Contains(user.JobTitle))
                     {
-                        var token = _authService.GenerateJwtToken(user.UserName, user.JobTitle);
-                        response.Data = new { token, user.JobTitle };
+                        var accessToken = await _authService.GenerateJwtToken(user.UserName, user.JobTitle);
+                        var refreshToken = await _authService.GenerateRefreshToken(user.UserId);
+
+                        response.Data = new
+                        {
+                            AccessToken = accessToken,
+                            RefreshToken = refreshToken,
+                            JobTitle = user.JobTitle
+                        };
                         return new JsonResult(response);
                     }
                     else
@@ -110,7 +114,8 @@ namespace FleetPulse_BackEndDevelopment.Controllers
             }
             catch (Exception error)
             {
-                _logger.LogError(error, "An error occurred while processing the login request: {Message}", error.Message);
+                _logger.LogError(error, "An error occurred while processing the login request: {Message}",
+                    error.Message);
                 response.Status = false;
                 response.Error = "An internal error occurred";
                 return StatusCode(500, response);
@@ -160,7 +165,8 @@ namespace FleetPulse_BackEndDevelopment.Controllers
             }
             catch (Exception error)
             {
-                _logger.LogError(error, "An error occurred while processing the forgot password request: {Message}", error.Message);
+                _logger.LogError(error, "An error occurred while processing the forgot password request: {Message}",
+                    error.Message);
 
                 response.Status = false;
                 response.Message = "An error occurred while processing your request";
@@ -222,17 +228,6 @@ namespace FleetPulse_BackEndDevelopment.Controllers
                     if (passwordReset)
                     {
                         response.Message = "Password reset successfully";
-
-                        // Send email notification
-                        var mailRequest = new MailRequest
-                        {
-                            ToEmail = model.Email,
-                            Subject = "Password Reset Notification",
-                            Body = model.NewPassword
-                        };
-
-                        await _emailService.SendEmailAsync(mailRequest);
-
                         return new JsonResult(response);
                     }
                     else
@@ -250,12 +245,80 @@ namespace FleetPulse_BackEndDevelopment.Controllers
             }
             catch (Exception error)
             {
-                _logger.LogError(error, "An error occurred while processing the reset password request: {Message}", error.Message);
+                _logger.LogError(error, "An error occurred while processing the reset password request: {Message}",
+                    error.Message);
                 return StatusCode(500, "An error occurred while processing your request");
             }
         }
 
+        
+        
+        [HttpPost("reset-password-driver")]
+public async Task<IActionResult> ResetDriverPassword([FromBody] ResetDriverPasswordRequest request)
+{
+    if (request == null || string.IsNullOrEmpty(request.EmailAddress) || string.IsNullOrEmpty(request.NewPassword))
+    {
+        return BadRequest("Invalid request.");
+    }
 
+    try
+    {
+        // Check if the email address exists
+        var emailExists = _authService.DoesEmailExists(request.EmailAddress);
+        if (!emailExists)
+        {
+            return BadRequest(new ApiResponse { Status = false, Message = "Email not found" });
+        }
+
+        // Reset the password
+        var result = await _authService.ResetDriverPasswordAsync(request.EmailAddress, request.NewPassword);
+        if (result)
+        {
+            // Retrieve user by email address
+            var user = await _authService.GetUserByEmailAsync(request.EmailAddress);
+            if (user == null)
+            {
+                return BadRequest(new ApiResponse { Status = false, Message = "User not found" });
+            }
+
+            // Send email notification
+            var mailRequest = new MailRequest
+            {
+                ToEmail = request.EmailAddress,
+                Subject = "Password Reset Notification",
+                Body = request.NewPassword
+            };
+
+            await _emailService.SendEmailAsync(mailRequest);
+
+            // Save notification to the database
+            var notification = new FCMNotification
+            {
+                NotificationId = Guid.NewGuid().ToString(),
+                UserName = user.UserName, // Save the username here
+                Title = "Password Reset Request",
+                Message = $"Your password has been reset successfully.",
+                Date = DateTime.Now,
+                Time = DateTime.Now.TimeOfDay,
+                Status = false
+            };
+
+            await _authService.AddNotificationAsync(notification);
+
+            return Ok(new ApiResponse { Status = true, Message = "Password reset successful." });
+        }
+        else
+        {
+            return BadRequest(new ApiResponse { Status = false, Message = "Failed to reset password." });
+        }
+    }
+    catch (Exception ex)
+    {
+        _logger.LogError(ex, "An error occurred while resetting driver password: {Message}", ex.Message);
+        return StatusCode(500, new ApiResponse { Status = false, Error = "An error occurred while resetting password." });
+    }
+}
+        
         [HttpPost("change-password")]
         public IActionResult ChangePassword([FromBody] ChangePasswordDTO model)
         {
@@ -304,7 +367,8 @@ namespace FleetPulse_BackEndDevelopment.Controllers
             }
             catch (Exception error)
             {
-                _logger.LogError(error, "An error occurred while processing the change password request: {Message}", error.Message);
+                _logger.LogError(error, "An error occurred while processing the change password request: {Message}",
+                    error.Message);
                 return StatusCode(500, "An error occurred while processing your request");
             }
         }
@@ -355,6 +419,30 @@ namespace FleetPulse_BackEndDevelopment.Controllers
             }
         }
 
+        [HttpGet("userProfile")]
+        public async Task<ActionResult<StaffDTO>> GetUserByUsernameAsync(string username)
+        {
+            var user = await _authService.GetUserByUsernameAsync(username);
+
+            if (user == null)
+                return NotFound();
+
+            var profilePictureBase64 = user.ProfilePicture != null ? Convert.ToBase64String(user.ProfilePicture) : null;
+
+            var staffDTO = new StaffDTO
+            {
+                UserId = user.UserId,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                DateOfBirth = user.DateOfBirth,
+                EmailAddress = user.EmailAddress,
+                PhoneNo = user.PhoneNo,
+                NIC = user.NIC,
+                ProfilePicture = profilePictureBase64
+            };
+
+            return Ok(staffDTO);
+        }
 
         [HttpPut("UpdateDriverProfilePicture")]
         public async Task<IActionResult> UpdateDriverProfilePicture([FromBody] ProfilePictureDTO profilePictureDTO)
@@ -378,31 +466,7 @@ namespace FleetPulse_BackEndDevelopment.Controllers
                 return StatusCode(500, $"An error occurred while updating the profile picture: {ex.Message}");
             }
         }
-
-        [HttpGet("userProfile")]
-        public async Task<ActionResult<StaffDTO>> GetUserByUsernameAsync(string username)
-        {
-            var user = await _authService.GetUserByUsernameAsync(username);
-
-            if (user == null)
-                return NotFound();
-
-            var profilePictureBase64 = user.ProfilePicture != null ? Convert.ToBase64String(user.ProfilePicture) : null;
-
-            var staffDTO = new StaffDTO
-            {
-                FirstName = user.FirstName,
-                LastName = user.LastName,
-                DateOfBirth = user.DateOfBirth,
-                EmailAddress = user.EmailAddress,
-                PhoneNo = user.PhoneNo,
-                NIC = user.NIC,
-                ProfilePicture = profilePictureBase64
-            };
-
-            return Ok(staffDTO);
-        }
-
+        
         [HttpPost("logout")]
         public IActionResult Logout()
         {

@@ -1,3 +1,5 @@
+//IAuth Service
+
 using FleetPulse_BackEndDevelopment.Models;
 using Google.Apis.Auth.OAuth2.Responses;
 using System.Threading.Tasks;
@@ -12,7 +14,7 @@ public interface IAuthService
 
     // User Existence Checks
     bool DoesUserExists(string username);
-    bool DoesEmailExists(string email); 
+    bool DoesEmailExists(string email);
 
     // User Queries
     User GetById(int id);
@@ -44,6 +46,5 @@ public interface IAuthService
     Task<string> GenerateRefreshToken(int userId);
     Task<bool> ValidateRefreshToken(string token);
     Task<bool> AddNotificationAsync(FCMNotification notification);
-    Task<bool> UpdateUserProfilePictureAsync(string username, string profilePicture);
-
+   Task<bool> UpdateUserProfilePictureAsync(string username, string profilePicture);
 }

@@ -1,3 +1,5 @@
+//Auth Service
+
 using FleetPulse_BackEndDevelopment.Models;
 using FleetPulse_BackEndDevelopment.Data;
 using Microsoft.EntityFrameworkCore;
@@ -7,6 +9,10 @@ using System.Security.Cryptography;
 using System.Text;
 using Google.Apis.Auth.OAuth2.Responses;
 using Microsoft.IdentityModel.Tokens;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
 
 namespace FleetPulse_BackEndDevelopment.Services
 {
@@ -55,7 +61,7 @@ namespace FleetPulse_BackEndDevelopment.Services
             return this.dataContext.Users.ToArray();
         }
 
-        public User? GetByUsername(string username)
+        public User GetByUsername(string username)
         {
             return dataContext.Users.FirstOrDefault(c => c.UserName == username);
         }
@@ -80,10 +86,10 @@ namespace FleetPulse_BackEndDevelopment.Services
             return t.Payload.FirstOrDefault(x => x.Key == "username").Value.ToString();
         }
 
-        public User ChangeRole(string username, string JobTitle)
+        public User ChangeRole(string username, string jobTitle)
         {
             var user = this.GetByUsername(username);
-            user.JobTitle = JobTitle;
+            user.JobTitle = jobTitle;
             this.dataContext.SaveChanges();
 
             return user;
@@ -151,7 +157,7 @@ namespace FleetPulse_BackEndDevelopment.Services
             }
             return false;
         }
-
+        
         public async Task<bool> ResetDriverPasswordAsync(string emailAddress, string newPassword)
         {
             var user = await dataContext.Users.SingleOrDefaultAsync(u => u.EmailAddress == emailAddress);
@@ -165,7 +171,7 @@ namespace FleetPulse_BackEndDevelopment.Services
             var notification = new FCMNotification
             {
                 NotificationId = Guid.NewGuid().ToString(),
-                UserName = user.UserName,
+                UserName = user.UserName, 
                 Title = "Password Reset Request",
                 Message = $"Your password has been reset successfully.",
                 Date = DateTime.Now,
@@ -208,11 +214,9 @@ namespace FleetPulse_BackEndDevelopment.Services
             return user?.UserId;
         }
 
-
         public async Task<TokenResponse> Authenticate(User user)
         {
             var existingUser = await dataContext.Users
-                .Include(u => u.RefreshTokens)
                 .SingleOrDefaultAsync(u => u.UserName == user.UserName);
 
             if (existingUser == null || !BCrypt.Net.BCrypt.Verify(user.HashedPassword, existingUser.HashedPassword))
@@ -220,7 +224,7 @@ namespace FleetPulse_BackEndDevelopment.Services
 
             var token = await GenerateJwtToken(existingUser.UserName, existingUser.JobTitle);
             var refreshToken = await GenerateRefreshToken(existingUser.UserId);
-
+            
             return new TokenResponse { AccessToken = token, RefreshToken = refreshToken };
         }
 
@@ -346,7 +350,7 @@ namespace FleetPulse_BackEndDevelopment.Services
 
             return refreshToken != null;
         }
-
+        
         public async Task<bool> UpdateUserProfilePictureAsync(string username, string profilePicture)
         {
             try
@@ -355,7 +359,7 @@ namespace FleetPulse_BackEndDevelopment.Services
 
                 if (user == null)
                 {
-                    return false;
+                    return false; 
                 }
 
                 if (string.IsNullOrEmpty(profilePicture))
