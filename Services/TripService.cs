@@ -30,10 +30,9 @@ namespace FleetPulse_BackEndDevelopment.Services
 
         public async Task<bool> IsTripExist(int id)
         {
-            return await _context.Trips.AnyAsync(x => x.TripId == id.ToString());
+            return await _context.Trips.AnyAsync(x => x.TripId == id);
         }
-
-        public bool DoesTripExists(string tripId)
+        public bool DoesTripExists(int tripId)
         {
             return _context.Trips.Any(x => x.TripId == tripId);
         }

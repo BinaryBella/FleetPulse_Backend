@@ -133,7 +133,6 @@ void ConfigureServices(IServiceCollection services, IConfiguration configuration
     services.AddScoped<IDriverService, DriverService>();
     services.AddScoped<IHelperService, HelperService>();
     services.AddScoped<IStaffService, StaffService>();
-    services.AddScoped<ITripUserService, TripUserService>();
     services.AddScoped<IAccidentService, AccidentService>();
     services.AddScoped<IAccidentUserService, AccidentUserService>();
     services.AddScoped<IPushNotificationService, PushNotificationService>();
