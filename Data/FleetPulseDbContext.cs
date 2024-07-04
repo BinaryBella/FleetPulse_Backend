@@ -43,7 +43,7 @@ namespace FleetPulse_BackEndDevelopment.Data
             modelBuilder.ApplyConfiguration(new VerificationCodeConfig());
             modelBuilder.ApplyConfiguration(new FCMNotificationConfig());
             modelBuilder.ApplyConfiguration(new TripConfig());
-            // modelBuilder.ApplyConfiguration(new TripUserConfig());
+            modelBuilder.ApplyConfiguration(new TripUserConfig());
             modelBuilder.ApplyConfiguration(new UserConfig());
             
             // One-to-many relationships
