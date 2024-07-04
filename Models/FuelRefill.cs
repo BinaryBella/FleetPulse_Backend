@@ -13,10 +13,5 @@ public class FuelRefill
     public Vehicle Vehicle { get; set; }
     public int UserId { get; set; }
     public User User { get; set; }
-    
-    //Vehicle
-    public ICollection<Vehicle> Vehicles { get; set; }
-        
-    //FuelRefillUser
     public ICollection<FuelRefillUser> FuelRefillUsers { get; set; }
 }

@@ -55,10 +55,8 @@ namespace FleetPulse_BackEndDevelopment.Controllers
                     Status = vehicleDto.Status,
                     VehicleTypeId = vehicleDto.VehicleTypeId,
                     ManufactureId = vehicleDto.ManufactureId,
-                    AccidentId = vehicleDto.AccidentId,
-                    TripId = vehicleDto.TripId,
-                    VehicleMaintenances = vehicleDto.VehicleMaintenanceIds?.Select(id => new VehicleMaintenance {MaintenanceId = id }).ToList(),
-                    FuelRefills = vehicleDto.FuelRefillIds?.Select(id => new FuelRefill {FuelRefillId = id }).ToList()
+                    VehicleMaintenances = vehicleDto.VehicleMaintenanceIds?.Select(id => new VehicleMaintenance { MaintenanceId = id }).ToList(),
+                    FuelRefills = vehicleDto.FuelRefillIds?.Select(id => new FuelRefill { FuelRefillId = id }).ToList()
                 };
 
                 var addedVehicle = await _vehicleService.AddVehicleAsync(vehicle);
@@ -106,8 +104,6 @@ namespace FleetPulse_BackEndDevelopment.Controllers
                     Status = vehicleDto.Status,
                     VehicleTypeId = vehicleDto.VehicleTypeId,
                     ManufactureId = vehicleDto.ManufactureId,
-                    AccidentId = vehicleDto.AccidentId,
-                    TripId = vehicleDto.TripId,
                     VehicleMaintenances = vehicleDto.VehicleMaintenanceIds?.Select(id => new VehicleMaintenance { MaintenanceId = id }).ToList(),
                     FuelRefills = vehicleDto.FuelRefillIds?.Select(id => new FuelRefill { FuelRefillId = id }).ToList()
                 };

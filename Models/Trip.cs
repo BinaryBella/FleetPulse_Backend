@@ -14,11 +14,8 @@ namespace FleetPulse_BackEndDevelopment.Models
         public float StartMeterValue { get; set; }
         public float EndMeterValue { get; set; }
         public bool Status { get; set; }
-        
-        // Vehicle - assuming a trip can involve multiple vehicles
-        public ICollection<Vehicle> Vehicles { get; set; }
-        
-        // TripUser - many-to-many relationship with User through TripUser
-        public ICollection<TripUser> TripUsers { get; set; }  // Correctly define the navigation property
+        public int VehicleId { get; set; }
+        public Vehicle Vehicle { get; set; }
+        public ICollection<TripUser> TripUsers { get; set; } 
     }
 }

@@ -11,27 +11,13 @@ namespace FleetPulse_BackEndDevelopment.Models
         public DateTime LicenseExpireDate { get; set; }
         public string? VehicleColor { get; set; }
         public string? Status { get; set; }
-        
-        // Vehicle_Type
         public int VehicleTypeId { get; set; }
         public VehicleType Type { get; set; }
-        
-        // Vehicle_Manufacture
         public int ManufactureId { get; set; }
         public Manufacture Manufacturer { get; set; }
-        
-        // Accident
-        public int AccidentId { get; set; }
-        public Accident Accident { get; set; }
-        
-        // Trip
-        public int TripId { get; set; }
-        public Trip Trip { get; set; }
-        
-        // Vehicle_Maintenance
+        public ICollection<Trip> Trips { get; set; }
+        public ICollection<Accident> Accidents { get; set; }
         public ICollection<VehicleMaintenance> VehicleMaintenances { get; set; }
-        
-        // FuelRefill
         public ICollection<FuelRefill> FuelRefills { get; set; }
     }
 }

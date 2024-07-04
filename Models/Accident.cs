@@ -15,13 +15,11 @@ namespace FleetPulse_BackEndDevelopment.Models
         public bool HelperInjuredStatus { get; set; }
         public bool VehicleDamagedStatus { get; set; }
         public int VehicleId { get; set; }
+        public Vehicle Vehicle { get; set; }
         public bool Status { get; set; }
-        
-        //Vehicle
-        public ICollection<Vehicle> Vehicles { get; set; }
-        
-        //AccidentUser
         public ICollection<AccidentUser> AccidentUsers { get; set; }
+
+
     }
 }
 
