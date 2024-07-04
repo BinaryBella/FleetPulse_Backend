@@ -18,13 +18,10 @@ namespace FleetPulse_BackEndDevelopment.Models
         public string JobTitle { get; set; }
         public byte[]? ProfilePicture { get; set; }
         public bool Status { get; set; }
-        // Navigation properties
         public ICollection<FuelRefill> FuelRefills { get; set; }
         public ICollection<FCMNotification> FCMNotifications { get; set; }
-        public ICollection<RefreshToken> RefreshTokens { get; set; }
         public ICollection<AccidentUser> AccidentUsers { get; set; }
-        public ICollection<TripUser> TripUsers { get; set; }
+        // public ICollection<TripUser> TripUsers { get; set; } = new List<TripUser>(); 
         public ICollection<FuelRefillUser> FuelRefillUsers { get; set; }
-
     }
 }

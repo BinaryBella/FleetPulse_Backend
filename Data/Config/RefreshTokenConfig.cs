@@ -27,12 +27,6 @@ namespace FleetPulse_BackEndDevelopment.Configurations
 
             builder.Property(rt => rt.UserId)
                 .IsRequired();
-
-            // Define relationships if any (e.g., foreign key constraints)
-            builder.HasOne<User>()
-                .WithMany()
-                .HasForeignKey(rt => rt.UserId)
-                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }
