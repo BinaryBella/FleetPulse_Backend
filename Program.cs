@@ -134,7 +134,6 @@ void ConfigureServices(IServiceCollection services, IConfiguration configuration
     services.AddScoped<IHelperService, HelperService>();
     services.AddScoped<IStaffService, StaffService>();
     services.AddScoped<IAccidentService, AccidentService>();
-    services.AddScoped<IAccidentUserService, AccidentUserService>();
     services.AddScoped<IPushNotificationService, PushNotificationService>();
 
     // Add AutoMapper

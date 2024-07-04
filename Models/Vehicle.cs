@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace FleetPulse_BackEndDevelopment.Models
 {
@@ -16,19 +14,19 @@ namespace FleetPulse_BackEndDevelopment.Models
         
         // Vehicle_Type
         public int VehicleTypeId { get; set; }
-        public VehicleType? Type { get; set; }
+        public VehicleType Type { get; set; }
         
         // Vehicle_Manufacture
         public int ManufactureId { get; set; }
-        public Manufacture? Manufacturer { get; set; }
+        public Manufacture Manufacturer { get; set; }
         
         // Accident
-        public int? AccidentId { get; set; }
-        public Accident? Accident { get; set; }
+        public int AccidentId { get; set; }
+        public Accident Accident { get; set; }
         
         // Trip
-        public string? TripId { get; set; }
-        public Trip? Trip { get; set; }
+        public int TripId { get; set; }
+        public Trip Trip { get; set; }
         
         // Vehicle_Maintenance
         public ICollection<VehicleMaintenance> VehicleMaintenances { get; set; }
