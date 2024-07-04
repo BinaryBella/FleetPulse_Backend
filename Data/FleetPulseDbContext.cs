@@ -88,7 +88,7 @@ namespace FleetPulse_BackEndDevelopment.Data
 
             modelBuilder.Entity<Vehicle>()
                 .HasOne(v => v.Manufacturer)
-                .WithMany()
+                .WithMany(m => m.Vehicles)
                 .HasForeignKey(v => v.ManufactureId);
 
             modelBuilder.Entity<FuelRefill>()

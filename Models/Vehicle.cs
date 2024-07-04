@@ -4,6 +4,7 @@ namespace FleetPulse_BackEndDevelopment.Models
 {
     public class Vehicle
     {
+        
         [Key]
         public int VehicleId { get; set; }
         public string VehicleRegistrationNo { get; set; }
