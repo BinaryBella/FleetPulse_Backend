@@ -10,6 +10,7 @@ namespace FleetPulse_BackEndDevelopment.Quartz.Jobs
         private readonly IVehicleMaintenanceConfigurationService _vehicleMaintenanceConfigurationService;
         private readonly IConfiguration _configuration;
         private readonly ILogger<SendMaintenanceNotificationJob> _logger;
+        private static readonly Dictionary<int, bool> _notifiedTasks = new Dictionary<int, bool>();
 
         public SendMaintenanceNotificationJob(
             IPushNotificationService pushNotificationService,
@@ -39,12 +40,30 @@ namespace FleetPulse_BackEndDevelopment.Quartz.Jobs
 
                 foreach (var task in dueTasks)
                 {
-                    var message = $"Vehicle {task.VehicleId} requires maintenance for {task.TypeName}.";
+                    // Check for invalid or default vehicle registration number
+                    if (string.IsNullOrWhiteSpace(task.VehicleRegistrationNo) || task.VehicleRegistrationNo == "0")
+                    {
+                        _logger.LogWarning($"Skipping notification for vehicle with invalid registration number: {task.VehicleRegistrationNo}");
+                        continue;
+                    }
+
+                    // Check if the task has already been notified
+                    if (_notifiedTasks.ContainsKey(task.Id))
+                    {
+                        _logger.LogInformation($"Task for vehicle {task.VehicleRegistrationNo} already notified.");
+                        continue;
+                    }
+
+                    var message = $"Vehicle {task.VehicleRegistrationNo} requires maintenance for {task.TypeName}.";
 
                     foreach (var token in deviceTokens)
                     {
                         await _pushNotificationService.SendNotificationAsync(token, "Maintenance Due", message, 0);
+                        _logger.LogInformation($"Notification sent for vehicle {task.VehicleRegistrationNo}: {message}");
                     }
+
+                    // Mark the task as notified
+                    _notifiedTasks[task.Id] = true;
                 }
             }
             catch (Exception ex)
