@@ -133,13 +133,13 @@ namespace FleetPulse_BackEndDevelopment.Migrations
                 columns: table => new
                 {
                     NotificationId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    UserId = table.Column<int>(type: "int", nullable: false),
                     UserName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Title = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
                     Message = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: false),
                     Date = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Time = table.Column<TimeSpan>(type: "time", nullable: false),
-                    Status = table.Column<bool>(type: "bit", nullable: false),
-                    UserId = table.Column<int>(type: "int", nullable: true)
+                    Status = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -148,7 +148,8 @@ namespace FleetPulse_BackEndDevelopment.Migrations
                         name: "FK_Notifications_Users_UserId",
                         column: x => x.UserId,
                         principalTable: "Users",
-                        principalColumn: "UserId");
+                        principalColumn: "UserId",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(

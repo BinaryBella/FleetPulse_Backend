@@ -1,5 +1,3 @@
-//auth controller
-
 using FleetPulse_BackEndDevelopment.Configuration;
 using FleetPulse_BackEndDevelopment.Data;
 using FleetPulse_BackEndDevelopment.Data.DTO;
@@ -96,7 +94,9 @@ namespace FleetPulse_BackEndDevelopment.Controllers
                         {
                             AccessToken = accessToken,
                             RefreshToken = refreshToken,
-                            JobTitle = user.JobTitle
+                            JobTitle = user.JobTitle,
+                            UserId = user.UserId  // Make sure this is included
+
                         };
                         return new JsonResult(response);
                     }

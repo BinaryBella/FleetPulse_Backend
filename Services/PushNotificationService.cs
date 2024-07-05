@@ -104,7 +104,23 @@ namespace FleetPulse_BackEndDevelopment.Services
                 _logger.LogError(ex, "Error sending notification.");
             }
         }
-
+        //
+        // public async Task SaveNotificationAsync(FCMNotification notification)
+        // {
+        //     try
+        //     {
+        //         notification.NotificationId = Guid.NewGuid().ToString();
+        //         notification.Date = DateTime.UtcNow;
+        //         notification.Time = DateTime.UtcNow.TimeOfDay;
+        //         await _context.FCMNotifications.AddAsync(notification);
+        //         await _context.SaveChangesAsync();
+        //     }
+        //     catch (Exception ex)
+        //     {
+        //         _logger.LogError(ex, "Error saving notification.");
+        //     }
+        // }
+        
         public async Task SaveNotificationAsync(FCMNotification notification)
         {
             try
@@ -120,6 +136,7 @@ namespace FleetPulse_BackEndDevelopment.Services
                 _logger.LogError(ex, "Error saving notification.");
             }
         }
+
 
         public async Task<List<FCMNotification>> GetAllNotificationsAsync()
         {
@@ -236,6 +253,16 @@ namespace FleetPulse_BackEndDevelopment.Services
             {
                 var response = await FirebaseMessaging.DefaultInstance.SendAsync(message);
                 _logger.LogInformation("Successfully sent message: " + response);
+                await SaveNotificationAsync(new FCMNotification
+                {
+                    NotificationId = Guid.NewGuid().ToString(),
+                    UserName = username,
+                    Title = notification.Title,
+                    Message = notification.Message,
+                    Date = DateTime.UtcNow,
+                    Time = DateTime.UtcNow.TimeOfDay,
+                    Status = false
+                });
                 return true;
             }
             catch (Exception ex)
@@ -254,6 +281,13 @@ namespace FleetPulse_BackEndDevelopment.Services
         {
             var user = _context.Users.FirstOrDefault(u => u.EmailAddress == email);
             return user?.UserName;
+        }
+        
+        public async Task<List<FCMNotification>> GetUnreadNotificationsAsync(int userId)
+        {
+            return await _context.FCMNotifications
+                .Where(n => n.UserId == userId && !n.Status)
+                .ToListAsync();
         }
     }
 }

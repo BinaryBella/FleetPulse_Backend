@@ -2,9 +2,6 @@ using FleetPulse_BackEndDevelopment.DTOs;
 using FleetPulse_BackEndDevelopment.Models;
 using FleetPulse_BackEndDevelopment.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace FleetPulse_BackEndDevelopment.Controllers
 {
@@ -13,10 +10,12 @@ namespace FleetPulse_BackEndDevelopment.Controllers
     public class NotificationController : ControllerBase
     {
         private readonly IPushNotificationService _pushNotificationService;
+        private readonly ILogger<NotificationController> _logger;
 
-        public NotificationController(IPushNotificationService pushNotificationService)
+        public NotificationController(IPushNotificationService pushNotificationService, ILogger<NotificationController> logger)
         {
             _pushNotificationService = pushNotificationService;
+            _logger = logger;
         }
 
         [HttpGet]
@@ -25,6 +24,52 @@ namespace FleetPulse_BackEndDevelopment.Controllers
             var notifications = await _pushNotificationService.GetAllNotificationsAsync();
             return Ok(notifications);
         }
+        
+        [HttpGet("unread/{userId}")]
+        public async Task<ActionResult<IEnumerable<FCMNotification>>> GetUnreadNotifications(int userId)
+        {
+            var notifications = await _pushNotificationService.GetUnreadNotificationsAsync(userId);
+            return Ok(notifications);
+        }
+        
+        [HttpPost("save-notification")]
+        public async Task<IActionResult> SaveNotification([FromBody] FCMNotification notification)
+        {
+            if (notification == null)
+            {
+                return BadRequest("Invalid notification data.");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            try
+            {
+                notification.NotificationId = Guid.NewGuid().ToString();
+        
+                if (notification.Date == default)
+                {
+                    notification.Date = DateTime.UtcNow.Date;
+                }
+
+                // Extract only the time part from DateTime
+                if (notification.Time == default)
+                {
+                    notification.Time = DateTime.UtcNow.TimeOfDay;
+                }
+
+                await _pushNotificationService.SaveNotificationAsync(notification);
+                return Ok(new { Status = "Success", Message = "Notification saved successfully" });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while saving the notification");
+                return StatusCode(500, new { Status = "Error", Message = "An error occurred while saving the notification.", Detail = ex.Message });
+            }
+        }
+
 
         [HttpPost("mark-as-read/{id}")]
         public async Task<IActionResult> MarkNotificationAsRead(string id)

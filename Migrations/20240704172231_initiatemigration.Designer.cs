@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FleetPulse_BackEndDevelopment.Migrations
 {
     [DbContext(typeof(FleetPulseDbContext))]
-    [Migration("20240704094319_initiatemigration")]
+    [Migration("20240704172231_initiatemigration")]
     partial class initiatemigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -114,7 +114,7 @@ namespace FleetPulse_BackEndDevelopment.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
 
-                    b.Property<int?>("UserId")
+                    b.Property<int>("UserId")
                         .HasColumnType("int");
 
                     b.Property<string>("UserName")
@@ -592,7 +592,9 @@ namespace FleetPulse_BackEndDevelopment.Migrations
                 {
                     b.HasOne("FleetPulse_BackEndDevelopment.Models.User", null)
                         .WithMany("FCMNotifications")
-                        .HasForeignKey("UserId");
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("FleetPulse_BackEndDevelopment.Models.Trip", b =>

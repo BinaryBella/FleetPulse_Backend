@@ -15,5 +15,7 @@ namespace FleetPulse_BackEndDevelopment.Services.Interfaces
         Task SendNotificationAsync(string fcmDeviceToken, string title, string message, int userId);
         bool DoesEmailExist(string email); // Add this method to check email existence
         string GetUsernameByEmail(string email); // New method to get username by email
+        Task<List<FCMNotification>> GetUnreadNotificationsAsync(int userId);
+
     }
 }
