@@ -21,6 +21,7 @@ namespace FleetPulse_BackEndDevelopment.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<FCMNotification>>> GetNotifications()
         {
+            // Simulate getting notifications in memory
             var notifications = await _pushNotificationService.GetAllNotificationsAsync();
             return Ok(notifications);
         }
@@ -28,52 +29,15 @@ namespace FleetPulse_BackEndDevelopment.Controllers
         [HttpGet("unread/{userId}")]
         public async Task<ActionResult<IEnumerable<FCMNotification>>> GetUnreadNotifications(int userId)
         {
+            // Simulate getting unread notifications in memory
             var notifications = await _pushNotificationService.GetUnreadNotificationsAsync(userId);
             return Ok(notifications);
         }
         
-        [HttpPost("save-notification")]
-        public async Task<IActionResult> SaveNotification([FromBody] FCMNotification notification)
-        {
-            if (notification == null)
-            {
-                return BadRequest("Invalid notification data.");
-            }
-
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            try
-            {
-                notification.NotificationId = Guid.NewGuid().ToString();
-        
-                if (notification.Date == default)
-                {
-                    notification.Date = DateTime.UtcNow.Date;
-                }
-
-                // Extract only the time part from DateTime
-                if (notification.Time == default)
-                {
-                    notification.Time = DateTime.UtcNow.TimeOfDay;
-                }
-
-                await _pushNotificationService.SaveNotificationAsync(notification);
-                return Ok(new { Status = "Success", Message = "Notification saved successfully" });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "An error occurred while saving the notification");
-                return StatusCode(500, new { Status = "Error", Message = "An error occurred while saving the notification.", Detail = ex.Message });
-            }
-        }
-
-
         [HttpPost("mark-as-read/{id}")]
         public async Task<IActionResult> MarkNotificationAsRead(string id)
         {
+            // Simulate marking a notification as read in memory
             await _pushNotificationService.MarkNotificationAsReadAsync(id);
             return Ok(new { Status = "Success", Message = "Notification marked as read" });
         }
@@ -81,6 +45,7 @@ namespace FleetPulse_BackEndDevelopment.Controllers
         [HttpPost("markAllAsRead")]
         public async Task<IActionResult> MarkAllAsRead()
         {
+            // Simulate marking all notifications as read in memory
             await _pushNotificationService.MarkAllAsReadAsync();
             return Ok(new { Status = "Success", Message = "All notifications marked as read" });
         }
@@ -88,6 +53,7 @@ namespace FleetPulse_BackEndDevelopment.Controllers
         [HttpDelete("delete/{id}")]
         public async Task<IActionResult> DeleteNotification(string id)
         {
+            // Simulate deleting a notification in memory
             await _pushNotificationService.DeleteNotificationAsync(id);
             return Ok(new { Status = "Success", Message = "Notification deleted successfully" });
         }
@@ -95,6 +61,7 @@ namespace FleetPulse_BackEndDevelopment.Controllers
         [HttpDelete("deleteAll")]
         public async Task<IActionResult> DeleteAllNotifications()
         {
+            // Simulate deleting all notifications in memory
             await _pushNotificationService.DeleteAllNotificationsAsync();
             return Ok(new { Status = "Success", Message = "All notifications deleted" });
         }
