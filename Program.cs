@@ -123,6 +123,9 @@ void ConfigureServices(IServiceCollection services, IConfiguration configuration
         options.UseSqlServer(configuration.GetConnectionString("SqlServerConnectionString"),
             sqlOptions => sqlOptions.EnableRetryOnFailure(5, TimeSpan.FromSeconds(10), null));
     });
+    
+    // Add AutoMapper
+    services.AddAutoMapper(typeof(MappingProfiles));
 
     // Declared services
     services.AddScoped<DBSeeder>();
@@ -135,11 +138,6 @@ void ConfigureServices(IServiceCollection services, IConfiguration configuration
     services.AddScoped<IStaffService, StaffService>();
     services.AddScoped<IAccidentService, AccidentService>();
     services.AddScoped<IPushNotificationService, PushNotificationService>();
-
-    // Add AutoMapper
-    services.AddAutoMapper(typeof(MappingProfiles));
-
-    // Register services
     services.Configure<MailSettings>(configuration.GetSection("MailSettings"));
     services.AddTransient<IMailService, MailService>();
     services.AddTransient<IVerificationCodeService, VerificationCodeService>();

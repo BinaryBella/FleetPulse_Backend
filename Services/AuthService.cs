@@ -166,21 +166,7 @@ namespace FleetPulse_BackEndDevelopment.Services
 
             user.HashedPassword = HashPassword(newPassword);
             await dataContext.SaveChangesAsync();
-
-            // Save notification to the database
-            var notification = new FCMNotification
-            {
-                NotificationId = Guid.NewGuid().ToString(),
-                UserName = user.UserName, 
-                Title = "Password Reset Request",
-                Message = $"Your password has been reset successfully.",
-                Date = DateTime.Now,
-                Time = DateTime.Now.TimeOfDay,
-                Status = false
-            };
-
-            await AddNotificationAsync(notification);
-
+            
             return true;
         }
 

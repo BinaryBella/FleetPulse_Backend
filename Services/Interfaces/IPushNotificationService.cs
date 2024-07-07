@@ -12,7 +12,7 @@ namespace FleetPulse_BackEndDevelopment.Services.Interfaces
         Task DeleteNotificationAsync(string notificationId);
         Task DeleteAllNotificationsAsync();
         Task<bool> SendNotificationAsynctoAdmin(FCMNotificationDTO notification);
-        Task SendNotificationAsync(string fcmDeviceToken, string title, string message, int userId);
+        Task SendNotificationAsync(string token, string title, string message, Dictionary<string, string> dataPayload);
         bool DoesEmailExist(string email); // Add this method to check email existence
         string GetUsernameByEmail(string email); // New method to get username by email
         Task<List<FCMNotification>> GetUnreadNotificationsAsync(int userId);

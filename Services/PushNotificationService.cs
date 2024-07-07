@@ -72,38 +72,54 @@ namespace FleetPulse_BackEndDevelopment.Services
             }
         }
 
-        public async Task SendNotificationAsync(string fcmDeviceToken, string title, string message, int userId)
-        {
-            if (string.IsNullOrEmpty(fcmDeviceToken))
+        public async Task SendNotificationAsync(string token, string title, string body, Dictionary<string, string> data)
             {
-                _logger.LogWarning("FCM Device Token not found.");
-                return;
-            }
-
-            var notification = new Message()
-            {
-                Token = fcmDeviceToken,
-                Notification = new Notification
+                var message = new Message
                 {
-                    Title = title,
-                    Body = message
-                },
-                Data = new Dictionary<string, string>
-                {
-                    { "userId", userId.ToString() }
-                }
-            };
-
-            try
-            {
-                var response = await FirebaseMessaging.DefaultInstance.SendAsync(notification);
-                _logger.LogInformation("Successfully sent message: " + response);
+                    Token = token,
+                    Notification = new Notification
+                    {
+                        Title = title,
+                        Body = body
+                    },
+                    Data = data
+                };
+        
+                // Assuming you have a configured FirebaseMessaging instance
+                await FirebaseMessaging.DefaultInstance.SendAsync(message);
             }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error sending notification.");
-            }
-        }
+        // public async Task SendNotificationAsync(string fcmDeviceToken, string title, string message, int userId)
+        // {
+        //     if (string.IsNullOrEmpty(fcmDeviceToken))
+        //     {
+        //         _logger.LogWarning("FCM Device Token not found.");
+        //         return;
+        //     }
+        //
+        //     var notification = new Message()
+        //     {
+        //         Token = fcmDeviceToken,
+        //         Notification = new Notification
+        //         {
+        //             Title = title,
+        //             Body = message
+        //         },
+        //         Data = new Dictionary<string, string>
+        //         {
+        //             { "userId", userId.ToString() }
+        //         }
+        //     };
+        //
+        //     try
+        //     {
+        //         var response = await FirebaseMessaging.DefaultInstance.SendAsync(notification);
+        //         _logger.LogInformation("Successfully sent message: " + response);
+        //     }
+        //     catch (Exception ex)
+        //     {
+        //         _logger.LogError(ex, "Error sending notification.");
+        //     }
+        // }
         //
         // public async Task SaveNotificationAsync(FCMNotification notification)
         // {
