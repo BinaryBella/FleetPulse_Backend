@@ -164,7 +164,7 @@ namespace FleetPulse_BackEndDevelopment.Services
             if (user == null)
                 return false;
 
-            user.HashedPassword = HashPassword(newPassword);
+            user.HashedPassword = BCrypt.Net.BCrypt.HashPassword(newPassword); 
             await dataContext.SaveChangesAsync();
 
             // Save notification to the database

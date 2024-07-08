@@ -1,6 +1,7 @@
-﻿using FleetPulse_BackEndDevelopment.Models;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using FleetPulse_BackEndDevelopment.DTOs;
+using FleetPulse_BackEndDevelopment.Models;
 
 namespace FleetPulse_BackEndDevelopment.Services.Interfaces
 {
@@ -10,7 +11,7 @@ namespace FleetPulse_BackEndDevelopment.Services.Interfaces
         Task<Trip> GetTripByIdAsync(int id);
         Task<bool> IsTripExist(int id);
         bool DoesTripExists(int tripId);
-        Task<Trip> AddTripAsync(Trip trip);
+        Task<Trip> AddTripAsync(TripDTO tripDto); // Change to accept TripDTO
         Task<bool> UpdateTripAsync(Trip trip);
         Task DeactivateTripAsync(int tripId);
         Task ActivateTripAsync(int id);
