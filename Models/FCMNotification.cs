@@ -10,12 +10,6 @@ namespace FleetPulse_BackEndDevelopment.Models
         public string NotificationId { get; set; }
 
         [Required]
-        public int UserId { get; set; }
-
-        [Required]
-        public string UserName { get; set; }
-
-        [Required]
         public string Title { get; set; }
 
         [Required]

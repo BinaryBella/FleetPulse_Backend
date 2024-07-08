@@ -9,12 +9,10 @@ namespace FleetPulse_BackEndDevelopment.Controllers
     public class NotificationController : ControllerBase
     {
         private readonly IPushNotificationService _pushNotificationService;
-        private readonly ILogger<NotificationController> _logger;
 
-        public NotificationController(IPushNotificationService pushNotificationService, ILogger<NotificationController> logger)
+        public NotificationController(IPushNotificationService pushNotificationService)
         {
             _pushNotificationService = pushNotificationService;
-            _logger = logger;
         }
 
         [HttpGet]
@@ -25,11 +23,11 @@ namespace FleetPulse_BackEndDevelopment.Controllers
             return Ok(notifications);
         }
         
-        [HttpGet("unread/{userId}")]
-        public async Task<ActionResult<IEnumerable<FCMNotification>>> GetUnreadNotifications(int userId)
+        [HttpGet("unread")]
+        public async Task<ActionResult<IEnumerable<FCMNotification>>> GetUnreadNotifications()
         {
             // Simulate getting unread notifications in memory
-            var notifications = await _pushNotificationService.GetUnreadNotificationsAsync(userId);
+            var notifications = await _pushNotificationService.GetUnreadNotificationsAsync();
             return Ok(notifications);
         }
         

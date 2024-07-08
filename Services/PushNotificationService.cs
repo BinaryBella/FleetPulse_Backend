@@ -20,7 +20,8 @@ namespace FleetPulse_BackEndDevelopment.Services
         private readonly ILogger<PushNotificationService> _logger;
         private readonly FirebaseMessaging _messaging;
 
-        public PushNotificationService(FleetPulseDbContext context, ILogger<PushNotificationService> logger, FirebaseMessaging messaging)
+        public PushNotificationService(FleetPulseDbContext context, ILogger<PushNotificationService> logger,
+            FirebaseMessaging messaging)
         {
             _context = context;
             _logger = logger;
@@ -72,71 +73,24 @@ namespace FleetPulse_BackEndDevelopment.Services
             }
         }
 
-        public async Task SendNotificationAsync(string token, string title, string body, Dictionary<string, string> data)
+        public async Task SendNotificationAsync(string token, string title, string body,
+            Dictionary<string, string> data)
+        {
+            var message = new Message
             {
-                var message = new Message
+                Token = token,
+                Notification = new Notification
                 {
-                    Token = token,
-                    Notification = new Notification
-                    {
-                        Title = title,
-                        Body = body
-                    },
-                    Data = data
-                };
-        
-                // Assuming you have a configured FirebaseMessaging instance
-                await FirebaseMessaging.DefaultInstance.SendAsync(message);
-            }
-        // public async Task SendNotificationAsync(string fcmDeviceToken, string title, string message, int userId)
-        // {
-        //     if (string.IsNullOrEmpty(fcmDeviceToken))
-        //     {
-        //         _logger.LogWarning("FCM Device Token not found.");
-        //         return;
-        //     }
-        //
-        //     var notification = new Message()
-        //     {
-        //         Token = fcmDeviceToken,
-        //         Notification = new Notification
-        //         {
-        //             Title = title,
-        //             Body = message
-        //         },
-        //         Data = new Dictionary<string, string>
-        //         {
-        //             { "userId", userId.ToString() }
-        //         }
-        //     };
-        //
-        //     try
-        //     {
-        //         var response = await FirebaseMessaging.DefaultInstance.SendAsync(notification);
-        //         _logger.LogInformation("Successfully sent message: " + response);
-        //     }
-        //     catch (Exception ex)
-        //     {
-        //         _logger.LogError(ex, "Error sending notification.");
-        //     }
-        // }
-        //
-        // public async Task SaveNotificationAsync(FCMNotification notification)
-        // {
-        //     try
-        //     {
-        //         notification.NotificationId = Guid.NewGuid().ToString();
-        //         notification.Date = DateTime.UtcNow;
-        //         notification.Time = DateTime.UtcNow.TimeOfDay;
-        //         await _context.FCMNotifications.AddAsync(notification);
-        //         await _context.SaveChangesAsync();
-        //     }
-        //     catch (Exception ex)
-        //     {
-        //         _logger.LogError(ex, "Error saving notification.");
-        //     }
-        // }
-        
+                    Title = title,
+                    Body = body
+                },
+                Data = data
+            };
+
+            // Assuming you have a configured FirebaseMessaging instance
+            await FirebaseMessaging.DefaultInstance.SendAsync(message);
+        }
+
         public async Task SaveNotificationAsync(FCMNotification notification)
         {
             try
@@ -159,6 +113,18 @@ namespace FleetPulse_BackEndDevelopment.Services
             try
             {
                 return await _context.FCMNotifications.ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving notifications.");
+                return new List<FCMNotification>();
+            }
+        }
+        public async Task<List<FCMNotification>> GetUnreadNotificationsAsync()
+        {
+            try
+            {
+                return await _context.FCMNotifications.Where(n => !n.Status).ToListAsync();
             }
             catch (Exception ex)
             {
@@ -260,10 +226,12 @@ namespace FleetPulse_BackEndDevelopment.Services
                     Title = notification.Title,
                     Body = notification.Message
                 },
-                Token = "foAwll9oGeXgr1eS7d0h-w:APA91bFORCNY1m8DQjVql0g14z64BEvuncpVuh5JKqkPxILLqwJBqg_B-4MZqpVI-gPISSy6c-py-ioprh45M4MezQQwYDN5EkejBTH7SdiRLUbU6VUoaJQrbgL1cJDK8jI-0PlS3tot" // replace with the actual admin device token
+                Token =
+                    "foAwll9oGeXgr1eS7d0h-w:APA91bFORCNY1m8DQjVql0g14z64BEvuncpVuh5JKqkPxILLqwJBqg_B-4MZqpVI-gPISSy6c-py-ioprh45M4MezQQwYDN5EkejBTH7SdiRLUbU6VUoaJQrbgL1cJDK8jI-0PlS3tot" // replace with the actual admin device token
             };
 
-            _logger.LogInformation($"Sending notification with data: {{Username: {notification.Username}, JobTitle: {notification.JobTitle}, Title: {notification.Title}, Message: {notification.Message}, EmailAddress: {notification.EmailAddress}}}");
+            _logger.LogInformation(
+                $"Sending notification with data: {{Username: {notification.Username}, JobTitle: {notification.JobTitle}, Title: {notification.Title}, Message: {notification.Message}, EmailAddress: {notification.EmailAddress}}}");
 
             try
             {
@@ -272,7 +240,6 @@ namespace FleetPulse_BackEndDevelopment.Services
                 await SaveNotificationAsync(new FCMNotification
                 {
                     NotificationId = Guid.NewGuid().ToString(),
-                    UserName = username,
                     Title = notification.Title,
                     Message = notification.Message,
                     Date = DateTime.UtcNow,
@@ -297,13 +264,6 @@ namespace FleetPulse_BackEndDevelopment.Services
         {
             var user = _context.Users.FirstOrDefault(u => u.EmailAddress == email);
             return user?.UserName;
-        }
-        
-        public async Task<List<FCMNotification>> GetUnreadNotificationsAsync(int userId)
-        {
-            return await _context.FCMNotifications
-                .Where(n => n.UserId == userId && !n.Status)
-                .ToListAsync();
         }
     }
 }

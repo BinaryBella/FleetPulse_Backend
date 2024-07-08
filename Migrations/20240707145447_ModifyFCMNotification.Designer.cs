@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FleetPulse_BackEndDevelopment.Migrations
 {
     [DbContext(typeof(FleetPulseDbContext))]
-    [Migration("20240704172231_initiatemigration")]
-    partial class initiatemigration
+    [Migration("20240707145447_ModifyFCMNotification")]
+    partial class ModifyFCMNotification
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -114,16 +114,7 @@ namespace FleetPulse_BackEndDevelopment.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("UserName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.HasKey("NotificationId");
-
-                    b.HasIndex("UserId");
 
                     b.ToTable("Notifications", (string)null);
                 });
@@ -588,15 +579,6 @@ namespace FleetPulse_BackEndDevelopment.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("FleetPulse_BackEndDevelopment.Models.FCMNotification", b =>
-                {
-                    b.HasOne("FleetPulse_BackEndDevelopment.Models.User", null)
-                        .WithMany("FCMNotifications")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("FleetPulse_BackEndDevelopment.Models.Trip", b =>
                 {
                     b.HasOne("FleetPulse_BackEndDevelopment.Models.Vehicle", "Vehicle")
@@ -721,8 +703,6 @@ namespace FleetPulse_BackEndDevelopment.Migrations
             modelBuilder.Entity("FleetPulse_BackEndDevelopment.Models.User", b =>
                 {
                     b.Navigation("AccidentUsers");
-
-                    b.Navigation("FCMNotifications");
 
                     b.Navigation("FuelRefillUsers");
 

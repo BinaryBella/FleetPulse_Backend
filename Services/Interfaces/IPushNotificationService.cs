@@ -7,6 +7,7 @@ namespace FleetPulse_BackEndDevelopment.Services.Interfaces
     {
         Task SaveNotificationAsync(FCMNotification notification);
         Task<List<FCMNotification>> GetAllNotificationsAsync();
+        Task<List<FCMNotification>> GetUnreadNotificationsAsync();
         Task MarkNotificationAsReadAsync(string notificationId);
         Task MarkAllAsReadAsync();
         Task DeleteNotificationAsync(string notificationId);
@@ -15,7 +16,6 @@ namespace FleetPulse_BackEndDevelopment.Services.Interfaces
         Task SendNotificationAsync(string token, string title, string message, Dictionary<string, string> dataPayload);
         bool DoesEmailExist(string email); // Add this method to check email existence
         string GetUsernameByEmail(string email); // New method to get username by email
-        Task<List<FCMNotification>> GetUnreadNotificationsAsync(int userId);
 
     }
 }

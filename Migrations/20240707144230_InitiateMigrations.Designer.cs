@@ -4,6 +4,7 @@ using FleetPulse_BackEndDevelopment.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FleetPulse_BackEndDevelopment.Migrations
 {
     [DbContext(typeof(FleetPulseDbContext))]
-    partial class FleetPulseDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240707144230_InitiateMigrations")]
+    partial class InitiateMigrations
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -112,7 +114,12 @@ namespace FleetPulse_BackEndDevelopment.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
 
+                    b.Property<int?>("UserId")
+                        .HasColumnType("int");
+
                     b.HasKey("NotificationId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Notifications", (string)null);
                 });
@@ -577,6 +584,13 @@ namespace FleetPulse_BackEndDevelopment.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("FleetPulse_BackEndDevelopment.Models.FCMNotification", b =>
+                {
+                    b.HasOne("FleetPulse_BackEndDevelopment.Models.User", null)
+                        .WithMany("FCMNotifications")
+                        .HasForeignKey("UserId");
+                });
+
             modelBuilder.Entity("FleetPulse_BackEndDevelopment.Models.Trip", b =>
                 {
                     b.HasOne("FleetPulse_BackEndDevelopment.Models.Vehicle", "Vehicle")
@@ -701,6 +715,8 @@ namespace FleetPulse_BackEndDevelopment.Migrations
             modelBuilder.Entity("FleetPulse_BackEndDevelopment.Models.User", b =>
                 {
                     b.Navigation("AccidentUsers");
+
+                    b.Navigation("FCMNotifications");
 
                     b.Navigation("FuelRefillUsers");
 

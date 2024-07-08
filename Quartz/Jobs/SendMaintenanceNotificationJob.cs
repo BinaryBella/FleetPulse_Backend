@@ -1,11 +1,7 @@
+using FleetPulse_BackEndDevelopment.Models;
 using FleetPulse_BackEndDevelopment.Services;
 using Quartz;
 using FleetPulse_BackEndDevelopment.Services.Interfaces;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Configuration;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace FleetPulse_BackEndDevelopment.Quartz.Jobs
 {
@@ -61,6 +57,14 @@ namespace FleetPulse_BackEndDevelopment.Quartz.Jobs
 
                     foreach (var token in deviceTokens)
                     {
+                        var notification = new FCMNotification
+                        {
+                            Title = "Maintenance Due",
+                            Message = message,
+                            Status = true 
+                        };
+                        await _pushNotificationService.SaveNotificationAsync(notification);
+                        
                         await _pushNotificationService.SendNotificationAsync(token, "Maintenance Due", message, dataPayload);
                         _logger.LogInformation($"Notification sent for vehicle {task.VehicleRegistrationNo}: {message}");
                     }
