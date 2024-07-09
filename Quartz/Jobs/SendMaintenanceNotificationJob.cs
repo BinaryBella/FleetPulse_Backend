@@ -61,7 +61,8 @@ namespace FleetPulse_BackEndDevelopment.Quartz.Jobs
                         {
                             Title = "Maintenance Due",
                             Message = message,
-                            Status = true 
+                            Status = false,
+                            Date = DateTime.Now
                         };
                         await _pushNotificationService.SaveNotificationAsync(notification);
                         
